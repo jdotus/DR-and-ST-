@@ -12,7 +12,7 @@
         * {
             font-family: "Arial Narrow", sans-serif;
             font-weight: 900;
-            font-size: 9.5px;
+            font-size: 10px;
             margin: 0;
             padding: 0;
             background: #fff;
@@ -34,7 +34,7 @@
         .portrait-container {
             width: 138mm;
             margin: 0mm 7mm 0mm 5mm;
-            padding-top: 22mm;
+            padding-top: 26.8mm;
             box-sizing: border-box;
             background: #fff;
         }
@@ -48,7 +48,7 @@
 
         td,
         th {
-            border: 1px solid red; 
+            /* border: 1px solid red;  */
             padding: 4px;
             text-align: center;
             box-sizing: border-box;
@@ -77,9 +77,7 @@
         }
 
         .col-sold-to {
-            width: 91.5mm !important;
-            max-height: 10mm !important;
-            min-height: 9.8mm !important;
+            width: 91.5mm !important; 
         }
 
         .col-particulars {
@@ -109,15 +107,17 @@
         }
 
         .dr-row {
-            height: 10mm;
+            height: 9.5mm;
         }
 
         .dr-2nd-row {
-            height: 7.5mm !important;
+            /* height: 7.5mm !important; */
+            height: 6.7mm !important;
         }
 
         .dr-2nd-row-header {
-            height: 6mm !important;
+            /* height: 6mm !important; */
+            height: 5.5mm !important;
         }
 
         .text-align {
@@ -171,6 +171,7 @@
             <table>
                 <tr class="dr-row">
                     <td class="col-si-number">
+                        <br>
                         <?= htmlspecialchars($info1['si_number'])?>
                     </td>
                     <td class="col-sold-to">
@@ -179,11 +180,11 @@
                     </td>
                 </tr>
                 <tr class="dr-row">
-                    <td class="col-si-date"> <?= htmlspecialchars($info1['si_date'])?></td>
+                    <td class="col-si-date"> <br> <?= htmlspecialchars($info1['si_date'])?></td>
                     <td class="col-sold-to"> <?= htmlspecialchars($info1['address'])?></td>
                 </tr>
                 <tr class="dr-row">
-                    <td class="col-terms" colspan="1"> <?= htmlspecialchars($info1['term'])?></td>
+                    <td class="col-terms" colspan="1"> <br> <?= htmlspecialchars($info1['term'])?></td>
                     <td class="col-particulars"> <?= htmlspecialchars($info1['si_number'])?></td>
                 </tr>
             </table>
@@ -208,7 +209,7 @@
                     <tr class="dr-2nd-row">
                         <td> <?= htmlspecialchars($infos['quantity'])?></td>
                         <td><?= htmlspecialchars($infos['unit'])?></td>
-                        <td><?= htmlspecialchars($infos['description'])?></td>
+                        <td class="text-align"><?= htmlspecialchars($infos['description'])?></td>
                     </tr>
                 <?php endforeach; ?>
                 <tr class="dr-2nd-row">
