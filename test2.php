@@ -1,3 +1,6 @@
+<?php 
+    $info1 = ['si_number' => '98765432', 'delivered_to' => 'john doe', 'address' => '123 main st', 'tin' => '123-456-789', 'term' => 'temr 25', 'si_date' => '10-22-205', 'particulars' => 'various items'];
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,9 +10,9 @@
     <title>DR and ST</title>
     <style>
         * {
-            font-family: "Arial Black", sans-serif;
-            font-weight: 700;
-            font-size: 10px;
+            font-family: "Arial Narrow", sans-serif;
+            font-weight: 900;
+            font-size: 9.5px;
             margin: 0;
             padding: 0;
             background: #fff;
@@ -168,49 +171,46 @@
             <table>
                 <tr class="dr-row">
                     <td class="col-si-number">
-                        <p>9123123</p>
+                        <?= htmlspecialchars($info1['si_number'])?>
                     </td>
                     <td class="col-sold-to">
-                        DELIVERED TO<br>
-                        123123123123
+                         <?= htmlspecialchars($info1['delivered_to'])?><br>
+                         <?= htmlspecialchars($info1['tin'])?>
                     </td>
                 </tr>
                 <tr class="dr-row">
-                    <td class="col-si-date">10-10-1010</td>
-                    <td class="col-sold-to">ASASASASASASASAS</td>
+                    <td class="col-si-date"> <?= htmlspecialchars($info1['si_date'])?></td>
+                    <td class="col-sold-to"> <?= htmlspecialchars($info1['address'])?></td>
                 </tr>
                 <tr class="dr-row">
-                    <td class="col-terms" colspan="1">TERMS</td>
-                    <td class="col-particulars">PARTICULARS</td>
+                    <td class="col-terms" colspan="1"> <?= htmlspecialchars($info1['term'])?></td>
+                    <td class="col-particulars"> <?= htmlspecialchars($info1['si_number'])?></td>
                 </tr>
             </table>
 
             <table>
+                <!-- HEADINGS -->
                 <tr class="dr-2nd-row-header">
-                    <td class="col-quantity"></td>
-                    <td class="col-units"></td>
-                    <td class="col-description"></td>
+                    <td class="col-quantity"></td> <!-- QUANTITY -->
+                    <td class="col-units"></td> <!-- UNIT -->
+                    <td class="col-description"></td> <!-- DESCRIPTION -->
                 </tr>
-                <tr class="dr-2nd-row">
-                    <td>5</td>
-                    <td>PC</td>
-                    <td>Toner Cartridge, Black CT202496</td>
-                </tr>
-                <tr class="dr-2nd-row">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="dr-2nd-row">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr class="dr-2nd-row">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
+
+                <?php
+                    $info = [ ['quantity' => '5', 'unit' => 'PC', 'description' => 'Toner Cartridge, Black CT20249 6'],
+                              ['quantity' => '4', 'unit' => 'PC', 'description' => 'Toner Cartridge, Black CT202496'],
+                              ['quantity' => '3', 'unit' => 'PC', 'description' => 'Toner Cartridge, Black CT202496'],
+                              ['quantity' => '2', 'unit' => 'PC', 'description' => 'Toner Cartridge, Black CT202496']
+                            ];
+                ?>
+
+                <?php foreach ($info as $infos): ?>
+                    <tr class="dr-2nd-row">
+                        <td> <?= htmlspecialchars($infos['quantity'])?></td>
+                        <td><?= htmlspecialchars($infos['unit'])?></td>
+                        <td><?= htmlspecialchars($infos['description'])?></td>
+                    </tr>
+                <?php endforeach; ?>
                 <tr class="dr-2nd-row">
                     <td></td>
                     <td></td>
