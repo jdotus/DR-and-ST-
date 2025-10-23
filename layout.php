@@ -7,31 +7,31 @@
     <title>DR and ST</title>
     <style>
         * {
-            font-family: "Arial Black", sans-serif;
+            font-family: "Arial", sans-serif;
             font-weight: 700;
             font-size: 10px;
             margin: 0;
             padding: 0;
             background: #fff;
             text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
-        /* A5 paper layout (Landscape) */
+        /* Keep your A5 layout size */
         .a5 {
-            width: 210mm;
-            /* A5 landscape width */
-            height: 148mm;
-            /* A5 landscape height */
+            width: 203.2mm;
+            /* Your custom A5-like width */
+            height: 139.7mm;
+            /* Your A5-like height */
             background: white;
             box-sizing: border-box;
-            margin: 0 auto;
             position: relative;
         }
 
         .portrait-container {
-            width: 190mm;
-            margin: 0 auto;
-            padding-top: 22mm;
+            width: 138mm;
+            margin: 0mm 7mm 0mm 5mm;
+            padding-top: 29mm;
             box-sizing: border-box;
             background: #fff;
         }
@@ -45,8 +45,7 @@
 
         td,
         th {
-            border: 1px solid #000;
-            padding: 4px;
+            border: 1px solid red;
             text-align: center;
             box-sizing: border-box;
             vertical-align: top;
@@ -58,12 +57,12 @@
 
         /* First table */
         table:first-of-type {
-            width: 120mm !important;
+            width: 90mm !important;
         }
 
         /* Second table */
         table:last-of-type {
-            width: 190mm !important;
+            width: 138mm !important;
         }
 
         /* Column widths */
@@ -75,8 +74,6 @@
 
         .col-sold-to {
             width: 91.5mm !important;
-            max-height: 10mm !important;
-            min-height: 9.8mm !important;
         }
 
         .col-particulars {
@@ -96,58 +93,43 @@
             width: 156.5mm !important;
         }
 
-        .col-unit-cost,
-        .col-amount {
-            width: 23mm !important;
-        }
-
         .dr-row {
-            height: 10mm;
+            height: 9.5mm;
         }
 
         .dr-2nd-row {
-            height: 7.5mm !important;
+            height: 6.7mm !important;
         }
 
         .dr-2nd-row-header {
-            height: 6mm !important;
+            height: 5.5mm !important;
         }
 
         .text-align {
             text-align: left !important;
         }
 
-        .no-space {
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Print setup */
+        /* Print setup — centers A5 content on A4 paper */
         @media print {
             @page {
-                size: A5 landscape;
-                /* Ensures correct paper size */
+                size: A4 portrait;
+                /* A4 paper */
                 margin: 0;
-                /* Adjust printer margin as needed */
+                /* no browser margin */
             }
 
             html,
             body {
                 width: 210mm;
-                height: 148mm;
+                height: 297mm;
                 margin: 0;
                 padding: 0;
-                display: flex;
-                justify-content: center;
-                /* centers horizontally */
-                align-items: center;
-                /* centers vertically */
                 background: none !important;
             }
 
             .a5 {
-                margin: auto;
                 page-break-after: always;
+                box-shadow: none;
             }
         }
     </style>
@@ -157,65 +139,70 @@
     <div class="a5">
         <div class="portrait-container">
             <table>
+                <?php 
+                    $info1 = ['si_number' => '98765432', 'delivered_to' => 'john doe', 'address' => '123 main st', 'tin' => '123-456-789', 'term' => 'term 25', 'si_date' => '10-22-205', 'particulars' => 'various items'];
+                ?>
                 <tr class="dr-row">
                     <td class="col-si-number">
-                        <p>9123123</p>
+                        <br>
+                        <?= htmlspecialchars($info1['si_number'])?>
                     </td>
                     <td class="col-sold-to">
-                        DELIVERED TO<br>
-                        123123123123
+                         <?= htmlspecialchars($info1['delivered_to'])?><br>
+                         <?= htmlspecialchars($info1['tin'])?>
                     </td>
                 </tr>
                 <tr class="dr-row">
-                    <td class="col-si-date">10-10-1010</td>
-                    <td class="col-sold-to">ASASASASASASASAS</td>
+                    <td class="col-si-date"><br> <?= htmlspecialchars($info1['si_date'])?></td>
+                    <td class="col-sold-to"> <?= htmlspecialchars($info1['address'])?></td>
                 </tr>
                 <tr class="dr-row">
-                    <td class="col-terms" colspan="1">TERMS</td>
-                    <td class="col-particulars">PARTICULARS</td>
+                    <td class="col-terms"><br> <?= htmlspecialchars($info1['term'])?></td>
+                    <td class="col-particulars"> <?= htmlspecialchars($info1['si_number'])?></td>
                 </tr>
             </table>
 
             <table>
+                <!-- HEADINGS -->
                 <tr class="dr-2nd-row-header">
-                    <td class="col-quantity"></td>
-                    <td class="col-units"></td>
-                    <td class="col-description"></td>
-                </tr>
-                <tr class="dr-2nd-row">
-                    <td>5</td>
-                    <td>PC</td>
-                    <td>Toner Cartridge, Black CT202496</td>
+                    <td class="col-quantity"></td> <!-- QUANTITY -->
+                    <td class="col-units"></td> <!-- UNIT -->
+                    <td class="col-description"></td> <!-- DESCRIPTION -->
                 </tr>
                 <tr class="dr-2nd-row">
                     <td></td>
                     <td></td>
-                    <td></td>
+                    <td class="text-align"></td>
                 </tr>
                 <tr class="dr-2nd-row">
                     <td></td>
                     <td></td>
-                    <td></td>
+                    <td class="text-align"></td>
                 </tr>
                 <tr class="dr-2nd-row">
                     <td></td>
                     <td></td>
-                    <td></td>
+                    <td class="text-align"></td>
                 </tr>
                 <tr class="dr-2nd-row">
                     <td></td>
                     <td></td>
-                    <td class="text-align">Model: Apeos C2560</td>
+                    <td class="text-align"></td>
                 </tr>
                 <tr class="dr-2nd-row">
                     <td></td>
                     <td></td>
-                    <td class="text-align">Under PO No.: 2025-351</td>
+                    <td class="text-align"></td>
                 </tr>
                 <tr class="dr-2nd-row">
                     <td></td>
                     <td></td>
-                    <td class="text-align">Under Invoice No: 5131</td>
+                    <td class="text-align"></td>
+                </tr>
+                <tr class="dr-2nd-row">
+                    <td></td>
+                    <td></td>
+                    <td class="text-align"></td>
                 </tr>
             </table>
         </div>
