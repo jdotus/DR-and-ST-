@@ -1,6 +1,3 @@
-<?php 
-    $info1 = ['si_number' => '98765432', 'delivered_to' => 'john doe', 'address' => '123 main st', 'tin' => '123-456-789', 'term' => 'temr 25', 'si_date' => '10-22-205', 'particulars' => 'various items'];
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,13 +7,14 @@
     <title>DR and ST</title>
     <style>
         * {
-            font-family: "Arial Narrow", sans-serif;
-            font-weight: 900;
+            font-family: "Arial", sans-serif;
+            font-weight: 700;
             font-size: 10px;
             margin: 0;
             padding: 0;
             background: #fff;
             text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         /* Keep your A5 layout size */
@@ -34,7 +32,7 @@
         .portrait-container {
             width: 138mm;
             margin: 0mm 7mm 0mm 5mm;
-            padding-top: 26.8mm;
+            padding-top: 29mm;
             box-sizing: border-box;
             background: #fff;
         }
@@ -49,7 +47,7 @@
         td,
         th {
             /* border: 1px solid red;  */
-            padding: 4px;
+            /* padding: 4px; */
             text-align: center;
             box-sizing: border-box;
             vertical-align: top;
@@ -114,6 +112,11 @@
             /* height: 7.5mm !important; */
             height: 6.7mm !important;
         }
+        
+         .dr-2nd-row-new {
+            /* height: 7.5mm !important; */
+            height: 5.4mm !important;
+        }
 
         .dr-2nd-row-header {
             /* height: 6mm !important; */
@@ -131,6 +134,10 @@
         .no-space {
             margin: 0;
             padding: 0;
+        }
+
+        .small-font-size {
+            font-size: 10px;
         }
 
         /* Print setup — centers A5 content on A4 paper */
@@ -169,6 +176,9 @@
     <div class="a5">
         <div class="portrait-container">
             <table>
+                <?php 
+                    $info1 = ['si_number' => '98765432', 'delivered_to' => 'john doe', 'address' => '123 main st', 'tin' => '123-456-789', 'term' => 'term 25', 'si_date' => '10-22-205', 'particulars' => 'various items'];
+                ?>
                 <tr class="dr-row">
                     <td class="col-si-number">
                         <br>
@@ -196,37 +206,32 @@
                     <td class="col-units"></td> <!-- UNIT -->
                     <td class="col-description"></td> <!-- DESCRIPTION -->
                 </tr>
-
                 <?php
-                    $info = [ ['quantity' => '5', 'unit' => 'PC', 'description' => 'Toner Cartridge, Black CT20249 6'],
-                              ['quantity' => '4', 'unit' => 'PC', 'description' => 'Toner Cartridge, Black CT202496'],
-                              ['quantity' => '3', 'unit' => 'PC', 'description' => 'Toner Cartridge, Black CT202496'],
-                              ['quantity' => '2', 'unit' => 'PC', 'description' => 'Toner Cartridge, Black CT202496']
-                            ];
+                    $info = [ ['SRNo.' => '123456', 'MRstrat' => '123,456', 'CI' => '', 'BI' => '24,902', 'CLI' => ''],
+                            ['SRNo.' => '231323', 'MRstrat' => '123,456', 'CI' => '', 'BI' => '24,902', 'CLI' => ''],
+                            ['SRNo.' => '111111', 'MRstrat' => '123,456', 'CI' => '', 'BI' => '24,902', 'CLI' => ''],
+                            ['SRNo.' => '222222', 'MRstrat' => '123,456', 'CI' => '', 'BI' => '', 'CLI' => ''],
+                            ['SRNo.' => '333333', 'MRstrat' => '123,456', 'CI' => '', 'BI' => '', 'CLI' => ''],
+                            ['SRNo.' => '555555', 'MRstrat' => '123,456', 'CI' => '', 'BI' => '', 'CLI' => ''],
+                            ['SRNo.' => '999999', 'MRstrat' => '123,456', 'CI' => '', 'BI' => '', 'CLI' => '']
+                        ]; 
+                        $countQuantity = count($info);
                 ?>
 
+                <tr class="dr-2nd-row">
+                    <td><?= htmlspecialchars(count($info)) ?></td>
+                    <td>UNITS</td>
+                    <td class="text-align small-font-size">Deliver Machine<br>Model: APV 5576 </td>
+                </tr>
                 <?php foreach ($info as $infos): ?>
-                    <tr class="dr-2nd-row">
-                        <td> <?= htmlspecialchars($infos['quantity'])?></td>
-                        <td><?= htmlspecialchars($infos['unit'])?></td>
-                        <td class="text-align"><?= htmlspecialchars($infos['description'])?></td>
+                    <?php $messageFormat = "Serial No.: {$infos['SRNo.']} MR Start: {$infos['MRstrat']} (CI: {$infos['CI']}; BI: {$infos['BI']}; CLI: {$infos['CLI']})"; ?>
+                    <tr class="dr-2nd-row-new">
+                        <td></td>
+                        <td></td>
+                        <td class="text-align" style="font-size: 11px"><?= htmlspecialchars($messageFormat)?></td>
                     </tr>
                 <?php endforeach; ?>
-                <tr class="dr-2nd-row">
-                    <td></td>
-                    <td></td>
-                    <td class="text-align">Model: Apeos C2560</td> <!-- Echo here -->
-                </tr>
-                <tr class="dr-2nd-row">
-                    <td></td>
-                    <td></td>
-                    <td class="text-align">Under PO No.: 2025-351</td> <!-- Echo here -->
-                </tr>
-                <tr class="dr-2nd-row">
-                    <td></td>
-                    <td></td>
-                    <td class="text-align">Under Invoice No: 5131</td> <!-- Echo here -->
-                </tr>
+                
             </table>
         </div>
     </div>
