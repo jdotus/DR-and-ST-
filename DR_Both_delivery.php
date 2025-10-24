@@ -234,7 +234,6 @@
                 
                 <?php }?>
                 <?php for($j = count($serialNo); $j < 7; $j++) {?>
-
                     <tr class="dr-2nd-row-new">
                         <td></td>
                         <td></td>

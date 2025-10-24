@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic Input Form</title>
+  <title>Delivery for Mono And Colored Machine</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -50,7 +50,7 @@
 </head>
 <body>
 
-  <h2>Dynamic Input Form</h2>
+  <h2>Delivery for Mono And Colored Machine</h2>
 
   <form id="myForm" action="DR_Both_delivery.php" method="post">
     <div id="inputContainer">
