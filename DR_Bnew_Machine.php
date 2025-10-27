@@ -1,29 +1,3 @@
-<?php
-    if($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        echo "Invalid request method.";
-        exit;
-    }
-
-
-    $siNo = $_POST['siNumber'] ?? ''; 
-    $deliveredTo = $_POST['deliveredTo'] ?? '';
-    $date = $_POST['date'] ?? '';
-    $address = $_POST['address'] ?? '';
-    $terms = $_POST['terms'] ?? '';
-    $particulars = $_POST['particulars'] ?? '';
-    $machineModel = $_POST['machineModel'] ?? '';
-    $units = $_POST['units'] ?? '';
-    $tin = $_POST['tin'] ?? '';
-
-    $serialNo = isset($_POST['serialNo']) ? $_POST['serialNo'] : array_fill(0, 7, '__________');
-    $mrStart = isset($_POST['mrStart']) ? $_POST['mrStart'] : array_fill(0, 7, '__________');
-    $colorImpression = $_POST['colorImpression'] ?? 0;
-    $blackImpression = $_POST['blackImpression'] ?? 0;
-    $colorLargeImpression = $_POST['colorLargeImpression'] ?? 0;
-
-    
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -40,7 +14,7 @@
             padding: 0;
             background: #fff;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
         }
 
         /* Keep your A5 layout size */
@@ -135,19 +109,6 @@
             text-align: left !important;
         }
 
-        .underline-empty {
-            text-decoration: underline;
-            text-decoration-style: solid;
-            text-decoration-thickness: 1px;
-            display: inline-block;
-            min-width: 50px;
-        }
-        
-        .dr-2nd-row-new {
-            /* height: 7.5mm !important; */
-            height: 5.4mm !important;
-        }
-
         /* Print setup — centers A5 content on A4 paper */
         @media print {
             @page {
@@ -178,23 +139,26 @@
     <div class="a5">
         <div class="portrait-container">
             <table>
+                <?php 
+                    $info1 = ['si_number' => '98765432', 'delivered_to' => 'john doe', 'address' => '123 main st', 'tin' => '123-456-789', 'term' => 'term 25', 'si_date' => '10-22-205', 'particulars' => 'various items'];
+                ?>
                 <tr class="dr-row">
                     <td class="col-si-number">
                         <br>
-                        <?= htmlspecialchars($siNo)?>
+                        <?= htmlspecialchars($info1['si_number'])?>
                     </td>
                     <td class="col-sold-to">
-                         <?= htmlspecialchars($deliveredTo)?><br>
-                         <?= htmlspecialchars($tin)?>
+                         <?= htmlspecialchars($info1['delivered_to'])?><br>
+                         <?= htmlspecialchars($info1['tin'])?>
                     </td>
                 </tr>
                 <tr class="dr-row">
-                    <td class="col-si-date"><br> <?= htmlspecialchars($date)?></td>
-                    <td class="col-sold-to"> <?= htmlspecialchars($address)?></td>
+                    <td class="col-si-date"><br> <?= htmlspecialchars($info1['si_date'])?></td>
+                    <td class="col-sold-to"> <?= htmlspecialchars($info1['address'])?></td>
                 </tr>
                 <tr class="dr-row">
-                    <td class="col-terms"><br> <?= htmlspecialchars($terms)?></td>
-                    <td class="col-particulars"> <?= htmlspecialchars($particulars)?></td>
+                    <td class="col-terms"><br> <?= htmlspecialchars($info1['term'])?></td>
+                    <td class="col-particulars"> <?= htmlspecialchars($info1['si_number'])?></td>
                 </tr>
             </table>
 
@@ -205,41 +169,41 @@
                     <td class="col-units"></td> <!-- UNIT -->
                     <td class="col-description"></td> <!-- DESCRIPTION -->
                 </tr>
-
                 <tr class="dr-2nd-row">
-                    <td><?= htmlspecialchars(count($serialNo)) ?></td>
-                    <td><?= htmlspecialchars($units[0]) ?></td>
-                    <td class="text-align" style="font-size: 10px">Deliver Machine<br>Model: <?= htmlspecialchars($machineModel) ?></td>
-                </tr>
-
-                <?php
-                    for($i =0; $i < count($serialNo); $i++) {?>
-                <?php 
-                $srDisplay = trim($serialNo[$i]) !== '' ? htmlspecialchars($serialNo[$i]) : '<span class="underline-empty"></span>';
-                $mrDisplay = trim($mrStart[$i]) !== '' ? htmlspecialchars($mrStart[$i]) : '<span class="underline-empty">_</span>';
-                    
-                
-                if($colorImpression[$i] === 0 || $colorImpression[$i] === ''  ) {
-                        $messageFormat = "Serial No.: " . $srDisplay .  " MR Start: "  . $mrDisplay; 
-                    }else{
-                        $messageFormat = "Serial No.: " . $srDisplay . " MR Start: " . $mrDisplay . " (CI: " . $colorImpression[$i] . "; BI: " . $blackImpression[$i] . "; CLI: " . $colorLargeImpression[$i] . ")"; 
-                    }
-                ?>
-                
-                <tr class="dr-2nd-row-new">
                     <td></td>
                     <td></td>
-                    <td class="text-align" style="font-size: 11px; "><?= $messageFormat ?></td>
+                    <td class="text-align"></td>
                 </tr>
-                
-                <?php }?>
-                <?php for($j = count($serialNo); $j < 7; $j++) {?>
-                    <tr class="dr-2nd-row-new">
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                <?php } ?>
+                <tr class="dr-2nd-row">
+                    <td></td>
+                    <td></td>
+                    <td class="text-align"></td>
+                </tr>
+                <tr class="dr-2nd-row">
+                    <td></td>
+                    <td></td>
+                    <td class="text-align"></td>
+                </tr>
+                <tr class="dr-2nd-row">
+                    <td></td>
+                    <td></td>
+                    <td class="text-align"></td>
+                </tr>
+                <tr class="dr-2nd-row">
+                    <td></td>
+                    <td></td>
+                    <td class="text-align"></td>
+                </tr>
+                <tr class="dr-2nd-row">
+                    <td></td>
+                    <td></td>
+                    <td class="text-align"></td>
+                </tr>
+                <tr class="dr-2nd-row">
+                    <td></td>
+                    <td></td>
+                    <td class="text-align"></td>
+                </tr>
             </table>
         </div>
     </div>
