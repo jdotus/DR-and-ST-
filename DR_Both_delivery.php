@@ -205,40 +205,91 @@
                     <td class="col-units"></td> <!-- UNIT -->
                     <td class="col-description"></td> <!-- DESCRIPTION -->
                 </tr>
-
-                <tr class="dr-2nd-row">
-                    <td><?= htmlspecialchars(count($serialNo)) ?></td>
-                    <td><?= htmlspecialchars($units[0]) ?></td>
-                    <td class="text-align" style="font-size: 10px">Deliver Machine<br>Model: <?= htmlspecialchars($machineModel) ?></td>
-                </tr>
-
-                <?php
-                    for($i =0; $i < count($serialNo); $i++) {?>
+                
                 <?php 
-                $srDisplay = trim($serialNo[$i]) !== '' ? htmlspecialchars($serialNo[$i]) : '<span class="underline-empty"></span>';
-                $mrDisplay = trim($mrStart[$i]) !== '' ? htmlspecialchars($mrStart[$i]) : '<span class="underline-empty">_</span>';
+                if(isset($_POST['machineType']) && $_POST['machineType'] === 'used') { ?>
+                    <tr class="dr-2nd-row">
+                        <td><?= htmlspecialchars(count($serialNo)) ?></td>
+                        <td><?= htmlspecialchars($units) ?></td>
+                        <td class="text-align" style="font-size: 10px">Deliver Machine<br>Model: <?= htmlspecialchars($machineModel) ?></td>
+                    </tr>
+
+                    <?php
+                    for($i = 0; $i < count($serialNo); $i++) {?>
+                    <?php 
+                        $srDisplay = trim($serialNo[$i]) !== '' ? htmlspecialchars($serialNo[$i]) : '<span class="underline-empty"></span>';
+                        $mrDisplay = trim($mrStart[$i]) !== '' ? htmlspecialchars($mrStart[$i]) : '<span class="underline-empty"></span>';
+                            
+                        
+                        if($colorImpression[$i] === 0 || $colorImpression[$i] === ''){
+                                $messageFormat = "Serial No.: " . $srDisplay .  " MR Start: "  . $mrDisplay; 
+                            }else{
+                                $messageFormat = "Serial No.: " . $srDisplay . " MR Start: " . $mrDisplay . " (CI: " . $colorImpression[$i] . "; BI: " . $blackImpression[$i] . "; CLI: " . $colorLargeImpression[$i] . ")"; 
+                            }
+                        ?>
                     
-                
-                if($colorImpression[$i] === 0 || $colorImpression[$i] === ''  ) {
-                        $messageFormat = "Serial No.: " . $srDisplay .  " MR Start: "  . $mrDisplay; 
-                    }else{
-                        $messageFormat = "Serial No.: " . $srDisplay . " MR Start: " . $mrDisplay . " (CI: " . $colorImpression[$i] . "; BI: " . $blackImpression[$i] . "; CLI: " . $colorLargeImpression[$i] . ")"; 
-                    }
-                ?>
-                
-                <tr class="dr-2nd-row-new">
-                    <td></td>
-                    <td></td>
-                    <td class="text-align" style="font-size: 11px; "><?= $messageFormat ?></td>
-                </tr>
-                
-                <?php }?>
-                <?php for($j = count($serialNo); $j < 7; $j++) {?>
                     <tr class="dr-2nd-row-new">
                         <td></td>
                         <td></td>
-                        <td></td>
+                        <td class="text-align" style="font-size: 11px; "><?= $messageFormat ?></td>
                     </tr>
+                    
+                    <?php }?>
+                    <?php for($j = count($serialNo); $j < 7; $j++) {?>
+                        <tr class="dr-2nd-row-new">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                <?php } ?>
+
+                <?php } else if (isset($_POST['machineType']) && $_POST['machineType'] == 'bnew') { ?>
+                    <tr class="dr-2nd-row">
+                        <td><?= htmlspecialchars(count($serialNo)) ?></td>
+                        <td><?= htmlspecialchars($units) ?></td>
+                        <td class="text-align" style="font-size: 10px">Deliver Brand New Machine<br>Model: <?= htmlspecialchars($machineModel) ?></td>
+                    </tr>
+
+                    <?php
+                        if (!empty($serialNo)) {
+                            $countTableRows = 0;
+                            $count = 0;
+                            $perRow = 3; // ✅ how many serials per row
+                            $total = count($serialNo);
+
+                            foreach ($serialNo as $index => $sr) {
+                                $sr = trim($sr);
+                                if ($sr === '') continue; // skip empty entries
+
+                                // Start a new row every $perRow serials
+                                if ($count % $perRow == 0) {
+                                    if ($count > 0) echo '</td></tr>'; // close previous row
+                                    echo '<tr class="dr-2nd-row-new">';
+                                    echo '<td></td>';
+                                    echo '<td></td>';
+                                    echo '<td class="text-align" style="font-size: 11px;">';
+                                    $countTableRows++;
+                                }
+
+                                // Print serial number
+                                echo 'Serial No. ' . htmlspecialchars($sr) . str_repeat('&nbsp;', 5);
+                                $count++;
+
+                                // If last serial, close row
+                                if ($count == $total) {
+                                    echo '</td></tr>';
+                                }
+                            }   
+                        }
+                        // ✅ Fill remaining blank rows up to 7 total
+                        for ($s = $countTableRows; $s < 7; $s++) {
+                            echo '<tr class="dr-2nd-row-new">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>';
+                        }
+                        ?>
                 <?php } ?>
             </table>
         </div>
