@@ -15,13 +15,27 @@
     $units = $_POST['units'] ?? '';
     $tin = $_POST['tin'] ?? '';
 
+    /* for Delivery of Brand New Machines and Used Machines */ 
     $serialNo = isset($_POST['serialNo']) ? $_POST['serialNo'] : array_fill(0, 7, '__________');
     $mrStart = isset($_POST['mrStart']) ? $_POST['mrStart'] : array_fill(0, 7, '__________');
     $colorImpression = $_POST['colorImpression'] ?? 0;
     $blackImpression = $_POST['blackImpression'] ?? 0;
     $colorLargeImpression = $_POST['colorLargeImpression'] ?? 0;
 
-    
+    /* for Pull Out Replacement Machines */
+    $replacementMachineModel = $_POST['replacementMachineModel'] ?? '';
+    $replacementSerialNo = $_POST['replacementSerialNo'] ?? '';
+    $replacementMrStart = isset($_POST['replacementMrStart']) ? $_POST['replacementMrStart'] : '0';
+    $replacementColorImpression = isset($_POST['replacementColorImpression']) ? $_POST['replacementColorImpression'] : '0';
+    $replacementBlackImpression = isset($_POST['replacemenBlackImpression']) ? $_POST['replacemenBlackImpression'] : '0';
+    $replacementColorLargeImpression = isset($_POST['replacemenColorLargeImpression']) ? $_POST['replacemenColorLargeImpression'] : "0";
+
+    $pulloutMachineModel = isset($_POST['pulloutMachineModel']) ? $_POST['pulloutMachineModel'] : '';
+    $pulloutSerialNo = isset($_POST['pulloutSerialNo']) ? $_POST['pulloutSerialNo'] : '';
+    $pulloutMrEnd = isset($_POST['pulloutMrEnd']) ? $_POST['pulloutMrEnd'] : '0';
+    $pulloutColorImpression = isset($_POST['pulloutColorImpression']) ? $_POST['pulloutColorImpression'] : '';
+    $pulloutBlackImpression = isset($_POST['pulloutBlackImpression']) ? $_POST['pulloutBlackImpression'] : '';
+    $pulloutColorLargeImpression = isset($_POST['pulloutColorLargeImpression']) ? $_POST['pulloutColorLargeImpression'] : '';
 ?>
 
 <!DOCTYPE html>
@@ -249,7 +263,6 @@
                         <td><?= htmlspecialchars($units) ?></td>
                         <td class="text-align" style="font-size: 10px">Deliver Brand New Machine<br>Model: <?= htmlspecialchars($machineModel) ?></td>
                     </tr>
-
                     <?php
                         if (!empty($serialNo)) {
                             $countTableRows = 0;
@@ -281,6 +294,7 @@
                                 }
                             }   
                         }
+
                         // ✅ Fill remaining blank rows up to 7 total
                         for ($s = $countTableRows; $s < 7; $s++) {
                             echo '<tr class="dr-2nd-row-new">
@@ -290,7 +304,57 @@
                                 </tr>';
                         }
                         ?>
-                <?php } ?>
+                <?php } else if(isset($_POST['machineType']) && $_POST['machineType'] == 'pullout-delivery') { 
+                    $srReplacementDisplay = trim($replacementSerialNo[0]) !== '' ? htmlspecialchars($replacementSerialNo[0]) : '<span class="underline-empty"></span>';
+                    $mrReplacementDisplay = trim($replacementMrStart[0]) !== '' ? htmlspecialchars($replacementMrStart[0]) : '<span class="underline-empty"></span>';
+                    $srPulloutDisplay = trim($pulloutSerialNo[0]) !== '' ? htmlspecialchars($pulloutSerialNo[0]) : '<span class="underline-empty"></span>';
+                    $mrPulloutDisplay = trim($pulloutMrEnd[0]) !== '' ? htmlspecialchars($pulloutMrEnd[0]) : '<span class="underline-empty"></span>';
+
+                    $mrReplacementFormat = "MR Start: " . $mrReplacementDisplay . " (CI: " . htmlspecialchars($replacementColorImpression[0]) . "; BI: " . htmlspecialchars($replacementBlackImpression[0]) . "; CLI: " . htmlspecialchars($replacementColorLargeImpression[0]) . ")";
+                    $mrPulloutFormat = "MR End: " . $mrPulloutDisplay . " (CI: " . htmlspecialchars($pulloutColorImpression[0])  . "; BI: " . htmlspecialchars($pulloutBlackImpression[0]) . "; CLI: " . htmlspecialchars($pulloutColorLargeImpression[0]) . ")";
+                    ?>
+                    
+                        <tr class="dr-2nd-row">
+                            <td><?= htmlspecialchars(count($replacementSerialNo)) ?></td>
+                            <td><?= htmlspecialchars($units) ?></td>
+                            <td class="text-align" style="font-size: 10px">Deliever Replacement Machine</td>
+                        </tr>
+                        <tr class="dr-2nd-row">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align">Model: <?= htmlspecialchars($replacementMachineModel) ?></td>
+                        </tr>
+                        <tr class="dr-2nd-row">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align">Serial No. : <?= $srReplacementDisplay ?> </td>
+                        </tr>
+                        <tr class="dr-2nd-row">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align"><?= $mrReplacementFormat?></td>
+                        </tr>
+                        <tr class="dr-2nd-row">
+                            <td><?= htmlspecialchars(count($pulloutSerialNo)) ?></td>
+                            <td><?= htmlspecialchars($units) ?></td>
+                            <td class="text-align" style="font-size: 10px">Pull Out Machine</td>
+                        </tr>
+                        <tr class="dr-2nd-row">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align">Model: <?= htmlspecialchars($pulloutMachineModel) ?></td>
+                        </tr>
+                        <tr class="dr-2nd-row">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align">Serial No.: <?= $srPulloutDisplay ?></td>
+                        </tr>
+                        <tr class="dr-2nd-row">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align"><?= $mrPulloutFormat ?></td>
+                        </tr>
+                    <?php } ?>
             </table>
         </div>
     </div>

@@ -28,7 +28,8 @@
     }
 
     .input-group-used,
-    .input-group-bnew {
+    .input-group-bnew,
+    .input-group-pulloutreplace {
       border: 1px solid #ddd;
       padding: 28px 15px;
       border-radius: 8px;
@@ -175,10 +176,10 @@
           <label>S.I Date</label>
           <input type="date" name="date" required>
         </div>
-        <div class="form-control">
+        <!-- <div class="form-control">
           <label>Machine Model</label>
           <input type="text" name="machineModel" required placeholder="Enter Machine Model">
-        </div>
+        </div> -->
         <div class="form-control">
           <label>Unit Type</label>
           <input type="text" name="units" required placeholder="Enter Units">
@@ -201,6 +202,7 @@
       <div id="usedContainer">
         <div class="input-group-used">
           <div class="flex-row">
+            <div class="form-control"><label>Machine Model</label><input type="text" name="machineModel" required placeholder="Enter Machine Model"></div>
             <div class="form-control"><label>Serial No.</label><input type="text" name="serialNo[]" placeholder="Enter Serial Number"></div>
             <div class="form-control"><label>MR Start</label><input type="text" name="mrStart[]" placeholder="Enter MR Start"></div>
             <div class="form-control"><label>Color Impression</label><input type="text" name="colorImpression[]" placeholder="Enter Color Impression"></div>
@@ -217,37 +219,72 @@
       <div id="bnewContainer">
         <div class="input-group-bnew">
           <div class="flex-row">
+            <div class="form-control"><label>Machine Model</label><input type="text" name="machineModel" required placeholder="Enter Machine Model"></div>
             <div class="form-control"><label>Serial No.</label><input type="text" name="serialNo[]" placeholder="Enter Serial Number"></div>
           </div>
         </div>
       </div>
-      <button type="button" class="btn-add" onclick="addInput('bnew')">➕ Add Another</button>
+      <button type="button" class="btn-add" onclick="addInput('bnew')">➕ Add Another (Max 21)</button>
     </div>
 
+    <!-- Pullout Replace Machine Section -->
+    <div id="pulloutReplaceField" class="machine-section">
+      <div id="pulloutReplaceContainer">
+        <div class="input-group-pulloutreplace">
+          <h3>Replacement Machine</h3>
+          <div class="flex-row">
+            <div class="form-control"><label>Machine Model</label><input type="text" name="replacementMachineModel" required placeholder="Enter Machine Model" ></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="replacementSerialNo[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>MR Start</label><input type="text" name="replacementMrStart[]" placeholder="Enter MR Start"></div>
+            <div class="form-control"><label>Color Impression</label><input type="text" name="replacementColorImpression[]" placeholder="Enter Color Impression"></div>
+            <div class="form-control"><label>Black Impression</label><input type="text" name="replacemenBlackImpression[]" placeholder="Enter Black Impression"></div>
+            <div class="form-control"><label>Color Large Impression</label><input type="text" name="replacemenColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+          </div>
+            
+          <h3>Pull Out Machine</h3>
+          <div class="flex-row">
+            <div class="form-control"><label>Machine Model</label><input type="text" name="pulloutMachineModel" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="pulloutSerialNo[]" placeholder="Enter Serial Number"></div>
+             <div class="form-control"><label>MR End</label><input type="text" name="pulloutMrEnd[]" placeholder="Enter MR End"></div>
+            <div class="form-control"><label>Color Impression</label><input type="text" name="pulloutColorImpression[]" placeholder="Enter Color Impression"></div>
+            <div class="form-control"><label>Black Impression</label><input type="text" name="pulloutBlackImpression[]" placeholder="Enter Black Impression"></div>
+            <div class="form-control"><label>Color Large Impression</label><input type="text" name="pulloutColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+          </div>
+        </div>
+      </div>
+      <!-- <button type="button" class="btn-add" onclick="addInput('pulloutReplace')">➕ Add Another (Max 21)</button> -->
+
+    </div>
     <button type="submit" class="btn-submit">Submit</button>
   </form>
 
   <script>
     const maxGroupsUsed = 7;
-    const maxGroupsBnew = 14;
+    const maxGroupsBnew = 21;
 
     function toggleInputs(selected) {
       const usedSection = document.getElementById('usedMachineFields');
       const bnewSection = document.getElementById('bnewMachineFields');
+      const pulloutReplaceSection = document.getElementById('pulloutReplaceField');
 
       usedSection.classList.remove('visible');
       bnewSection.classList.remove('visible');
+      pulloutReplaceSection.classList.remove('visible');
 
       // disable inputs in both first
       usedSection.querySelectorAll('input').forEach(i => i.disabled = true);
       bnewSection.querySelectorAll('input').forEach(i => i.disabled = true);
+      pulloutReplaceSection.querySelectorAll('input').forEach(i => i.disabled = true);
 
       if (selected === 'used') {
         usedSection.classList.add('visible');
         usedSection.querySelectorAll('input').forEach(i => i.disabled = false);
-      } else {
+      } else if(selected === 'bnew') {
         bnewSection.classList.add('visible');
         bnewSection.querySelectorAll('input').forEach(i => i.disabled = false);
+      }else {
+        pulloutReplaceSection.classList.add('visible');
+        pulloutReplaceSection.querySelectorAll('input').forEach(i => i.disabled = false);
       }
     }
 
