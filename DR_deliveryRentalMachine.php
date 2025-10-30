@@ -209,12 +209,12 @@
       <div id="bnewContainer">
         <div class="input-group-bnew">
           <div class="flex-row">
-            <div class="form-control"><label>Machine Model</label><input type="text" name="machineModel" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" name="serialNo[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>Machine Model</label><input type="text" name="bnewMachineModel[]" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" name="serialNo[]" placeholder="Enter Serial Number"></div>
           </div>
         </div>
       </div>
-      <button type="button" class="btn-add" onclick="addInput('bnew')">➕ Add Another (Max 21)</button>
+      <button type="button" class="btn-add" onclick="addInput('bnew')">➕ Add Another (Max 2)</button>
     </div>
 
     <!-- Pullout Replace Machine Section -->
@@ -249,7 +249,29 @@
 
   <script>
     const maxGroupsUsed = 7;
-    const maxGroupsBnew = 21;
+    const maxGroupsBnew = 2;
+
+    const maxSerials = 15;
+
+    document.querySelectorAll('.serialInput').forEach(input => {
+      input.addEventListener('input', function() {
+        // Split by commas, trim spaces, and remove empties
+        const serials = this.value
+          .split(',')
+          .map(s => s.trim())
+          .filter(s => s !== '');
+
+        // Check limit
+        if (serials.length >= maxSerials) {
+          this.style.border = '2px solid red';
+          this.value = serials.slice(0, maxSerials).join(', ');
+          alert(`You have reached the maximum limit of ${maxSerials} serial numbers.`);
+        } else {
+          this.style.border = '1px solid #ccc';
+        }
+      });
+    });
+
 
     function toggleInputs(selected) {
       const usedSection = document.getElementById('usedMachineFields');
@@ -307,8 +329,9 @@
       } else {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
-          <div class="flex-row">
-            <div class="form-control"><label>Serial No.</label><input type="text" name="serialNo[]" placeholder="Enter Serial Number"></div>
+         <div class="flex-row">
+            <div class="form-control"><label>Machine Model</label><input type="text" name="bnewMachineModel[]" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" name="serialNo[]" placeholder="Enter Serial Number"></div>
           </div>
         `;
       }

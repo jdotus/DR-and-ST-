@@ -25,6 +25,8 @@
         $parts = array_filter(array_map('trim', explode(',', (string)$input)), function($v){ return $v !== ''; });
         foreach ($parts as $p) $serialNo[] = $p;
     }
+    $bnewMachineModel = isset($_POST['bnewMachineModel']) ? $_POST['bnewMachineModel'] : '0';
+
     $mrStart = isset($_POST['mrStart']) ? $_POST['mrStart'] : array_fill(0, 7, '__________');
     $colorImpression = $_POST['colorImpression'] ?? 0;
     $blackImpression = $_POST['blackImpression'] ?? 0;
@@ -93,7 +95,7 @@
 
         td,
         th {
-            border: 1px solid red;
+            /* border: 1px solid red; */
             text-align: center;
             box-sizing: border-box;
             vertical-align: top;
@@ -258,48 +260,75 @@
                     
                     <?php }?>
                     <?php for($j = count($serialNo); $j < 7; $j++) {?>
-                        <tr class="dr-2nd-row-new">
+                        <tr class="dr-2nd-row-new">s
                             <td></td>
                             <td></td>
                             <td></td>
                         </tr>
                 <?php } ?>
 
-                <?php } else if (isset($_POST['machineType']) && $_POST['machineType'] == 'bnew') { ?>
-                    <?php
-                        // Use flattened serial list produced earlier. Remove empty entries.
-                        $serialsClean = array_values(array_filter(array_map('trim', $serialNo), function($v){ return $v !== ''; }));
-                        $serialsCount = count($serialsClean);
-                    ?>
-                    <tr class="dr-2nd-row">
-                        <td><?= htmlspecialchars($serialsCount) ?></td>
-                        <td><?= htmlspecialchars($units) ?></td>
-                        <td class="text-align" style="font-size: 10px">Deliver Brand New Machine<br>Model: <?= htmlspecialchars($machineModel) ?></td>
-                    </tr>
-                    <?php
-                        $countTableRows = 0;
-                        if ($serialsCount > 0) {
-                            $perRow = 3;
+               <?php } else if (isset($_POST['machineType']) && $_POST['machineType'] == 'bnew') { ?>
+                <?php
+                    // ✅ Clean serial list for each machine (assume $_POST['serialNo'] is an array, one per machine)
+                    $countTableRows = 0;
+                    $perRow = 3; // how many serials per row
+
+                    if (!empty($bnewMachineModel) && !empty($_POST['serialNo']) && count($serialNo) < 18) {
+                        for ($i = 0; $i < count($bnewMachineModel); $i++) {
+                            if(count($_POST['serialNo']) > 15) {
+                                continue;
+                            }
+                            
+                            // Each machine has its own serial input field (comma-separated)
+                            $serialInput = $_POST['serialNo'][$i] ?? '';
+                            $serialsClean = array_values(array_filter(array_map('trim', explode(',', $serialInput))));
+                            $serialsCount = count($serialsClean);
+
+                            if ($serialsCount === 0) continue; // skip if no serials
+
+                            ?>
+                            <!-- Machine Header Row -->
+                            <tr class="dr-2nd-row">
+                                <td><?= htmlspecialchars($serialsCount) ?></td>
+                                <td><?= htmlspecialchars($units[$i] ?? '') ?></td>
+                                <td class="text-align" style="font-size: 10px">
+                                    Deliver Brand New Machine<br>
+                                    Model: <?= htmlspecialchars($bnewMachineModel[$i]) ?>
+                                </td>
+                            </tr>
+                            <?php
+
+                            // ✅ Display serials for this machine
                             $printed = 0;
                             foreach ($serialsClean as $sr) {
                                 if ($printed % $perRow == 0) {
                                     if ($printed > 0) echo '</td></tr>';
-                                    echo '<tr class="dr-2nd-row-new"><td></td><td></td><td class="text-align" style="font-size: 11px;">';
+                                    echo '<tr class="dr-2nd-row-new">
+                                            <td></td>
+                                            <td></td>
+                                            <td class="text-align" style="font-size: 11px;">';
                                     $countTableRows++;
                                 }
-                                echo 'Serial No. ' . htmlspecialchars($sr) . str_repeat('&nbsp;', 5);
+
+                                echo 'Serial No.: ' . htmlspecialchars($sr) . str_repeat('&nbsp;', 5);
                                 $printed++;
+
                                 if ($printed % $perRow == 0 || $printed == $serialsCount) {
                                     echo '</td></tr>';
                                 }
                             }
                         }
+                    }
 
-                        // Fill remaining blank rows up to 7 total
-                        for ($s = $countTableRows; $s < 7; $s++) {
-                            echo '<tr class="dr-2nd-row-new"><td></td><td></td><td></td></tr>';
-                        }
-                    ?>
+                    // ✅ Fill remaining blank rows up to 7 total
+                    for ($s = $countTableRows; $s < 6; $s++) {
+                        echo '<tr class="dr-2nd-row-new">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>';
+                    }
+                ?>
                 <?php } else if(isset($_POST['machineType']) && $_POST['machineType'] == 'pullout-delivery') { 
                     $srReplacementDisplay = trim($replacementSerialNo[0]) !== '' ? htmlspecialchars($replacementSerialNo[0]) : '<span class="underline-empty"></span>';
                     $mrReplacementDisplay = trim($replacementMrStart[0]) !== '' ? htmlspecialchars($replacementMrStart[0]) : '<span class="underline-empty"></span>';
