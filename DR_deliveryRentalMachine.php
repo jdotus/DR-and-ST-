@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -56,7 +55,7 @@
       font-size: 14px;
     }
 
-    input {
+    input, select {
       padding: 8px;
       border: 1px solid #ccc;
       border-radius: 4px;
@@ -112,17 +111,13 @@
     .radio-group {
       margin-bottom: 15px;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       margin: 50px 0 25px 0;
     }
 
     .radio-group label {
-      margin-right: 10px;
       font-weight: bold;
-    }
-
-    input[type="radio" i] {
-      margin: 0 3px 3px 3px !important;
+      margin-bottom: 5px;
     }
 
     .machine-section {
@@ -140,12 +135,11 @@
     }
   </style>
 </head>
-
 <body>
   <h2>Delivery Rental Machine</h2>
 
   <form id="myForm" action="DR_Both_delivery.php" method="post">
-    <!-- Fixed main details -->
+    <!-- Main details -->
     <div class="input-group">
       <div class="flex-row">
         <div class="form-control">
@@ -176,10 +170,6 @@
           <label>S.I Date</label>
           <input type="date" name="date" required>
         </div>
-        <!-- <div class="form-control">
-          <label>Machine Model</label>
-          <input type="text" name="machineModel" required placeholder="Enter Machine Model">
-        </div> -->
         <div class="form-control">
           <label>Unit Type</label>
           <input type="text" name="units" required placeholder="Enter Units">
@@ -187,14 +177,14 @@
       </div>
     </div>
 
-    <!-- Radio buttons -->
+    <!-- Dropdown replacing radio buttons -->
     <div class="radio-group">
-      <input type="radio" name="machineType" id="usedMachine" value="used" checked>
-      <label for="usedMachine">Used Machines</label>
-      <input type="radio" name="machineType" id="bnewMachine" value="bnew">
-      <label for="bnewMachine">Brand New Machines</label>
-      <input type="radio" name="machineType" id="pulloutDelivery" value="pullout-delivery">
-      <label for="pulloutDelivery">Pull Out Replacement</label>
+      <label for="machineTypeSelect">Select DR Format</label>
+      <select name="machineType" id="machineTypeSelect" required style="width: 40%;">
+        <option value="used" selected>Used Machines</option>
+        <option value="bnew">Brand New Machines</option>
+        <option value="pullout-delivery">Pull Out Replacement</option>
+      </select>
     </div>
 
     <!-- Used Machine Section -->
@@ -233,28 +223,27 @@
         <div class="input-group-pulloutreplace">
           <h3>Replacement Machine</h3>
           <div class="flex-row">
-            <div class="form-control"><label>Machine Model</label><input type="text" name="replacementMachineModel" required placeholder="Enter Machine Model" ></div>
+            <div class="form-control"><label>Machine Model</label><input type="text" name="replacementMachineModel" required placeholder="Enter Machine Model"></div>
             <div class="form-control"><label>Serial No.</label><input type="text" name="replacementSerialNo[]" placeholder="Enter Serial Number"></div>
             <div class="form-control"><label>MR Start</label><input type="text" name="replacementMrStart[]" placeholder="Enter MR Start"></div>
             <div class="form-control"><label>Color Impression</label><input type="text" name="replacementColorImpression[]" placeholder="Enter Color Impression"></div>
             <div class="form-control"><label>Black Impression</label><input type="text" name="replacemenBlackImpression[]" placeholder="Enter Black Impression"></div>
             <div class="form-control"><label>Color Large Impression</label><input type="text" name="replacemenColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
           </div>
-            
+
           <h3>Pull Out Machine</h3>
           <div class="flex-row">
             <div class="form-control"><label>Machine Model</label><input type="text" name="pulloutMachineModel" required placeholder="Enter Machine Model"></div>
             <div class="form-control"><label>Serial No.</label><input type="text" name="pulloutSerialNo[]" placeholder="Enter Serial Number"></div>
-             <div class="form-control"><label>MR End</label><input type="text" name="pulloutMrEnd[]" placeholder="Enter MR End"></div>
+            <div class="form-control"><label>MR End</label><input type="text" name="pulloutMrEnd[]" placeholder="Enter MR End"></div>
             <div class="form-control"><label>Color Impression</label><input type="text" name="pulloutColorImpression[]" placeholder="Enter Color Impression"></div>
             <div class="form-control"><label>Black Impression</label><input type="text" name="pulloutBlackImpression[]" placeholder="Enter Black Impression"></div>
             <div class="form-control"><label>Color Large Impression</label><input type="text" name="pulloutColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
           </div>
         </div>
       </div>
-      <!-- <button type="button" class="btn-add" onclick="addInput('pulloutReplace')">➕ Add Another (Max 21)</button> -->
-
     </div>
+
     <button type="submit" class="btn-submit">Submit</button>
   </form>
 
@@ -271,18 +260,18 @@
       bnewSection.classList.remove('visible');
       pulloutReplaceSection.classList.remove('visible');
 
-      // disable inputs in both first
-      usedSection.querySelectorAll('input').forEach(i => i.disabled = true);
-      bnewSection.querySelectorAll('input').forEach(i => i.disabled = true);
-      pulloutReplaceSection.querySelectorAll('input').forEach(i => i.disabled = true);
+      // Disable inputs in all sections first
+      [usedSection, bnewSection, pulloutReplaceSection].forEach(sec => {
+        sec.querySelectorAll('input').forEach(i => i.disabled = true);
+      });
 
       if (selected === 'used') {
         usedSection.classList.add('visible');
         usedSection.querySelectorAll('input').forEach(i => i.disabled = false);
-      } else if(selected === 'bnew') {
+      } else if (selected === 'bnew') {
         bnewSection.classList.add('visible');
         bnewSection.querySelectorAll('input').forEach(i => i.disabled = false);
-      }else {
+      } else {
         pulloutReplaceSection.classList.add('visible');
         pulloutReplaceSection.querySelectorAll('input').forEach(i => i.disabled = false);
       }
@@ -293,22 +282,19 @@
       const currentGroupsUsed = container.getElementsByClassName('input-group-used').length;
       const currentGroupsBnew = container.getElementsByClassName('input-group-bnew').length;
 
-      if (currentGroupsUsed >= maxGroupsUsed) {
+      if (type === 'used' && currentGroupsUsed >= maxGroupsUsed) {
         alert(`You can only add up to ${maxGroupsUsed} sets.`);
         return;
-      }else if(currentGroupsBnew >= maxGroupsBnew){
+      } else if (type === 'bnew' && currentGroupsBnew >= maxGroupsBnew) {
         alert(`You can only add up to ${maxGroupsBnew} sets.`);
         return;
       }
 
-      const newGroupUsed = document.createElement('div');
-      newGroupUsed.classList.add('input-group-used');
-
-      const newGroupBnew = document.createElement('div');
-      newGroupBnew.classList.add('input-group-bnew');
+      const newGroup = document.createElement('div');
+      newGroup.classList.add(type === 'used' ? 'input-group-used' : 'input-group-bnew');
 
       if (type === 'used') {
-        newGroupUsed.innerHTML = `
+        newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
             <div class="form-control"><label>Serial No.</label><input type="text" name="serialNo[]" placeholder="Enter Serial Number"></div>
@@ -319,32 +305,30 @@
           </div>
         `;
       } else {
-        newGroupBnew.innerHTML = `
+        newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
-             <div class="form-control"><label>Serial No.</label><input type="text" name="serialNo[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="serialNo[]" placeholder="Enter Serial Number"></div>
           </div>
         `;
       }
 
-      // container.appendChild(newGroup);
-      container.appendChild(type === 'used' ? newGroupUsed : newGroupBnew);
+      container.appendChild(newGroup);
     }
 
     function removeGroup(button) {
       button.parentNode.remove();
     }
 
+    // Initialize
     document.addEventListener("DOMContentLoaded", function() {
-      toggleInputs(document.querySelector('input[name="machineType"]:checked').value);
-    });
+      const select = document.getElementById('machineTypeSelect');
+      toggleInputs(select.value);
 
-    document.querySelectorAll('input[name="machineType"]').forEach(radio => {
-      radio.addEventListener('change', function() {
+      select.addEventListener('change', function() {
         toggleInputs(this.value);
       });
     });
   </script>
 </body>
-
 </html>
