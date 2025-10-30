@@ -28,7 +28,8 @@
 
     .input-group-used,
     .input-group-bnew,
-    .input-group-pulloutreplace {
+    .input-group-pulloutreplace,
+    .input-group-invoice {
       border: 1px solid #ddd;
       padding: 28px 15px;
       border-radius: 8px;
@@ -184,6 +185,7 @@
         <option value="used" selected>Used Machines</option>
         <option value="bnew">Brand New Machines</option>
         <option value="pullout-delivery">Pull Out Replacement</option>
+        <option value="drWithInvoice">DR With Invoice</option>
       </select>
     </div>
 
@@ -245,6 +247,23 @@
       </div>
     </div>
 
+    <!-- DR with Invoice Section -->
+    <div id="drWithInvoiceField" class="machine-section ">
+      <div id="drWithInvoiceContainer">
+        <div class="input-group-invoice">
+          <div class="flex-row">
+            <div class="form-control"><label>Machine Model</label><input type="text" name="machineModel" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="serialNo[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>MR Start</label><input type="text" name="mrStart[]" placeholder="Enter MR Start"></div>
+            <div class="form-control"><label>Color Impression</label><input type="text" name="colorImpression[]" placeholder="Enter Color Impression"></div>
+            <div class="form-control"><label>Black Impression</label><input type="text" name="blackImpression[]" placeholder="Enter Black Impression"></div>
+            <div class="form-control"><label>Color Large Impression</label><input type="text" name="colorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn-add" onclick="addInput('invoice')">➕ Add Another (Max 7)</button>
+    </div>
+
     <button type="submit" class="btn-submit">Submit</button>
   </form>
 
@@ -299,12 +318,14 @@
       const usedSection = document.getElementById('usedMachineFields');
       const bnewSection = document.getElementById('bnewMachineFields');
       const pulloutReplaceSection = document.getElementById('pulloutReplaceField');
+      const drWithInvoiceSection = document.getElementById('drWithInvoiceField');
 
       usedSection.classList.remove('visible');
       bnewSection.classList.remove('visible');
       pulloutReplaceSection.classList.remove('visible');
+      drWithInvoiceSection.classList.remove('visible');
 
-      [usedSection, bnewSection, pulloutReplaceSection].forEach(sec => {
+      [usedSection, bnewSection, pulloutReplaceSection, drWithInvoiceSection].forEach(sec => {
         sec.querySelectorAll('input').forEach(i => i.disabled = true);
       });
 
@@ -314,6 +335,9 @@
       } else if (selected === 'bnew') {
         bnewSection.classList.add('visible');
         bnewSection.querySelectorAll('input').forEach(i => i.disabled = false);
+      } else if(selected === 'drWithInvoice') {
+        drWithInvoiceSection.classList.add('visible');
+        drWithInvoiceSection.querySelectorAll('input').forEach(i => i.disabled = false);
       } else {
         pulloutReplaceSection.classList.add('visible');
         pulloutReplaceSection.querySelectorAll('input').forEach(i => i.disabled = false);
@@ -325,6 +349,7 @@
       const container = type === 'used' ? document.getElementById('usedContainer') : document.getElementById('bnewContainer');
       const currentGroupsUsed = container.getElementsByClassName('input-group-used').length;
       const currentGroupsBnew = container.getElementsByClassName('input-group-bnew').length;
+      const currentGroupInvoice = container.getElementsByClassName('input-group-invoice').length;
 
       if (type === 'used' && currentGroupsUsed >= maxGroupsUsed) {
         alert(`You can only add up to ${maxGroupsUsed} sets.`);
@@ -347,7 +372,9 @@
             <div class="form-control"><label>Black Impression</label><input type="text" name="blackImpression[]" placeholder="Enter Black Impression"></div>
             <div class="form-control"><label>Color Large Impression</label><input type="text" name="colorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
           </div>`;
-      } else {
+      } else if(type === 'invoice') {
+
+      }else {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">

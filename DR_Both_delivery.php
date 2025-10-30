@@ -26,7 +26,6 @@
         foreach ($parts as $p) $serialNo[] = $p;
     }
     $bnewMachineModel = isset($_POST['bnewMachineModel']) ? $_POST['bnewMachineModel'] : '0';
-
     $mrStart = isset($_POST['mrStart']) ? $_POST['mrStart'] : array_fill(0, 7, '__________');
     $colorImpression = $_POST['colorImpression'] ?? 0;
     $blackImpression = $_POST['blackImpression'] ?? 0;
@@ -46,6 +45,8 @@
     $pulloutColorImpression = isset($_POST['pulloutColorImpression']) ? $_POST['pulloutColorImpression'] : '';
     $pulloutBlackImpression = isset($_POST['pulloutBlackImpression']) ? $_POST['pulloutBlackImpression'] : '';
     $pulloutColorLargeImpression = isset($_POST['pulloutColorLargeImpression']) ? $_POST['pulloutColorLargeImpression'] : '';
+
+    /* DR with Invoice */
 ?>
 
 <!DOCTYPE html>
