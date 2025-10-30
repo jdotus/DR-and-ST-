@@ -16,7 +16,15 @@
     $tin = $_POST['tin'] ?? '';
 
     /* for Delivery of Brand New Machines and Used Machines */ 
-    $serialNo = isset($_POST['serialNo']) ? $_POST['serialNo'] : array_fill(0, 7, '__________');
+    // Accept one or more inputs in serialNo[] fields. Each input may contain
+    // comma-separated serial numbers. Flatten and trim into $serialNo array.
+    $rawSerialInputs = isset($_POST['serialNo']) ? $_POST['serialNo'] : [];
+    $serialNo = [];
+    foreach ((array)$rawSerialInputs as $input) {
+        // split by comma, trim and discard empty parts
+        $parts = array_filter(array_map('trim', explode(',', (string)$input)), function($v){ return $v !== ''; });
+        foreach ($parts as $p) $serialNo[] = $p;
+    }
     $mrStart = isset($_POST['mrStart']) ? $_POST['mrStart'] : array_fill(0, 7, '__________');
     $colorImpression = $_POST['colorImpression'] ?? 0;
     $blackImpression = $_POST['blackImpression'] ?? 0;
@@ -258,52 +266,40 @@
                 <?php } ?>
 
                 <?php } else if (isset($_POST['machineType']) && $_POST['machineType'] == 'bnew') { ?>
+                    <?php
+                        // Use flattened serial list produced earlier. Remove empty entries.
+                        $serialsClean = array_values(array_filter(array_map('trim', $serialNo), function($v){ return $v !== ''; }));
+                        $serialsCount = count($serialsClean);
+                    ?>
                     <tr class="dr-2nd-row">
-                        <td><?= htmlspecialchars(count($serialNo)) ?></td>
+                        <td><?= htmlspecialchars($serialsCount) ?></td>
                         <td><?= htmlspecialchars($units) ?></td>
                         <td class="text-align" style="font-size: 10px">Deliver Brand New Machine<br>Model: <?= htmlspecialchars($machineModel) ?></td>
                     </tr>
                     <?php
-                        if (!empty($serialNo)) {
-                            $countTableRows = 0;
-                            $count = 0;
-                            $perRow = 3; // ✅ how many serials per row
-                            $total = count($serialNo);
-
-                            foreach ($serialNo as $index => $sr) {
-                                $sr = trim($sr);
-                                if ($sr === '') continue; // skip empty entries
-
-                                // Start a new row every $perRow serials
-                                if ($count % $perRow == 0) {
-                                    if ($count > 0) echo '</td></tr>'; // close previous row
-                                    echo '<tr class="dr-2nd-row-new">';
-                                    echo '<td></td>';
-                                    echo '<td></td>';
-                                    echo '<td class="text-align" style="font-size: 11px;">';
+                        $countTableRows = 0;
+                        if ($serialsCount > 0) {
+                            $perRow = 3;
+                            $printed = 0;
+                            foreach ($serialsClean as $sr) {
+                                if ($printed % $perRow == 0) {
+                                    if ($printed > 0) echo '</td></tr>';
+                                    echo '<tr class="dr-2nd-row-new"><td></td><td></td><td class="text-align" style="font-size: 11px;">';
                                     $countTableRows++;
                                 }
-
-                                // Print serial number
                                 echo 'Serial No. ' . htmlspecialchars($sr) . str_repeat('&nbsp;', 5);
-                                $count++;
-
-                                // If last serial, close row
-                                if ($count == $total) {
+                                $printed++;
+                                if ($printed % $perRow == 0 || $printed == $serialsCount) {
                                     echo '</td></tr>';
                                 }
-                            }   
+                            }
                         }
 
-                        // ✅ Fill remaining blank rows up to 7 total
+                        // Fill remaining blank rows up to 7 total
                         for ($s = $countTableRows; $s < 7; $s++) {
-                            echo '<tr class="dr-2nd-row-new">
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>';
+                            echo '<tr class="dr-2nd-row-new"><td></td><td></td><td></td></tr>';
                         }
-                        ?>
+                    ?>
                 <?php } else if(isset($_POST['machineType']) && $_POST['machineType'] == 'pullout-delivery') { 
                     $srReplacementDisplay = trim($replacementSerialNo[0]) !== '' ? htmlspecialchars($replacementSerialNo[0]) : '<span class="underline-empty"></span>';
                     $mrReplacementDisplay = trim($replacementMrStart[0]) !== '' ? htmlspecialchars($replacementMrStart[0]) : '<span class="underline-empty"></span>';
