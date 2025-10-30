@@ -215,6 +215,7 @@
         </div>
       </div>
       <button type="button" class="btn-add" onclick="addInput('bnew')">➕ Add Another (Max 2)</button>
+      <p id="totalSerialCount" style="font-weight:bold; color:#333; margin-top:10px;">Total Serials: 0 / 15</p>
     </div>
 
     <!-- Pullout Replace Machine Section -->
@@ -250,29 +251,50 @@
   <script>
     const maxGroupsUsed = 7;
     const maxGroupsBnew = 2;
-
     const maxSerials = 15;
 
-    document.querySelectorAll('.serialInput').forEach(input => {
-      input.addEventListener('input', function() {
-        // Split by commas, trim spaces, and remove empties
-        const serials = this.value
+    // --- SERIAL COUNT HANDLING FOR BRAND NEW ---
+    function countTotalSerials() {
+      const inputs = document.querySelectorAll('#bnewMachineFields .serialInput');
+      let total = 0;
+      inputs.forEach(input => {
+        const serials = input.value.split(',').map(s => s.trim()).filter(s => s !== '');
+        total += serials.length;
+      });
+      return total;
+    }
+
+    function updateSerialCountDisplay() {
+      const total = countTotalSerials();
+      const counter = document.getElementById('totalSerialCount');
+      if (counter) counter.textContent = `Total Serials: ${total} / ${maxSerials}`;
+    }
+
+    document.addEventListener('input', function (e) {
+      if (e.target.classList.contains('serialInput')) {
+        const totalSerials = countTotalSerials();
+        updateSerialCountDisplay();
+
+        const currentSerials = e.target.value
           .split(',')
           .map(s => s.trim())
           .filter(s => s !== '');
 
-        // Check limit
-        if (serials.length >= maxSerials) {
-          this.style.border = '2px solid red';
-          this.value = serials.slice(0, maxSerials).join(', ');
-          alert(`You have reached the maximum limit of ${maxSerials} serial numbers.`);
+        if (totalSerials > maxSerials) {
+          e.target.style.border = '2px solid red';
+          alert(`Total of ${maxSerials} serial numbers reached for all Brand New Machines.`);
+
+          const excess = totalSerials - maxSerials;
+          const allowedCount = currentSerials.length - excess;
+          e.target.value = currentSerials.slice(0, allowedCount).join(', ');
+          updateSerialCountDisplay();
         } else {
-          this.style.border = '1px solid #ccc';
+          e.target.style.border = '1px solid #ccc';
         }
-      });
+      }
     });
 
-
+    // --- TOGGLE INPUT SECTIONS ---
     function toggleInputs(selected) {
       const usedSection = document.getElementById('usedMachineFields');
       const bnewSection = document.getElementById('bnewMachineFields');
@@ -282,7 +304,6 @@
       bnewSection.classList.remove('visible');
       pulloutReplaceSection.classList.remove('visible');
 
-      // Disable inputs in all sections first
       [usedSection, bnewSection, pulloutReplaceSection].forEach(sec => {
         sec.querySelectorAll('input').forEach(i => i.disabled = true);
       });
@@ -299,6 +320,7 @@
       }
     }
 
+    // --- ADD & REMOVE INPUTS ---
     function addInput(type) {
       const container = type === 'used' ? document.getElementById('usedContainer') : document.getElementById('bnewContainer');
       const currentGroupsUsed = container.getElementsByClassName('input-group-used').length;
@@ -324,16 +346,14 @@
             <div class="form-control"><label>Color Impression</label><input type="text" name="colorImpression[]" placeholder="Enter Color Impression"></div>
             <div class="form-control"><label>Black Impression</label><input type="text" name="blackImpression[]" placeholder="Enter Black Impression"></div>
             <div class="form-control"><label>Color Large Impression</label><input type="text" name="colorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
-          </div>
-        `;
+          </div>`;
       } else {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
-         <div class="flex-row">
+          <div class="flex-row">
             <div class="form-control"><label>Machine Model</label><input type="text" name="bnewMachineModel[]" required placeholder="Enter Machine Model"></div>
             <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" name="serialNo[]" placeholder="Enter Serial Number"></div>
-          </div>
-        `;
+          </div>`;
       }
 
       container.appendChild(newGroup);
@@ -341,13 +361,12 @@
 
     function removeGroup(button) {
       button.parentNode.remove();
+      updateSerialCountDisplay();
     }
 
-    // Initialize
     document.addEventListener("DOMContentLoaded", function() {
       const select = document.getElementById('machineTypeSelect');
       toggleInputs(select.value);
-
       select.addEventListener('change', function() {
         toggleInputs(this.value);
       });

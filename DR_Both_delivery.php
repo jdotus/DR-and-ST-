@@ -260,7 +260,7 @@
                     
                     <?php }?>
                     <?php for($j = count($serialNo); $j < 7; $j++) {?>
-                        <tr class="dr-2nd-row-new">s
+                        <tr class="dr-2nd-row-new">
                             <td></td>
                             <td></td>
                             <td></td>
@@ -278,7 +278,7 @@
                             if(count($_POST['serialNo']) > 15) {
                                 continue;
                             }
-                            
+
                             // Each machine has its own serial input field (comma-separated)
                             $serialInput = $_POST['serialNo'][$i] ?? '';
                             $serialsClean = array_values(array_filter(array_map('trim', explode(',', $serialInput))));
@@ -290,7 +290,7 @@
                             <!-- Machine Header Row -->
                             <tr class="dr-2nd-row">
                                 <td><?= htmlspecialchars($serialsCount) ?></td>
-                                <td><?= htmlspecialchars($units[$i] ?? '') ?></td>
+                                <td><?= htmlspecialchars($units ?? '') ?></td>
                                 <td class="text-align" style="font-size: 10px">
                                     Deliver Brand New Machine<br>
                                     Model: <?= htmlspecialchars($bnewMachineModel[$i]) ?>
