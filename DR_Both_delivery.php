@@ -48,7 +48,7 @@
 
     /* DR with Complete Delivery and Partial*/
     $drInvoiceMachineModel = $_POST['drInvoiceMachineModel'] ?? '';
-    $drInvoiceNote = $_POST['drInvoicenote'] ?? '';
+    $drInvoiceNote = $_POST['drInvoiceNote'] ?? '';
     $drInvoiceUnderPo = isset($_POST['drInvoiceUnderPo']) ? $_POST['drInvoiceUnderPo'] : '';
     $drInvoiceUnderInvoice = isset($_POST['drInvoiceUnderInvoice']) ? $_POST['drInvoiceUnderInvoice'] : '';
     $drInvoiceQuantity = isset($_POST['drInvoiceQuantity']) ? $_POST['drInvoiceQuantity'] : '';
@@ -417,23 +417,66 @@
                             <td class="text-align"></td> 
                         </tr>
                         <?php } ?>
-
+                        
                         <tr class="dr-2nd-row-new">
                             <td></td>
                             <td></td>
                             <td class="text-align">Model: <?= htmlspecialchars($drInvoiceMachineModel)?> </td> <!-- Echo here -->
                         </tr>
-                        <tr class="dr-2nd-row-new">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align">Under PO No.: <?= htmlspecialchars($drInvoiceUnderPo) ?></td> <!-- Echo here -->
-                        </tr>
-                        <tr class="dr-2nd-row-new">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align">Under Invoice No: <?= htmlspecialchars($drInvoiceUnderInvoice) ?><br> <span style="font-style: italic;">*Note: Completion of Delivery*</span><td> <!-- Echo here -->
-                        </tr>
-                    <?php } ?>
+
+                        <?php if(!empty($drInvoiceUnderPo) && !empty($drInvoiceUnderInvoice)) { ?>
+                            <tr class="dr-2nd-row-new">
+                                <td></td>
+                                <td></td>
+                                <td class="text-align">Under PO No.: <?= htmlspecialchars($drInvoiceUnderPo) ?></td> <!-- Echo here -->
+                            </tr>
+                            
+                            <tr class="dr-2nd-row-new">
+                                <td></td>
+                                <td></td>
+                                <td class="text-align">Under Invoice No: <?= htmlspecialchars($drInvoiceUnderInvoice) ?><br> <span style="font-style: italic;"><?= htmlspecialchars($drInvoiceNote); ?></span><td> <!-- Echo here -->
+                            </tr>
+                            
+                        <?php } else if(empty($drInvoiceUnderPo) && !empty($drInvoiceUnderInvoice)) {?>
+                            <tr class="dr-2nd-row-new">
+                                <td></td>
+                                <td></td>
+                                <td class="text-align">Under Invoice No: <?= htmlspecialchars($drInvoiceUnderInvoice) ?><br> <span style="font-style: italic;"><?= htmlspecialchars($drInvoiceNote); ?></span><td> <!-- Echo here -->
+                            </tr>
+                            <tr class="dr-2nd-row-new">
+                                <td></td>
+                                <td></td>
+                                <td class="text-align"></td> 
+                            </tr>
+                        <?php } else if(!empty($drInvoiceUnderPo) && empty($drInvoiceUnderInvoice)) { ?>
+                            <tr class="dr-2nd-row-new">
+                                <td></td>
+                                <td></td>
+                                <td class="text-align">Under PO No.: <?= htmlspecialchars($drInvoiceUnderPo) ?></td> <!-- Echo here -->
+                            </tr>
+                            <tr class="dr-2nd-row-new">
+                                <td></td>
+                                <td></td>
+                                <td class="text-align"></td> 
+                            </tr>
+                        <?php } else {?>
+                            <tr class="dr-2nd-row-new">
+                                <td></td>
+                                <td></td>
+                                <td class="text-align"></td> 
+                            </tr>
+                            <tr class="dr-2nd-row-new">
+                                <td></td>
+                                <td></td>
+                                <td class="text-align"></td> 
+                            </tr>
+                            <tr class="dr-2nd-row-new">
+                                <td></td>
+                                <td></td>
+                                <td class="text-align"></td> 
+                            </tr>
+                        <?php } ?>
+                    <?php }?>
             </table>
         </div>
     </div>

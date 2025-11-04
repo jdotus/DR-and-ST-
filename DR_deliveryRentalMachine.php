@@ -254,8 +254,8 @@
         <div class="input-group-invoice">
           <div class="flex-row">
             <div class="form-control"><label>Machine Model</label><input type="text" name="drInvoiceMachineModel" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Under PO No.</label><input type="text" name="drInvoiceUnderPo" required placeholder="Enter P.O No."></div>
-            <div class="form-control"><label>Under Invoice No.</label><input type="text" required name="drInvoiceUnderInvoice" placeholder="Enter Invoice No."></div>
+            <div class="form-control"><label>Under PO No.</label><input type="text" name="drInvoiceUnderPo"  placeholder="Enter P.O No."></div>
+            <div class="form-control"><label>Under Invoice No.</label><input type="text"  name="drInvoiceUnderInvoice" placeholder="Enter Invoice No."></div>
             <div class="form-control"><label>Note</label><input type="text" name="drInvoiceNote"  placeholder="Enter Note"></div>
           </div>
         </div>
