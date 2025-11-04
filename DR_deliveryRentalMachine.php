@@ -29,7 +29,8 @@
     .input-group-used,
     .input-group-bnew,
     .input-group-pulloutreplace,
-    .input-group-invoice {
+    .input-group-invoice,
+    .input-group-partial{
       border: 1px solid #ddd;
       padding: 28px 15px;
       border-radius: 8px;
@@ -171,8 +172,8 @@
           <label>S.I Date</label>
           <input type="date" name="date" required>
         </div>
-        <div class="form-control">
-          <label>Unit Type</label>
+        <div class="form-control" id="basedUnit">
+          <label >Unit Type</label>
           <input type="text" name="units" required placeholder="Enter Units">
         </div>
       </div>
@@ -185,7 +186,7 @@
         <option value="used" selected>Used Machines</option>
         <option value="bnew">Brand New Machines</option>
         <option value="pullout-delivery">Pull Out Replacement</option>
-        <option value="drWithInvoice">DR With Invoice</option>
+        <option value="drWithInvoice">DR with Invoice (Patrial and Complete)</option>
       </select>
     </div>
 
@@ -247,23 +248,20 @@
       </div>
     </div>
 
-    <!-- DR with Invoice Section -->
+    <!-- DR for Complete Delivery -->
     <div id="drWithInvoiceField" class="machine-section ">
       <div id="drWithInvoiceContainer">
         <div class="input-group-invoice">
           <div class="flex-row">
-            <div class="form-control"><label>Machine Model</label><input type="text" name="machineModel" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" name="serialNo[]" placeholder="Enter Serial Number"></div>
-            <div class="form-control"><label>MR Start</label><input type="text" name="mrStart[]" placeholder="Enter MR Start"></div>
-            <div class="form-control"><label>Color Impression</label><input type="text" name="colorImpression[]" placeholder="Enter Color Impression"></div>
-            <div class="form-control"><label>Black Impression</label><input type="text" name="blackImpression[]" placeholder="Enter Black Impression"></div>
-            <div class="form-control"><label>Color Large Impression</label><input type="text" name="colorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+            <div class="form-control"><label>Machine Model</label><input type="text" name="drInvoiceMachineModel" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Under PO No.</label><input type="text" name="drInvoiceUnderPo" required placeholder="Enter P.O No."></div>
+            <div class="form-control"><label>Under Invoice No.</label><input type="text" required name="drInvoiceUnderInvoice" placeholder="Enter Invoice No."></div>
+            <div class="form-control"><label>Note</label><input type="text" name="drInvoiceNote"  placeholder="Enter Note"></div>
           </div>
         </div>
       </div>
-      <button type="button" class="btn-add" onclick="addInput('invoice')">➕ Add Another (Max 7)</button>
+      <button type="button" class="btn-add" onclick="addInput('invoice')">➕ Add Another (Max 4)</button>
     </div>
-
     <button type="submit" class="btn-submit">Submit</button>
   </form>
 
@@ -320,25 +318,34 @@
       const pulloutReplaceSection = document.getElementById('pulloutReplaceField');
       const drWithInvoiceSection = document.getElementById('drWithInvoiceField');
 
+      const basedUnitInput = document.getElementById('basedUnit');
+
       usedSection.classList.remove('visible');
       bnewSection.classList.remove('visible');
       pulloutReplaceSection.classList.remove('visible');
       drWithInvoiceSection.classList.remove('visible');
 
-      [usedSection, bnewSection, pulloutReplaceSection, drWithInvoiceSection].forEach(sec => {
+      [usedSection, bnewSection, pulloutReplaceSection, drWithInvoiceSection,].forEach(sec => {
         sec.querySelectorAll('input').forEach(i => i.disabled = true);
       });
 
       if (selected === 'used') {
         usedSection.classList.add('visible');
         usedSection.querySelectorAll('input').forEach(i => i.disabled = false);
+
       } else if (selected === 'bnew') {
         bnewSection.classList.add('visible');
         bnewSection.querySelectorAll('input').forEach(i => i.disabled = false);
+
       } else if(selected === 'drWithInvoice') {
         drWithInvoiceSection.classList.add('visible');
         drWithInvoiceSection.querySelectorAll('input').forEach(i => i.disabled = false);
-      } else {
+        basedUnitInput.style.display = 'none';
+        basedUnitInput.querySelector('label').disabled = true;
+        basedUnitInput.querySelector('input').disabled = true;
+
+      } 
+      else {
         pulloutReplaceSection.classList.add('visible');
         pulloutReplaceSection.querySelectorAll('input').forEach(i => i.disabled = false);
       }
@@ -346,10 +353,25 @@
 
     // --- ADD & REMOVE INPUTS ---
     function addInput(type) {
-      const container = type === 'used' ? document.getElementById('usedContainer') : document.getElementById('bnewContainer');
+      let container;
+
+      // Determine which container to use
+      if (type === 'used') {
+        container = document.getElementById('usedContainer');
+      } else if (type === 'bnew') {
+        container = document.getElementById('bnewContainer');
+      } else if (type === 'invoice') {
+        container = document.getElementById('drWithInvoiceContainer'); // make sure this div exists in HTML
+      } 
+
       const currentGroupsUsed = container.getElementsByClassName('input-group-used').length;
       const currentGroupsBnew = container.getElementsByClassName('input-group-bnew').length;
-      const currentGroupInvoice = container.getElementsByClassName('input-group-invoice').length;
+      const currentGroupsInvoice = container.getElementsByClassName('input-group-invoice').length;
+
+      // Limit per section
+      const maxGroupsUsed = 7;
+      const maxGroupsBnew = 2;
+      const maxGroupsInvoice = 5;
 
       if (type === 'used' && currentGroupsUsed >= maxGroupsUsed) {
         alert(`You can only add up to ${maxGroupsUsed} sets.`);
@@ -357,11 +379,22 @@
       } else if (type === 'bnew' && currentGroupsBnew >= maxGroupsBnew) {
         alert(`You can only add up to ${maxGroupsBnew} sets.`);
         return;
+      } else if (type === 'invoice' && currentGroupsInvoice >= maxGroupsInvoice) {
+        alert(`You can only add up to 4 invoice rows.`);
+        return;
       }
 
-      const newGroup = document.createElement('div');
-      newGroup.classList.add(type === 'used' ? 'input-group-used' : 'input-group-bnew');
 
+      // Create new group container
+      const newGroup = document.createElement('div');
+      newGroup.classList.add(
+        type === 'used' ? 'input-group-used' :
+        type === 'bnew' ? 'input-group-bnew' :
+        type === 'invoice' ? 'input-group-invoice':
+        ''
+      );
+
+      // HTML structure based on type
       if (type === 'used') {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
@@ -372,9 +405,15 @@
             <div class="form-control"><label>Black Impression</label><input type="text" name="blackImpression[]" placeholder="Enter Black Impression"></div>
             <div class="form-control"><label>Color Large Impression</label><input type="text" name="colorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
           </div>`;
-      } else if(type === 'invoice') {
-
-      }else {
+      } else if (type === 'invoice') {
+        newGroup.innerHTML = `
+          <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
+          <div class="flex-row">
+             <div class="form-control"><label>Quantity</label><input type="number" name="drInvoiceQuantity[]" required placeholder="Enter Quantity"></div>
+            <div class="form-control"><label>Unit Type</label><input type="text" name="drInvoiceUnits[]" required placeholder="Enter Units"></div>
+            <div class="form-control"><label>Item Description</label><input type="text" name="drInvoiceItemDescription[]" required placeholder="Enter Item Description"></div>
+          </div>`;
+      } else {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
@@ -383,6 +422,7 @@
           </div>`;
       }
 
+      // Append the new group to the correct container
       container.appendChild(newGroup);
     }
 

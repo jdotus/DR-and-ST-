@@ -46,7 +46,14 @@
     $pulloutBlackImpression = isset($_POST['pulloutBlackImpression']) ? $_POST['pulloutBlackImpression'] : '';
     $pulloutColorLargeImpression = isset($_POST['pulloutColorLargeImpression']) ? $_POST['pulloutColorLargeImpression'] : '';
 
-    /* DR with Invoice */
+    /* DR with Complete Delivery and Partial*/
+    $drInvoiceMachineModel = $_POST['drInvoiceMachineModel'] ?? '';
+    $drInvoiceNote = $_POST['drInvoicenote'] ?? '';
+    $drInvoiceUnderPo = isset($_POST['drInvoiceUnderPo']) ? $_POST['drInvoiceUnderPo'] : '';
+    $drInvoiceUnderInvoice = isset($_POST['drInvoiceUnderInvoice']) ? $_POST['drInvoiceUnderInvoice'] : '';
+    $drInvoiceQuantity = isset($_POST['drInvoiceQuantity']) ? $_POST['drInvoiceQuantity'] : '';
+    $drInvoiceUnits = isset($_POST['drInvoiceUnits']) ? $_POST['drInvoiceUnits'] : '';
+    $drInvoiceItemDescription = isset($_POST['drInvoiceItemDescription']) ? $_POST['drInvoiceItemDescription'] : '';
 ?>
 
 <!DOCTYPE html>
@@ -66,6 +73,18 @@
             background: #fff;
             text-transform: uppercase;
             letter-spacing: 1.5px;
+        }
+
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+        -moz-appearance: textfield;
         }
 
         /* Keep your A5 layout size */
@@ -96,7 +115,7 @@
 
         td,
         th {
-            /* border: 1px solid red; */
+            border: 1px solid red;
             text-align: center;
             box-sizing: border-box;
             vertical-align: top;
@@ -379,6 +398,40 @@
                             <td></td>
                             <td></td>
                             <td class="text-align"><?= $mrPulloutFormat ?></td>
+                        </tr>
+
+                    <?php } else if (isset($_POST['machineType']) && $_POST['machineType'] == 'drWithInvoice') { ?>
+                        
+                        <?php for($i = 0; $i < count($drInvoiceQuantity); $i++) {?>
+                            <tr class="dr-2nd-row">
+                                <td> <?= htmlspecialchars($drInvoiceQuantity[$i])?></td>
+                                <td><?= htmlspecialchars($drInvoiceUnits[$i])?></td>
+                                <td class="text-align"><?= htmlspecialchars($drInvoiceItemDescription[$i])?></td>
+                            </tr>
+                        <?php } ?>
+
+                        <?php for($j = count($drInvoiceQuantity); $j < 4; $j++) {?>
+                        <tr class="dr-2nd-row-new">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align"></td> 
+                        </tr>
+                        <?php } ?>
+
+                        <tr class="dr-2nd-row-new">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align">Model: <?= htmlspecialchars($drInvoiceMachineModel)?> </td> <!-- Echo here -->
+                        </tr>
+                        <tr class="dr-2nd-row-new">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align">Under PO No.: <?= htmlspecialchars($drInvoiceUnderPo) ?></td> <!-- Echo here -->
+                        </tr>
+                        <tr class="dr-2nd-row-new">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align">Under Invoice No: <?= htmlspecialchars($drInvoiceUnderInvoice) ?><br> <span style="font-style: italic;">*Note: Completion of Delivery*</span><td> <!-- Echo here -->
                         </tr>
                     <?php } ?>
             </table>
