@@ -28,7 +28,8 @@
 
     .input-group-used,
     .input-group-bnew,
-    .input-group-pulloutreplace,
+    .input-group-pullout,
+    .input-group-replacement,
     .input-group-invoice,
     .input-group-partial{
       border: 1px solid #ddd;
@@ -76,6 +77,11 @@
       background: #0078d7;
       color: #fff;
       margin-top: 5px;
+    }
+
+    .no-margin {
+      margin-top: 0 !important;
+      margin: 0 0 12px 0 !important;
     }
 
     .btn-add:hover {
@@ -223,29 +229,36 @@
 
     <!-- Pullout Replace Machine Section -->
     <div id="pulloutReplaceField" class="machine-section">
-      <div id="pulloutReplaceContainer">
-        <div class="input-group-pulloutreplace">
+      <div id="replacementContainer">
+        <div class="input-group-replacement">
           <h3>Replacement Machine</h3>
-          <div class="flex-row">
-            <div class="form-control"><label>Machine Model</label><input type="text" name="replacementMachineModel" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" name="replacementSerialNo[]" placeholder="Enter Serial Number"></div>
-            <div class="form-control"><label>MR Start</label><input type="text" name="replacementMrStart[]" placeholder="Enter MR Start"></div>
-            <div class="form-control"><label>Color Impression</label><input type="text" name="replacementColorImpression[]" placeholder="Enter Color Impression"></div>
-            <div class="form-control"><label>Black Impression</label><input type="text" name="replacemenBlackImpression[]" placeholder="Enter Black Impression"></div>
-            <div class="form-control"><label>Color Large Impression</label><input type="text" name="replacemenColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
-          </div>
-
-          <h3>Pull Out Machine</h3>
-          <div class="flex-row">
-            <div class="form-control"><label>Machine Model</label><input type="text" name="pulloutMachineModel" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" name="pulloutSerialNo[]" placeholder="Enter Serial Number"></div>
-            <div class="form-control"><label>MR End</label><input type="text" name="pulloutMrEnd[]" placeholder="Enter MR End"></div>
-            <div class="form-control"><label>Color Impression</label><input type="text" name="pulloutColorImpression[]" placeholder="Enter Color Impression"></div>
-            <div class="form-control"><label>Black Impression</label><input type="text" name="pulloutBlackImpression[]" placeholder="Enter Black Impression"></div>
-            <div class="form-control"><label>Color Large Impression</label><input type="text" name="pulloutColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+            <div class="flex-row">
+              <div class="form-control"><label>Machine Model</label><input type="text" name="replacementMachineModel" required placeholder="Enter Machine Model"></div>
+              <div class="form-control"><label>Serial No.</label><input type="text" name="replacementSerialNo[]" placeholder="Enter Serial Number"></div>
+              <div class="form-control"><label>MR Start</label><input type="text" name="replacementMrStart[]" placeholder="Enter MR Start"></div>
+              <div class="form-control"><label>Color Impression</label><input type="text" name="replacementColorImpression[]" placeholder="Enter Color Impression"></div>
+              <div class="form-control"><label>Black Impression</label><input type="text" name="replacemenBlackImpression[]" placeholder="Enter Black Impression"></div>
+              <div class="form-control"><label>Color Large Impression</label><input type="text" name="replacemenColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+            </div>
           </div>
         </div>
-      </div>
+        <button type="button" class="btn-add no-margin" onclick="addInput('replacement')">➕ Add Another (Max 2)</button>
+      
+          
+        <div id="pulloutContainer">
+          <div class="input-group-pullout">
+            <h3>Pull Out Machine</h3>
+            <div class="flex-row">
+              <div class="form-control"><label>Machine Model</label><input type="text" name="pulloutMachineModel" required placeholder="Enter Machine Model"></div>
+              <div class="form-control"><label>Serial No.</label><input type="text" name="pulloutSerialNo[]" placeholder="Enter Serial Number"></div>
+              <div class="form-control"><label>MR End</label><input type="text" name="pulloutMrEnd[]" placeholder="Enter MR End"></div>
+              <div class="form-control"><label>Color Impression</label><input type="text" name="pulloutColorImpression[]" placeholder="Enter Color Impression"></div>
+              <div class="form-control"><label>Black Impression</label><input type="text" name="pulloutBlackImpression[]" placeholder="Enter Black Impression"></div>
+              <div class="form-control"><label>Color Large Impression</label><input type="text" name="pulloutColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+            </div>
+          </div>
+        </div> 
+        <button type="button" class="btn-add no-margin" onclick="addInput('pullout')">➕ Add Another (Max 2)</button>
     </div>
 
     <!-- DR for Complete Delivery -->
@@ -343,7 +356,6 @@
         basedUnitInput.style.display = 'none';
         basedUnitInput.querySelector('label').disabled = true;
         basedUnitInput.querySelector('input').disabled = true;
-
       } 
       else {
         pulloutReplaceSection.classList.add('visible');
@@ -362,16 +374,23 @@
         container = document.getElementById('bnewContainer');
       } else if (type === 'invoice') {
         container = document.getElementById('drWithInvoiceContainer'); // make sure this div exists in HTML
-      } 
+      }else if (type === 'replacement') {
+        container = document.getElementById('replacementContainer');
+      }else if (type === 'pullout') {
+        container = document.getElementById('pulloutContainer');
+      }
 
       const currentGroupsUsed = container.getElementsByClassName('input-group-used').length;
       const currentGroupsBnew = container.getElementsByClassName('input-group-bnew').length;
       const currentGroupsInvoice = container.getElementsByClassName('input-group-invoice').length;
+      const currentGroupsReplacement = container.getElementsByClassName('input-group-replacement');
+      const currentGroupsPullout = container.getElementsByClassName('input-group-pullout');
 
       // Limit per section
       const maxGroupsUsed = 7;
       const maxGroupsBnew = 2;
       const maxGroupsInvoice = 5;
+      const maxGroupsReplacementAndPullout = 2;
 
       if (type === 'used' && currentGroupsUsed >= maxGroupsUsed) {
         alert(`You can only add up to ${maxGroupsUsed} sets.`);
@@ -382,8 +401,13 @@
       } else if (type === 'invoice' && currentGroupsInvoice >= maxGroupsInvoice) {
         alert(`You can only add up to 4 invoice rows.`);
         return;
+      } else if (type === 'replacement' && currentGroupsReplacement.length >= maxGroupsReplacementAndPullout) {
+        alert(`You can only add up to ${maxGroupsReplacementAndPullout} replacement sets.`);
+        return;
+      } else if (type === 'pullout' && currentGroupsPullout.length >= maxGroupsReplacementAndPullout) {
+        alert(`You can only add up to ${maxGroupsReplacementAndPullout} pullout sets.`);
+        return;
       }
-
 
       // Create new group container
       const newGroup = document.createElement('div');
@@ -391,6 +415,8 @@
         type === 'used' ? 'input-group-used' :
         type === 'bnew' ? 'input-group-bnew' :
         type === 'invoice' ? 'input-group-invoice':
+        type === 'replacement' ? 'input-group-replacement':
+        type === 'pullout' ? 'input-group-pullout':
         ''
       );
 
@@ -409,9 +435,31 @@
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
-             <div class="form-control"><label>Quantity</label><input type="number" name="drInvoiceQuantity[]" required placeholder="Enter Quantity"></div>
+            <div class="form-control"><label>Quantity</label><input type="number" name="drInvoiceQuantity[]" required placeholder="Enter Quantity"></div>
             <div class="form-control"><label>Unit Type</label><input type="text" name="drInvoiceUnits[]" required placeholder="Enter Units"></div>
             <div class="form-control"><label>Item Description</label><input type="text" name="drInvoiceItemDescription[]" required placeholder="Enter Item Description"></div>
+          </div>`;
+      } else if (type === 'pullout') {
+        newGroup.innerHTML = `
+          <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
+          <div class="flex-row">
+              <div class="form-control"><label>Machine Model</label><input type="text" name="pulloutMachineModel" required placeholder="Enter Machine Model"></div>
+              <div class="form-control"><label>Serial No.</label><input type="text" name="pulloutSerialNo[]" placeholder="Enter Serial Number"></div>
+              <div class="form-control"><label>MR End</label><input type="text" name="pulloutMrEnd[]" placeholder="Enter MR End"></div>
+              <div class="form-control"><label>Color Impression</label><input type="text" name="pulloutColorImpression[]" placeholder="Enter Color Impression"></div>
+              <div class="form-control"><label>Black Impression</label><input type="text" name="pulloutBlackImpression[]" placeholder="Enter Black Impression"></div>
+              <div class="form-control"><label>Color Large Impression</label><input type="text" name="pulloutColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+          </div>`;
+      } else if (type === 'replacement') {
+        newGroup.innerHTML = `
+          <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
+          <div class="flex-row">
+              <div class="form-control"><label>Machine Model</label><input type="text" name="replacementMachineModel" required placeholder="Enter Machine Model"></div>
+              <div class="form-control"><label>Serial No.</label><input type="text" name="replacementSerialNo[]" placeholder="Enter Serial Number"></div>
+              <div class="form-control"><label>MR Start</label><input type="text" name="replacementMrStart[]" placeholder="Enter MR Start"></div>
+              <div class="form-control"><label>Color Impression</label><input type="text" name="replacementColorImpression[]" placeholder="Enter Color Impression"></div>
+              <div class="form-control"><label>Black Impression</label><input type="text" name="replacemenBlackImpression[]" placeholder="Enter Black Impression"></div>
+              <div class="form-control"><label>Color Large Impression</label><input type="text" name="replacemenColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
           </div>`;
       } else {
         newGroup.innerHTML = `
