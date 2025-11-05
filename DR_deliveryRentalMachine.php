@@ -443,7 +443,7 @@
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
-              <div class="form-control"><label>Machine Model</label><input type="text" name="pulloutMachineModel" required placeholder="Enter Machine Model"></div>
+             
               <div class="form-control"><label>Serial No.</label><input type="text" name="pulloutSerialNo[]" placeholder="Enter Serial Number"></div>
               <div class="form-control"><label>MR End</label><input type="text" name="pulloutMrEnd[]" placeholder="Enter MR End"></div>
               <div class="form-control"><label>Color Impression</label><input type="text" name="pulloutColorImpression[]" placeholder="Enter Color Impression"></div>
@@ -454,7 +454,7 @@
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
-              <div class="form-control"><label>Machine Model</label><input type="text" name="replacementMachineModel" required placeholder="Enter Machine Model"></div>
+              
               <div class="form-control"><label>Serial No.</label><input type="text" name="replacementSerialNo[]" placeholder="Enter Serial Number"></div>
               <div class="form-control"><label>MR Start</label><input type="text" name="replacementMrStart[]" placeholder="Enter MR Start"></div>
               <div class="form-control"><label>Color Impression</label><input type="text" name="replacementColorImpression[]" placeholder="Enter Color Impression"></div>

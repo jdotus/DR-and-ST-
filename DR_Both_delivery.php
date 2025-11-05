@@ -115,7 +115,7 @@
 
         td,
         th {
-            border: 1px solid red;
+            /* border: 1px solid red; */
             text-align: center;
             box-sizing: border-box;
             vertical-align: top;
@@ -184,7 +184,7 @@
             text-decoration-style: solid;
             text-decoration-thickness: 1px;
             display: inline-block;
-            min-width: 50px;
+            min-width: 55px;
         }
         
         .dr-2nd-row-new {
@@ -243,6 +243,7 @@
             </table>
 
             <table>
+
                 <!-- HEADINGS -->
                 <tr class="dr-2nd-row-header">
                     <td class="col-quantity"></td> <!-- QUANTITY -->
@@ -350,56 +351,80 @@
                     }
                 ?>
                 <?php } else if(isset($_POST['machineType']) && $_POST['machineType'] == 'pullout-delivery') { 
-                    $srReplacementDisplay = trim($replacementSerialNo[0]) !== '' ? htmlspecialchars($replacementSerialNo[0]) : '<span class="underline-empty"></span>';
-                    $mrReplacementDisplay = trim($replacementMrStart[0]) !== '' ? htmlspecialchars($replacementMrStart[0]) : '<span class="underline-empty"></span>';
-                    $srPulloutDisplay = trim($pulloutSerialNo[0]) !== '' ? htmlspecialchars($pulloutSerialNo[0]) : '<span class="underline-empty"></span>';
-                    $mrPulloutDisplay = trim($pulloutMrEnd[0]) !== '' ? htmlspecialchars($pulloutMrEnd[0]) : '<span class="underline-empty"></span>';
 
-                    $mrReplacementFormat = "MR Start: " . $mrReplacementDisplay . " (CI: " . htmlspecialchars($replacementColorImpression[0]) . "; BI: " . htmlspecialchars($replacementBlackImpression[0]) . "; CLI: " . htmlspecialchars($replacementColorLargeImpression[0]) . ")";
-                    $mrPulloutFormat = "MR End: " . $mrPulloutDisplay . " (CI: " . htmlspecialchars($pulloutColorImpression[0])  . "; BI: " . htmlspecialchars($pulloutBlackImpression[0]) . "; CLI: " . htmlspecialchars($pulloutColorLargeImpression[0]) . ")";
-                    ?>
-                    
+                    $countTableRows = 0;
+                    $perRow = 3;
+
+                    if(!empty($replacementMachineModel) && !empty($replacementSerialNo)) {?>
                         <tr class="dr-2nd-row">
                             <td><?= htmlspecialchars(count($replacementSerialNo)) ?></td>
                             <td><?= htmlspecialchars($units) ?></td>
-                            <td class="text-align" style="font-size: 10px">Deliever Replacement Machine</td>
+                            <td class="text-align" style="font-size: 10px">Deliever Replacement Machine <br>Model: <?= htmlspecialchars($replacementMachineModel) ?></td>
                         </tr>
+                        
+                        <?php for($i = 0; $i < count($replacementSerialNo); $i++) {  
+                            $srReplacementDisplay = trim($replacementSerialNo[$i]) !== '' ? htmlspecialchars($replacementSerialNo[$i]) : '<span class="underline-empty"></span>';
+                            $mrReplacementDisplay = trim($replacementMrStart[$i]) !== '' ? htmlspecialchars($replacementMrStart[$i]) : '<span class="underline-empty"></span>';
+
+                            $ciDisplay = trim($replacementColorImpression[$i]) !== '' ? htmlspecialchars($replacementColorImpression[$i]) : '<span class="underline-empty"></span>';
+                            $biDisplay = trim($replacementBlackImpression[$i]) !== '' ? htmlspecialchars($replacementBlackImpression[$i]) : '<span class="underline-empty"></span>';
+                            $cliDisplay = trim($replacementColorLargeImpression[$i]) !== '' ? htmlspecialchars($replacementColorLargeImpression[$i]) : '<span class="underline-empty"></span>';
+                            
+                            $mrReplacementFormat = "MR Start:" . $mrReplacementDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
+                            ?>
+                                
                         <tr class="dr-2nd-row">
                             <td></td>
                             <td></td>
-                            <td class="text-align">Model: <?= htmlspecialchars($replacementMachineModel) ?></td>
+                            <td class="text-align">Serial No.: <?= $srReplacementDisplay ?> <?= $mrReplacementFormat ?> </td>
                         </tr>
-                        <tr class="dr-2nd-row">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align">Serial No. : <?= $srReplacementDisplay ?> </td>
-                        </tr>
-                        <tr class="dr-2nd-row">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align"><?= $mrReplacementFormat?></td>
-                        </tr>
+                        
+                        <?php }
+                        for($j = count($replacementSerialNo); $j < 2; $j++) {?>
+                            <tr class="dr-2nd-row">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <?php } 
+                    } ?>
+
+                    <?php if(!empty($pulloutMachineModel) && !empty($pulloutSerialNo)) {?>
                         <tr class="dr-2nd-row">
                             <td><?= htmlspecialchars(count($pulloutSerialNo)) ?></td>
                             <td><?= htmlspecialchars($units) ?></td>
-                            <td class="text-align" style="font-size: 10px">Pull Out Machine</td>
+                            <td class="text-align" style="font-size: 10px">Pull Out Machine <br>Model: <?= htmlspecialchars($pulloutMachineModel) ?></td>
                         </tr>
-                        <tr class="dr-2nd-row">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align">Model: <?= htmlspecialchars($pulloutMachineModel) ?></td>
-                        </tr>
-                        <tr class="dr-2nd-row">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align">Serial No.: <?= $srPulloutDisplay ?></td>
-                        </tr>
-                        <tr class="dr-2nd-row">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align"><?= $mrPulloutFormat ?></td>
-                        </tr>
+                        <?php for($i = 0; $i < count($pulloutSerialNo); $i++) {
+                            $srPulloutDisplay = trim($pulloutSerialNo[$i]) !== '' ? htmlspecialchars($pulloutSerialNo[0]) : '<span class="underline-empty"></span>';
+                            $mrPulloutDisplay = trim($pulloutMrEnd[$i]) !== '' ? htmlspecialchars($pulloutMrEnd[0]) : '<span class="underline-empty"></span>';
+    
+                            $ciDisplay = trim($pulloutColorImpression[$i]) !== '' ? htmlspecialchars($pulloutColorImpression[$i]) : '<span class="underline-empty"></span>';
+                            $biDisplay = trim($pulloutBlackImpression[$i]) !== '' ? htmlspecialchars($pulloutBlackImpression[$i]) : '<span class="underline-empty"></span>';
+                            $cliDisplay = trim($pulloutColorLargeImpression[$i]) !== '' ? htmlspecialchars($pulloutColorLargeImpression[$i]) : '<span class="underline-empty"></span>';
+                            
+                            $mrPulloutFormat = "MR End:" . $mrPulloutDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
+                        ?>
+                            <tr class="dr-2nd-row">
+                                <td></td>
+                                <td></td>
+                                <td class="text-align">Serial No.:<?= $srReplacementDisplay ?> <?= $mrReplacementFormat ?> </td>
+                            </tr>
+                        <?php }
 
+                        for($j = count($pulloutSerialNo); $j < 2; $j++) {?>
+                            <tr class="dr-2nd-row">
+                                <td></td>
+                                <td></td>
+                                <td></td>   
+                            </tr>
+                    <?php } ?>
+                            <tr class="dr-2nd-row">
+                                    <td></td>
+                                    <td></td>
+                                    <td class="text-align"></td>
+                            </tr>
+                    <?php } ?>
                     <?php } else if (isset($_POST['machineType']) && $_POST['machineType'] == 'drWithInvoice') { ?>
                         
                         <?php for($i = 0; $i < count($drInvoiceQuantity); $i++) {?>
