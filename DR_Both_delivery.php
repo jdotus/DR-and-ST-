@@ -115,7 +115,7 @@
 
         td,
         th {
-            /* border: 1px solid red; */
+            /* border: 1px solid red;   */
             text-align: center;
             box-sizing: border-box;
             vertical-align: top;
@@ -350,10 +350,8 @@
                             </tr>';
                     }
                 ?>
-                <?php } else if(isset($_POST['machineType']) && $_POST['machineType'] == 'pullout-delivery') { 
 
-                    $countTableRows = 0;
-                    $perRow = 3;
+                <?php } else if(isset($_POST['machineType']) && $_POST['machineType'] == 'pullout-delivery') { 
 
                     if(!empty($replacementMachineModel) && !empty($replacementSerialNo)) {?>
                         <tr class="dr-2nd-row">
@@ -425,7 +423,8 @@
                                     <td class="text-align"></td>
                             </tr>
                     <?php } ?>
-                    <?php } else if (isset($_POST['machineType']) && $_POST['machineType'] == 'drWithInvoice') { ?>
+
+                <?php } else if (isset($_POST['machineType']) && $_POST['machineType'] == 'drWithInvoice') { ?>
                         
                         <?php for($i = 0; $i < count($drInvoiceQuantity); $i++) {?>
                             <tr class="dr-2nd-row">
@@ -506,5 +505,10 @@
         </div>
     </div>
 </body>
+<script>
+    window.onload = function() {
+        window.print();
+    }
+</script>
 
 </html>
