@@ -18,15 +18,16 @@
     /* for Delivery of Brand New Machines and Used Machines */ 
     // Accept one or more inputs in serialNo[] fields. Each input may contain
     // comma-separated serial numbers. Flatten and trim into $serialNo array.
-    $rawSerialInputs = isset($_POST['serialNo']) ? $_POST['serialNo'] : [];
-    $serialNo = [];
-    foreach ((array)$rawSerialInputs as $input) {
-        // split by comma, trim and discard empty parts
-        $parts = array_filter(array_map('trim', explode(',', (string)$input)), function($v){ return $v !== ''; });
-        foreach ($parts as $p) $serialNo[] = $p;
-    }
+    // $rawSerialInputs = isset($_POST['serialNo']) ? $_POST['serialNo'] : [];
+    // $serialNo = [];
+    // foreach ((array)$rawSerialInputs as $input) {
+    //     // split by comma, trim and discard empty parts
+    //     $parts = array_filter(array_map('trim', explode(',', (string)$input)), function($v){ return $v; });
+    //     foreach ($parts as $p) $serialNo[] = $p;
+    // }
     $bnewMachineModel = isset($_POST['bnewMachineModel']) ? $_POST['bnewMachineModel'] : '0';
-    $mrStart = isset($_POST['mrStart']) ? $_POST['mrStart'] : array_fill(0, 7, '__________');
+    $serialNo = isset($_POST['serialNo']) ? $_POST['serialNo'] : array_fill(0, 7, '________');
+    $mrStart = isset($_POST['mrStart']) ? $_POST['mrStart'] : array_fill(0, 7, '________');
     $colorImpression = $_POST['colorImpression'] ?? 0;
     $blackImpression = $_POST['blackImpression'] ?? 0;
     $colorLargeImpression = $_POST['colorLargeImpression'] ?? 0;
@@ -115,7 +116,7 @@
 
         td,
         th {
-            /* border: 1px solid red;   */
+            border: 1px solid red;  
             text-align: center;
             box-sizing: border-box;
             vertical-align: top;
@@ -264,13 +265,17 @@
                     <?php 
                         $srDisplay = trim($serialNo[$i]) !== '' ? htmlspecialchars($serialNo[$i]) : '<span class="underline-empty"></span>';
                         $mrDisplay = trim($mrStart[$i]) !== '' ? htmlspecialchars($mrStart[$i]) : '<span class="underline-empty"></span>';
-                            
                         
-                        if($colorImpression[$i] === 0 || $colorImpression[$i] === ''){
-                                $messageFormat = "Serial No.: " . $srDisplay .  " MR Start: "  . $mrDisplay; 
-                            }else{
-                                $messageFormat = "Serial No.: " . $srDisplay . " MR Start: " . $mrDisplay . " (CI: " . $colorImpression[$i] . "; BI: " . $blackImpression[$i] . "; CLI: " . $colorLargeImpression[$i] . ")"; 
-                            }
+                        $ci = trim((string)($colorImpression[$i] ?? ''));
+                        $bi = trim((string)($blackImpression[$i] ?? ''));
+                        $cli = trim((string)($colorLargeImpression[$i] ?? ''));
+
+                        if ($ci === '' && $bi === '' && $cli === '') {
+                            $messageFormat = "Serial No.: " . $srDisplay .  " MR Start: "  . $mrDisplay;
+                        } else {
+                            $messageFormat = "Serial No.: " . $srDisplay . " MR Start: " . $mrDisplay
+                                . " (CI: " . htmlspecialchars($ci) . "; BI: " . htmlspecialchars($bi) . "; CLI: " . htmlspecialchars($cli) . ")";
+                        }
                         ?>
                     
                     <tr class="dr-2nd-row-new">
@@ -287,7 +292,8 @@
                             <td></td>
                         </tr>
                 <?php } ?>
-
+                    
+                    <!-- For the Brand New Machine Delivery -->
                <?php } else if (isset($_POST['machineType']) && $_POST['machineType'] == 'bnew') { ?>
                 <?php
                     // ✅ Clean serial list for each machine (assume $_POST['serialNo'] is an array, one per machine)
@@ -351,9 +357,76 @@
                     }
                 ?>
 
+                <!-- For the Pullout Replacement Section -->
                 <?php } else if(isset($_POST['machineType']) && $_POST['machineType'] == 'pullout-delivery') { 
 
-                    if(!empty($replacementMachineModel) && !empty($replacementSerialNo)) {?>
+                    if(isset($_POST['machineType2']) && $_POST['machineType2'] == 'replacementOnly') { ?>
+                         <tr class="dr-2nd-row">
+                            <td><?= htmlspecialchars(count($replacementSerialNo)) ?></td>
+                            <td><?= htmlspecialchars($units) ?></td>
+                            <td class="text-align" style="font-size: 10px">Deliever Replacement Machine <br>Model: <?= htmlspecialchars($replacementMachineModel) ?></td>
+                        </tr>
+
+                        <?php for($i = 0; $i < count($replacementSerialNo); $i++) { 
+                            $srReplacementDisplay = trim($replacementSerialNo[$i]) !== '' ? htmlspecialchars($replacementSerialNo[$i]) : '<span class="underline-empty"></span>';
+                            $mrReplacementDisplay = trim($replacementMrStart[$i]) !== '' ? htmlspecialchars($replacementMrStart[$i]) : '<span class="underline-empty"></span>';
+
+                            $ciDisplay = trim($replacementColorImpression[$i]) !== '' ? htmlspecialchars($replacementColorImpression[$i]) : '<span class="underline-empty"></span>';
+                            $biDisplay = trim($replacementBlackImpression[$i]) !== '' ? htmlspecialchars($replacementBlackImpression[$i]) : '<span class="underline-empty"></span>';
+                            $cliDisplay = trim($replacementColorLargeImpression[$i]) !== '' ? htmlspecialchars($replacementColorLargeImpression[$i]) : '<span class="underline-empty"></span>';
+                            
+                            $mrReplacementFormat = "MR Start:" . $mrReplacementDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
+                        ?>
+                        <tr class="dr-2nd-row">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align">Serial No.: <?= $srReplacementDisplay ?> <?= $mrReplacementFormat ?> </td>
+                        </tr>
+                        <?php }?>
+
+                        <?php for($i = count($replacementSerialNo); $i < 6; $i++) { ?>
+                        <tr class="dr-2nd-row">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align"></td>
+                        </tr>
+                    <?php } ?>
+
+                   <?php } else if (isset($_POST['machineType2']) && $_POST['machineType2'] == 'pulloutOnly') { ?>
+                        <tr class="dr-2nd-row">
+                            <td><?= htmlspecialchars(count($pulloutSerialNo)) ?></td>
+                            <td><?= htmlspecialchars($units) ?></td>
+                            <td class="text-align" style="font-size: 10px">Pull Out Machine <br>Model: <?= htmlspecialchars($pulloutMachineModel) ?></td>
+                        </tr>
+
+                        <?php for($i = 0; $i < count($pulloutSerialNo); $i++) {
+                            $srPulloutDisplay = trim($pulloutSerialNo[$i]) !== '' ? htmlspecialchars($pulloutSerialNo[0]) : '<span class="underline-empty"></span>';
+                            $mrPulloutDisplay = trim($pulloutMrEnd[$i]) !== '' ? htmlspecialchars($pulloutMrEnd[0]) : '<span class="underline-empty"></span>';
+    
+                            $ciDisplay = trim($pulloutColorImpression[$i]) !== '' ? htmlspecialchars($pulloutColorImpression[$i]) : '<span class="underline-empty"></span>';
+                            $biDisplay = trim($pulloutBlackImpression[$i]) !== '' ? htmlspecialchars($pulloutBlackImpression[$i]) : '<span class="underline-empty"></span>';
+                            $cliDisplay = trim($pulloutColorLargeImpression[$i]) !== '' ? htmlspecialchars($pulloutColorLargeImpression[$i]) : '<span class="underline-empty"></span>';
+                            
+                            $mrPulloutFormat = "MR End:" . $mrPulloutDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
+                        ?>
+
+                            <tr class="dr-2nd-row">
+                                <td></td>
+                                <td></td>
+                                <td class="text-align">Serial No.:<?= $srPulloutDisplay ?> <?= $mrPulloutFormat ?> </td>
+                            </tr>
+                        <?php } ?>
+                        
+                        <?php for($i = count($pulloutSerialNo); $i < 6; $i++) {?>
+                            <tr class="dr-2nd-row">
+                                <td></td>
+                                <td></td>
+                                <td class="text-align"></td>
+                            </tr>
+                        <?php } ?>
+                    <?php } else { 
+                        if(!empty($replacementMachineModel) && !empty($replacementSerialNo)) { ?>
+
                         <tr class="dr-2nd-row">
                             <td><?= htmlspecialchars(count($replacementSerialNo)) ?></td>
                             <td><?= htmlspecialchars($units) ?></td>
@@ -368,8 +441,9 @@
                             $biDisplay = trim($replacementBlackImpression[$i]) !== '' ? htmlspecialchars($replacementBlackImpression[$i]) : '<span class="underline-empty"></span>';
                             $cliDisplay = trim($replacementColorLargeImpression[$i]) !== '' ? htmlspecialchars($replacementColorLargeImpression[$i]) : '<span class="underline-empty"></span>';
                             
+                            
                             $mrReplacementFormat = "MR Start:" . $mrReplacementDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
-                            ?>
+                        ?>
                                 
                         <tr class="dr-2nd-row">
                             <td></td>
@@ -384,7 +458,7 @@
                                 <td></td>
                                 <td></td>
                             </tr>
-                            <?php } 
+                        <?php } 
                     } ?>
 
                     <?php if(!empty($pulloutMachineModel) && !empty($pulloutSerialNo)) {?>
@@ -406,7 +480,7 @@
                             <tr class="dr-2nd-row">
                                 <td></td>
                                 <td></td>
-                                <td class="text-align">Serial No.:<?= $srReplacementDisplay ?> <?= $mrReplacementFormat ?> </td>
+                                <td class="text-align">Serial No.:<?= $srPulloutDisplay ?> <?= $mrPulloutFormat ?> </td>
                             </tr>
                         <?php }
 
@@ -423,7 +497,9 @@
                                     <td class="text-align"></td>
                             </tr>
                     <?php } ?>
+                <?php } ?>
 
+                <!-- For the DR with Invoice Section -->
                 <?php } else if (isset($_POST['machineType']) && $_POST['machineType'] == 'drWithInvoice') { ?>
                         
                         <?php for($i = 0; $i < count($drInvoiceQuantity); $i++) {?>
@@ -476,7 +552,7 @@
                             <tr class="dr-2nd-row-new">
                                 <td></td>
                                 <td></td>
-                                <td class="text-align">Under PO No.: <?= htmlspecialchars($drInvoiceUnderPo) ?></td> <!-- Echo here -->
+                                <td class="text-align">Under PO No.: <?= htmlspecialchars($drInvoiceUnderPo) ?><br><span style="font-style: italic;"><?= htmlspecialchars($drInvoiceNote); ?></span></td> <!-- Echo here -->
                             </tr>
                             <tr class="dr-2nd-row-new">
                                 <td></td>
@@ -500,7 +576,9 @@
                                 <td class="text-align"></td> 
                             </tr>
                         <?php } ?>
-                    <?php }?>
+                    <?php }else if (isset($_POST['machineType']) && $_POST['machineType'] == 'drWithPrice') { ?>
+                            
+                    <?php } ?>
             </table>
         </div>
     </div>

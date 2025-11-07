@@ -33,7 +33,8 @@
     .input-group-replacement,
     .input-group-replacement-only,
     .input-group-invoice,
-    .input-group-partial{
+    .input-group-partial,
+    .input-group-price{
       border: 1px solid #ddd;
       padding: 28px 15px;
       border-radius: 8px;
@@ -202,13 +203,14 @@
         <option value="used" selected>Used Machines</option>
         <option value="bnew">Brand New Machines</option>
         <option value="pullout-delivery">Pull Out Replacement</option>
+        <option value="drWithPrice">DR with Unit Price </option>
         <option value="drWithInvoice">DR with Invoice (Patrial and Complete)</option>
       </select>
     </div>
 
     <div class="pullout-replacement-group" id="pullout-replacement-group">
       <label for="pulloutReplacementTypeSelect">Select Type</label>
-      <select name="machineType" id="pulloutReplacementTypeSelect" required style="width: 40%;">
+      <select name="machineType2" id="pulloutReplacementTypeSelect" required style="width: 40%;">
         <option value="pulloutReplacement" selected>Replacement & Pullout Machines</option>
         <option value="replacementOnly">Replacement Machines</option>
         <option value="pulloutOnly">Pullout Machines</option>
@@ -249,7 +251,7 @@
 
     <!-- Pullout Replace Machine Section -->
     <div id="pulloutReplaceFieldMain">
-      <div id="pulloutReplaceField"  class="machine-section">
+      <div id="pulloutReplaceField" class="machine-section">
         <div id="replacementContainerMain">
           <div id="replacementContainer">
             <div class="input-group-replacement">
@@ -286,7 +288,7 @@
         </div> 
       </div>
         
-        <div id="replacementOnlyContainerMain">
+        <div id="replacementOnlyContainerMain" class="machine-section">
           <div id="replacementOnlyContainer">
             <div class="input-group-replacement-only">
               <h3>Replacement Machine</h3>
@@ -303,7 +305,7 @@
             <button type="button" class="btn-add no-margin" onclick="addInput('replacement-only')">➕ Add Another (Max 7)</button>
           </div>
         
-        <div id="pulloutOnlyContainerMain">
+        <div id="pulloutOnlyContainerMain" class="machine-section">
           <div id="pulloutOnlyContainer">
             <div class="input-group-pullout-only">
               <h3>Pull Out Machine</h3>
@@ -327,7 +329,7 @@
         <div class="input-group-invoice">
           <div class="flex-row">
             <div class="form-control"><label>Machine Model</label><input type="text" name="drInvoiceMachineModel" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Under PO No.</label><input type="text" name="drInvoiceUnderPo"  placeholder="Enter P.O No."></div>
+            <div class="form-control"><label>Under PO No.</label><input type="text" name="drInvoiceUnderPo" required placeholder="Enter P.O No."></div>
             <div class="form-control"><label>Under Invoice No.</label><input type="text"  name="drInvoiceUnderInvoice" placeholder="Enter Invoice No."></div>
             <div class="form-control"><label>Note</label><input type="text" name="drInvoiceNote"  placeholder="Enter Note"></div>
           </div>
@@ -335,7 +337,25 @@
       </div>
       <button type="button" class="btn-add" onclick="addInput('invoice')">➕ Add Another (Max 4)</button>
     </div>
-    <button type="submit" class="btn-submit" >Submit</button>
+
+    <!-- DR with Prices -->
+    <div id="drWithPriceField" class="machine-section">
+      <div id="drWithPriceContainer">
+        <div class="input-group-price">
+          <div class="flex-row">
+            <div class="form-control"><label>Machine Model</label><input type="text" name="drInvoiceMachineModel" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Quantity</label><input type="number" name="drInvoiceMachineModel" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>price</label><input type="text" name="drInvoiceMachineModel" required placeholder="Enter Machine Model"></div>
+            <div class="form-control" id="basedUnit"><label >Unit Type</label><input type="text" name="units" required placeholder="Enter Units"></div>
+            <div class="form-control"><label>Item Description</label><input type="text" name="drInvoiceMachineModel" required placeholder="Enter Machine Model"></div>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn-add" onclick="addInput('invoice')">➕ Add Another (Max )</button>
+    </div>
+
+
+    <button type="submit" class="btn-submit" >Save & Generate</button>
   </form>
 
   <script>
@@ -390,6 +410,7 @@
     const bnewSection = document.getElementById('bnewMachineFields');
     const pulloutReplaceSection = document.getElementById('pulloutReplaceField');
     const drWithInvoiceSection = document.getElementById('drWithInvoiceField');
+    const drWithPriceSection = document.getElementById('drWithPriceField');
 
     const pulloutOnlyContainer = document.getElementById('pulloutOnlyContainerMain');
     const replacementOnlyContainer = document.getElementById('replacementOnlyContainerMain');
@@ -404,7 +425,8 @@
       pulloutReplaceSection,
       drWithInvoiceSection,
       pulloutOnlyContainer,
-      replacementOnlyContainer
+      replacementOnlyContainer,
+      drWithPriceSection
     ];
 
     allSections.forEach(sec => {
@@ -452,15 +474,26 @@
       basedUnitInput.querySelector('label').disabled = true;
       basedUnitInput.querySelector('input').disabled = true;
 
-    } else if (selected === 'pullout-delivery') {
+    } else if(selected === 'drWithPrice') {
+      drWithPriceSection.classList.add('visible');
+      drWithPriceSection.style.display = 'block';
+
+      // Enable all inputs inside this section
+      drWithPriceSection.querySelectorAll('input').forEach(i => (i.disabled = false));
+      drWithPriceSection.querySelectorAll('label').forEach(l => (l.disabled = false));
+
+      basedUnitInput.style.display = 'none';
+      basedUnitInput.querySelector('label').disabled = true;
+      basedUnitInput.querySelector('input').disabled = true;
+    }else if (selected === 'pullout-delivery') {
       // Always show dropdown for pullout type
       pulloutReplacementSelect.style.display = 'flex';
       pulloutReplacementSelect.querySelector('select').disabled = false;
       pulloutReplacementSelect.querySelector('label').disabled = false;
 
-      basedUnitInput.style.display = 'none';
-      basedUnitInput.querySelector('label').disabled = true;
-      basedUnitInput.querySelector('input').disabled = true;
+      basedUnitInput.style.display = 'flex';
+      basedUnitInput.querySelector('label').disabled = false;
+      basedUnitInput.querySelector('input').disabled = false;
 
       // Handle secondary selection
       if (secondarySelected === 'replacementOnly') {
@@ -492,17 +525,19 @@
         container = document.getElementById('replacementContainer');
       }else if (type === 'pullout') {
         container = document.getElementById('pulloutContainer');
-      }else if (type === 'replacement-only') { {
-        container = document.getElementById('')
-      }
-
-      }
+      }else if (type === 'replacement-only') { 
+        container = document.getElementById('replacementOnlyContainer');
+      } else if (type === 'pullout-only') {
+        container = document.getElementById('pulloutOnlyContainer');
+      } 
 
       const currentGroupsUsed = container.getElementsByClassName('input-group-used').length;
       const currentGroupsBnew = container.getElementsByClassName('input-group-bnew').length;
       const currentGroupsInvoice = container.getElementsByClassName('input-group-invoice').length;
-      const currentGroupsReplacement = container.getElementsByClassName('input-group-replacement');
-      const currentGroupsPullout = container.getElementsByClassName('input-group-pullout');
+      const currentGroupsReplacement = container.getElementsByClassName('input-group-replacement').length;
+      const currentGroupsPullout = container.getElementsByClassName('input-group-pullout').length;
+      const currentGroupsPulloutOnly = container.getElementsByClassName('input-group-pullout-only').length;
+      const currentGroupsReplacementOnly = container.getElementsByClassName('input-group-replacement-only').length;
 
       // Limit per section
       const maxGroupsUsed = 7;
@@ -519,12 +554,14 @@
       } else if (type === 'invoice' && currentGroupsInvoice >= maxGroupsInvoice) {
         alert(`You can only add up to 4 invoice rows.`);
         return;
-      } else if (type === 'replacement' && currentGroupsReplacement.length >= maxGroupsReplacementAndPullout) {
+      } else if (type === 'replacement' && currentGroupsReplacement >= maxGroupsReplacementAndPullout) {
         alert(`You can only add up to ${maxGroupsReplacementAndPullout} replacement sets.`);
         return;
-      } else if (type === 'pullout' && currentGroupsPullout.length >= maxGroupsReplacementAndPullout) {
+      } else if (type === 'pullout' && currentGroupsPullout >= maxGroupsReplacementAndPullout) {
         alert(`You can only add up to ${maxGroupsReplacementAndPullout} pullout sets.`);
-        return;
+        return; 
+      }else if ((type === 'replacement-only' && currentGroupsReplacementOnly >= maxGroupsUsed) || (type === 'pullout-only' && currentGroupsPulloutOnly >= maxGroupsUsed)) {
+        alert(`You can only add up to ${maxGroupsUsed} sets.`);
       }
 
       // Create new group container
@@ -535,6 +572,8 @@
         type === 'invoice' ? 'input-group-invoice':
         type === 'replacement' ? 'input-group-replacement':
         type === 'pullout' ? 'input-group-pullout':
+        type === 'replacement-only' ? 'input-group-replacement-only':
+        type === 'pullout-only' ? 'input-group-pullout-only':
         ''
       );
 
@@ -579,7 +618,32 @@
               <div class="form-control"><label>Black Impression</label><input type="text" name="replacemenBlackImpression[]" placeholder="Enter Black Impression"></div>
               <div class="form-control"><label>Color Large Impression</label><input type="text" name="replacemenColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
           </div>`;
-      } else {
+      } else if (type === 'replacement-only') {
+        newGroup.innerHTML = `
+          <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
+
+            <div class="flex-row">
+             
+              <div class="form-control"><label>Serial No.</label><input type="text" name="replacementSerialNo[]" placeholder="Enter Serial Number"></div>
+              <div class="form-control"><label>MR Start</label><input type="text" name="replacementMrStart[]" placeholder="Enter MR Start"></div>
+              <div class="form-control"><label>Color Impression</label><input type="text" name="replacementColorImpression[]" placeholder="Enter Color Impression"></div>
+              <div class="form-control"><label>Black Impression</label><input type="text" name="replacemenBlackImpression[]" placeholder="Enter Black Impression"></div>
+              <div class="form-control"><label>Color Large Impression</label><input type="text" name="replacemenColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+            </div>
+          `;
+        } else if (type === 'pullout-only') {
+          newGroup.innerHTML = `
+          <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
+          <div class="flex-row">
+            
+            <div class="form-control"><label>Serial No.</label><input type="text" name="pulloutSerialNo[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>MR End</label><input type="text" name="pulloutMrEnd[]" placeholder="Enter MR End"></div>
+            <div class="form-control"><label>Color Impression</label><input type="text" name="pulloutColorImpression[]" placeholder="Enter Color Impression"></div>
+            <div class="form-control"><label>Black Impression</label><input type="text" name="pulloutBlackImpression[]" placeholder="Enter Black Impression"></div>
+            <div class="form-control"><label>Color Large Impression</label><input type="text" name="pulloutColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+          </div>
+          `;
+      }else {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
