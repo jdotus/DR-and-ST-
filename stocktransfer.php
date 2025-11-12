@@ -415,7 +415,14 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
             <!-- Additional Information Rows -->
             <?php echo $additional_info_html; ?>
             <!-- Empty row before signatures -->    
-            
+            <tr style="height: 15px;">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
             <!-- Signature Rows -->
             <tr style="height: 15px;">
                 <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;border-top: 2px solid black;">Acknowledged by- End-user</td>
@@ -438,6 +445,14 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
                 <td></td>
                 <td></td>
             </tr>
+            <tr style="height: 15px;">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+             </tr>
         </tbody>
     </table>
 
@@ -597,21 +612,29 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
 
             <!-- Additional Information Rows -->
             <?php echo $additional_info_html; ?>
-
+            
+            <tr style="height: 15px;">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+             </tr>
             <!-- Signature Rows -->
 
             <tr style="height: 15px;">
-                <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;border-top: 2px solid black;">Acknowledged by- End-user</td>
+                <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;border-top: 2px solid black;">OTUS Authorized Representative</td>
                 <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
-                <td colspan="3" class="merged-block" style="font-weight: bold; text-align: center;border-top: 2px solid black;">OTUS Authorized Representative</td>
+                <td colspan="3" class="merged-block" style="font-weight: bold; text-align: center;"> </td>
                 <td></td>
             </tr>
 
             <tr style="height: 15px;">
-                <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;">Signature over Printed Name</td>
+                <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;"> </td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -783,7 +806,14 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
 
             <!-- Additional Information Rows -->
             <?php echo $additional_info_html; ?>
-
+            <tr style="height: 15px;">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
             <!-- Signature Rows -->
             <tr style="height: 15px;">
                 <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;border-top: 2px solid black;">Acknowledged by- End-user</td>
