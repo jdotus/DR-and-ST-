@@ -445,6 +445,14 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
                 <td></td>
                 <td></td>
             </tr>
+            <tr style="height: 15px;">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+             </tr>
         </tbody>
     </table>
 
