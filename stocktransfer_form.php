@@ -78,6 +78,11 @@
             margin-top: 0;
             color: #333;
         }
+        .add-btn[disabled] {
+            background: #888 !important;
+            color: #fff !important;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -157,21 +162,40 @@
 </div>
 
 <script>
+function updateAddBtn() {
+    const tbody = document.querySelector('#itemsTable tbody');
+    const addBtn = document.querySelector('.add-btn');
+    const currentRows = tbody.querySelectorAll('tr').length;
+    const maxRows = 10;
+    const remaining = maxRows - currentRows;
+    addBtn.textContent = remaining > 0 ? `+ Add Another (${remaining} remaining)` : '+ Add Another (0 remaining)';
+    addBtn.disabled = currentRows >= maxRows;
+}
+
 function addRow() {
     const tbody = document.querySelector('#itemsTable tbody');
+    const currentRows = tbody.querySelectorAll('tr').length;
+    const maxRows = 10;
+    if (currentRows >= maxRows) return;
     const tr = document.createElement('tr');
     tr.innerHTML = `
-        <td><input type="text" name="quantity[]" required></td>
+        <td><input type="number" name="quantity[]" required></td>
         <td><input type="text" name="unit[]" required></td>
         <td><input type="text" name="description[]" required></td>
         <td><button type="button" class="remove-btn" onclick="removeRow(this)">×</button></td>
     `;
     tbody.appendChild(tr);
+    updateAddBtn();
 }
 
 function removeRow(btn) {
     btn.closest('tr').remove();
+    updateAddBtn();
 }
+
+
+document.addEventListener('DOMContentLoaded', updateAddBtn);
+
 </script>
 
 </body>
