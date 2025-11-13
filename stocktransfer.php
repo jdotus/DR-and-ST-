@@ -23,7 +23,7 @@ $descriptions = $_POST['description'] ?? [];
 $item_count = count($quantities);
 
 // Calculate how many blank rows we need (total 11 rows for items section)
-$total_rows_needed = 11;
+$total_rows_needed = 10;
 $blank_rows_needed = max(0, $total_rows_needed - $item_count);
 
 // Function to generate item rows
@@ -65,7 +65,7 @@ function generateItemRows($quantities, $units, $descriptions, $blank_rows_needed
 // Function to generate additional info rows
 function generateAdditionalInfoRows($mr, $model, $serial_no, $tech,$prno) {
     $html = '';
-    
+
     // Add MR row if not empty
     if (!empty($mr)) {
         $html .= '
@@ -144,7 +144,7 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
 
     .a4-container {
         width: 210mm;
-        height: 297mm;
+        height: 300mm;
         margin: 0 auto;
         background-color: white;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
@@ -412,9 +412,13 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
             <!-- Dynamic Item Rows -->
             <?php echo $item_rows_html; ?>
 
+            <tr style="height: 10px;">
+                <td colspan="10"></td>
+            </tr>
+
             <!-- Additional Information Rows -->
             <?php echo $additional_info_html; ?>
-            <!-- Empty row before signatures -->    
+              
             <tr style="height: 15px;">
                 <td></td>
                 <td></td>
@@ -423,6 +427,7 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
                 <td></td>
                 <td></td>
             </tr>
+
             <!-- Signature Rows -->
             <tr style="height: 15px;">
                 <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;border-top: 2px solid black;">Acknowledged by- End-user</td>
@@ -483,10 +488,10 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
             </tr>
 
             <!-- Row 3 -->
-            <tr style="height: 15px;">
+            <!-- <tr style="height: 15px;">
                 <td colspan="9" class="merged-block"> </td>
                 <td></td>
-            </tr>
+            </tr> -->
 
             <!-- Row 4 -->
             <tr style="height: 12.75px;">
@@ -609,6 +614,10 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
 
             <!-- Dynamic Item Rows -->
             <?php echo $item_rows_html; ?>
+
+            <tr style="height: 10px;">
+                <td colspan="10"></td>
+            </tr>
 
             <!-- Additional Information Rows -->
             <?php echo $additional_info_html; ?>
@@ -803,6 +812,10 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
 
             <!-- Dynamic Item Rows -->
             <?php echo $item_rows_html; ?>
+
+            <tr style="height: 10px;">
+                <td colspan="10"></td>
+            </tr>
 
             <!-- Additional Information Rows -->
             <?php echo $additional_info_html; ?>
