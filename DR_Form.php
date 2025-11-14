@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Delivery for Mono and Colored Machine</title>
   <style>
+    /* ... (CSS remains exactly the same) ... */
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
@@ -35,7 +36,8 @@
     .input-group-replacement-only,
     .input-group-invoice,
     .input-group-partial,
-    .input-group-price {
+    .input-group-price,
+    .input-group-used-dr {
       border: 1px solid #ddd;
       padding: 28px 15px;
       border-radius: 8px;
@@ -160,17 +162,17 @@
 <body>
   <h2>Delivery Rental Machine</h2>
 
-  <form id="myForm" action="DR_Both_delivery.php" method="post" target="_blank">
+  <form id="myForm" action="print.php" method="post" target="_blank">
     <!-- Main details -->
     <div class="input-group">
       <div class="flex-row">
         <div class="form-control">
           <label>S.I Number</label>
-          <input type="text" name="siNumber" required placeholder="Enter SI Number">
+          <input type="text" name="si_number" required placeholder="Enter SI Number">
         </div>
         <div class="form-control">
           <label>Delivered To</label>
-          <input type="text" name="deliveredTo" required placeholder="Enter Name">
+          <input type="text" name="delivered_to" required placeholder="Enter Name">
         </div>
         <div class="form-control">
           <label>TIN</label>
@@ -194,7 +196,7 @@
         </div>
         <div class="form-control" id="basedUnit">
           <label>Unit Type</label>
-          <input type="text" name="units" required placeholder="Enter Units">
+          <input type="text" name="unit_type" required placeholder="Enter Units">
         </div>
       </div>
     </div>
@@ -202,18 +204,19 @@
     <!-- Dropdown replacing radio buttons -->
     <div class="radio-group">
       <label for="machineTypeSelect">Select DR Format</label>
-      <select name="machineType" id="machineTypeSelect" required style="width: 40%;">
+      <select name="dr_format" id="machineTypeSelect" required style="width: 40%;">
         <option value="used" selected>Used Machines</option>
         <option value="bnew">Brand New Machines</option>
         <option value="pullout-delivery">Pull Out Replacement</option>
         <option value="drWithPrice">DR with Unit Price </option>
         <option value="drWithInvoice">DR with Invoice (Patrial and Complete)</option>
+        <option value="usedDr">Used DR</option>
       </select>
     </div>
 
     <div class="pullout-replacement-group" id="pullout-replacement-group">
       <label for="pulloutReplacementTypeSelect">Select Type</label>
-      <select name="machineType2" id="pulloutReplacementTypeSelect" required style="width: 40%;">
+      <select name="pullout_type" id="pulloutReplacementTypeSelect" required style="width: 40%;">
         <option value="pulloutReplacement" selected>Replacement & Pullout Machines</option>
         <option value="replacementOnly">Replacement Machines</option>
         <option value="pulloutOnly">Pullout Machines</option>
@@ -226,16 +229,16 @@
       <div id="usedContainer">
         <div class="input-group-used">
           <div class="flex-row">
-            <div class="form-control"><label>Machine Model</label><input type="text" name="machineModel" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" name="serialNo[]" placeholder="Enter Serial Number"></div>
-            <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mrStart[]" placeholder="Enter MR Start"></div>
-            <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="colorImpression[]" placeholder="Enter Color Impression"></div>
-            <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="blackImpression[]" placeholder="Enter Black Impression"></div>
-            <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="colorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+            <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mr_start[]" placeholder="Enter MR Start"></div>
+            <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="color_imp[]" placeholder="Enter Color Impression"></div>
+            <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="black_imp[]" placeholder="Enter Black Impression"></div>
+            <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="color_large_imp[]" placeholder="Enter Color Large Impression"></div>
           </div>
         </div>
       </div>
-      <button type="button" class="btn-add" onclick="addInput('used')">➕ Add Another (Max 7)</button>
+      <button type="button" class="btn-add" onclick="addInput('used')">➕ Add Another Serial (Max 7)</button>
     </div>
 
     <!-- Brand New Machine Section -->
@@ -243,12 +246,12 @@
       <div id="bnewContainer">
         <div class="input-group-bnew">
           <div class="flex-row">
-            <div class="form-control"><label>Machine Model</label><input type="text" name="bnewMachineModel[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" name="serialNo[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" name="serial[]" placeholder="Enter Serial Number"></div>
           </div>
         </div>
       </div>
-      <button type="button" class="btn-add" onclick="addInput('bnew')">➕ Add Another (Max 2)</button>
+      <button type="button" class="btn-add" onclick="addInput('bnew')">➕ Add Another Model and Serials (Max 2)</button>
       <p id="totalSerialCount" style="font-weight:bold; color:#333; margin-top:10px;">Total Serials: 0 / 15</p>
     </div>
 
@@ -260,16 +263,16 @@
             <div class="input-group-replacement">
               <h3>Replacement Machine</h3>
               <div class="flex-row">
-                <div class="form-control"><label>Machine Model</label><input type="text" name="replacementMachineModel" required placeholder="Enter Machine Model"></div>
-                <div class="form-control"><label>Serial No.</label><input type="text" name="replacementSerialNo[]" placeholder="Enter Serial Number"></div>
-                <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="replacementMrStart[]" placeholder="Enter MR Start"></div>
-                <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="replacementColorImpression[]" placeholder="Enter Color Impression"></div>
-                <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="replacemenBlackImpression[]" placeholder="Enter Black Impression"></div>
-                <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="replacemenColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+                <div class="form-control"><label>Machine Model</label><input type="text" name="replace_model[]" required placeholder="Enter Machine Model"></div>
+                <div class="form-control"><label>Serial No.</label><input type="text" name="replace_serial[]" placeholder="Enter Serial Number"></div>
+                <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="replace_mr_start[]" placeholder="Enter MR Start"></div>
+                <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="replace_color_imp[]" placeholder="Enter Color Impression"></div>
+                <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="replace_black_imp[]" placeholder="Enter Black Impression"></div>
+                <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="replace_color_large_imp[]" placeholder="Enter Color Large Impression"></div>
               </div>
             </div>
           </div>
-          <button type="button" class="btn-add no-margin" onclick="addInput('replacement')">➕ Add Another (Max 2)</button>
+          <button type="button" class="btn-add no-margin" onclick="addInput('replacement')">➕ Add Another Serial (Max 2)</button>
         </div>
 
         <div id="pulloutContainerMain">
@@ -277,16 +280,16 @@
             <div class="input-group-pullout">
               <h3>Pull Out Machine</h3>
               <div class="flex-row">
-                <div class="form-control"><label>Machine Model</label><input type="text" name="pulloutMachineModel" required placeholder="Enter Machine Model"></div>
-                <div class="form-control"><label>Serial No.</label><input type="text" name="pulloutSerialNo[]" placeholder="Enter Serial Number"></div>
-                <div class="form-control"><label>MR End</label><input type="text" oninput="formatPrice(this)" name="pulloutMrEnd[]" placeholder="Enter MR End"></div>
-                <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="pulloutColorImpression[]" placeholder="Enter Color Impression"></div>
-                <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="pulloutBlackImpression[]" placeholder="Enter Black Impression"></div>
-                <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="pulloutColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+                <div class="form-control"><label>Machine Model</label><input type="text" name="pullout_model[]" required placeholder="Enter Machine Model"></div>
+                <div class="form-control"><label>Serial No.</label><input type="text" name="pullout_serial[]" placeholder="Enter Serial Number"></div>
+                <div class="form-control"><label>MR End</label><input type="text" oninput="formatPrice(this)" name="pullout_mr_end[]" placeholder="Enter MR End"></div>
+                <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="pullout_color_imp[]" placeholder="Enter Color Impression"></div>
+                <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="pullout_black_imp[]" placeholder="Enter Black Impression"></div>
+                <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="pullout_color_large_imp[]" placeholder="Enter Color Large Impression"></div>
               </div>
             </div>
           </div>
-          <button type="button" class="btn-add no-margin" onclick="addInput('pullout')">➕ Add Another (Max 2)</button>
+          <button type="button" class="btn-add no-margin" onclick="addInput('pullout')">➕ Add Another Serial (Max 2)</button>
         </div>
       </div>
 
@@ -295,16 +298,16 @@
           <div class="input-group-replacement-only">
             <h3>Replacement Machine</h3>
             <div class="flex-row">
-              <div class="form-control"><label>Machine Model</label><input type="text" name="replacementMachineModel" required placeholder="Enter Machine Model"></div>
-              <div class="form-control"><label>Serial No.</label><input type="text" name="replacementSerialNo[]" placeholder="Enter Serial Number"></div>
-              <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="replacementMrStart[]" placeholder="Enter MR Start"></div>
-              <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="replacementColorImpression[]" placeholder="Enter Color Impression"></div>
-              <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="replacemenBlackImpression[]" placeholder="Enter Black Impression"></div>
-              <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="replacemenColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+              <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
+              <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
+              <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mr_start[]" placeholder="Enter MR Start"></div>
+              <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="color_imp[]" placeholder="Enter Color Impression"></div>
+              <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="black_imp[]" placeholder="Enter Black Impression"></div>
+              <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="color_large_imp[]" placeholder="Enter Color Large Impression"></div>
             </div>
           </div>
         </div>
-        <button type="button" class="btn-add no-margin" onclick="addInput('replacement-only')">➕ Add Another (Max 7)</button>
+        <button type="button" class="btn-add no-margin" onclick="addInput('replacement-only')">➕ Add Another Serial (Max 7)</button>
       </div>
 
       <div id="pulloutOnlyContainerMain" class="machine-section">
@@ -312,16 +315,16 @@
           <div class="input-group-pullout-only">
             <h3>Pull Out Machine</h3>
             <div class="flex-row">
-              <div class="form-control"><label>Machine Model</label><input type="text" name="pulloutMachineModel" required placeholder="Enter Machine Model"></div>
-              <div class="form-control"><label>Serial No.</label><input type="text" name="pulloutSerialNo[]" placeholder="Enter Serial Number"></div>
-              <div class="form-control"><label>MR End</label><input type="text" oninput="formatPrice(this)" name="pulloutMrEnd[]" placeholder="Enter MR End"></div>
-              <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="pulloutColorImpression[]" placeholder="Enter Color Impression"></div>
-              <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="pulloutBlackImpression[]" placeholder="Enter Black Impression"></div>
-              <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="pulloutColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+              <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
+              <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
+              <div class="form-control"><label>MR End</label><input type="text" oninput="formatPrice(this)" name="mr_end[]" placeholder="Enter MR End"></div>
+              <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="color_imp[]" placeholder="Enter Color Impression"></div>
+              <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="black_imp[]" placeholder="Enter Black Impression"></div>
+              <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="color_large_imp[]" placeholder="Enter Color Large Impression"></div>
             </div>
           </div>
         </div>
-        <button type="button" class="btn-add no-margin" onclick="addInput('pullout-only')">➕ Add Another (Max 7)</button>
+        <button type="button" class="btn-add no-margin" onclick="addInput('pullout-only')">➕ Add Another Serial (Max 7)</button>
       </div>
     </div>
 
@@ -330,14 +333,14 @@
       <div id="drWithInvoiceContainer">
         <div class="input-group-invoice">
           <div class="flex-row">
-            <div class="form-control"><label>Machine Model</label><input type="text" name="drInvoiceMachineModel" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Under PO No.</label><input type="text" name="drInvoiceUnderPo" required placeholder="Enter P.O No."></div>
-            <div class="form-control"><label>Under Invoice No.</label><input type="text" name="drInvoiceUnderInvoice" placeholder="Enter Invoice No."></div>
-            <div class="form-control"><label>Note</label><input type="text" name="drInvoiceNote" placeholder="Enter Note"></div>
+            <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Under PO No.</label><input type="text" name="po_number[]" required placeholder="Enter P.O No."></div>
+            <div class="form-control"><label>Under Invoice No.</label><input type="text" name="invoice_number[]" placeholder="Enter Invoice No."></div>
+            <div class="form-control"><label>Note</label><input type="text" name="note[]" placeholder="Enter Note"></div>
           </div>
         </div>
       </div>
-      <button type="button" class="btn-add" onclick="addInput('invoice')">➕ Add Another (Max 4)</button>
+      <button type="button" class="btn-add" onclick="addInput('invoice')">➕ Add Another Item (Max 4)</button>
     </div>
 
     <!-- DR with Prices -->
@@ -345,17 +348,32 @@
       <div id="drWithPriceContainer">
         <div class="input-group-price">
           <div class="flex-row">
-            <div class="form-control"><label>Machine Model</label><input type="text" name="drInvoiceMachineModel[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Quantity</label><input type="text" oninput="formatPrice(this)" name="drInvoiceQuantity[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>price</label><input oninput="formatPrice(this)" type="text" name="price[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control" id="basedUnit"><label>Unit Type</label><input type="text" name="drInvoiceUnits[]" required placeholder="Enter Unit Type"></div>
-            <div class="form-control"><label>Item Description</label><input type="text" name="drInvoiceItemDescription[]" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Quantity</label><input type="text" oninput="formatPrice(this)" name="quantity[]" required placeholder="Enter Quantity"></div>
+            <div class="form-control"><label>Price</label><input oninput="formatPrice(this)" type="text" name="price[]" required placeholder="Enter Price"></div>
+            <div class="form-control" id="basedUnit"><label>Unit Type</label><input type="text" name="unit_type[]" required placeholder="Enter Unit Type"></div>
+            <div class="form-control"><label>Item Description</label><input type="text" name="item_desc[]" required placeholder="Enter Item Description"></div>
           </div>
         </div>
       </div>
-      <button type="button" class="btn-add" onclick="addInput('dr-price')">➕ Add Another (Max 5)</button>
+      <button type="button" class="btn-add" onclick="addInput('dr-price')">➕ Add Another Item (Max 5)</button>
     </div>
 
+    <!-- Used Dr -->
+    <div id="usedDrField" class="machine-section visible">
+      <div id="usedDrContainer">
+        <div class="input-group-used-dr">
+          <div class="flex-row">
+            <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" required placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mr_start[]" placeholder="Enter MR Start"></div>
+            <div class="form-control"><label>Technician Name</label><input type="text" name="tech_name[]" placeholder="Enter Technician Name"></div>
+            <div class="form-control"><label>PR No.</label><input type="text" name="pr_number[]" placeholder="Enter PR Number"></div>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn-add" onclick="addInput('used-dr')">➕ Add Another Item</button>
+    </div>
 
     <button type="submit" class="btn-submit">Save & Generate</button>
   </form>
@@ -400,9 +418,6 @@
       if (counter) counter.textContent = `Total Serials: ${total} / ${maxSerials}`;
     }
 
-
-
-
     document.addEventListener('input', function(e) {
       if (e.target.classList.contains('serialInput')) {
         // --- Format serials: every 6 digits separated by comma and space ---
@@ -436,11 +451,13 @@
 
     // --- TOGGLE INPUT SECTIONS ---
     function toggleInputs(selected, secondarySelected) {
+      // ... (JavaScript remains exactly the same) ...
       const usedSection = document.getElementById('usedMachineFields');
       const bnewSection = document.getElementById('bnewMachineFields');
       const pulloutReplaceSection = document.getElementById('pulloutReplaceField');
       const drWithInvoiceSection = document.getElementById('drWithInvoiceField');
       const drWithPriceSection = document.getElementById('drWithPriceField');
+      const usedDrSection = document.getElementById('usedDrField')
 
       const pulloutOnlyContainer = document.getElementById('pulloutOnlyContainerMain');
       const replacementOnlyContainer = document.getElementById('replacementOnlyContainerMain');
@@ -456,7 +473,8 @@
         drWithInvoiceSection,
         pulloutOnlyContainer,
         replacementOnlyContainer,
-        drWithPriceSection
+        drWithPriceSection,
+        usedDrSection
       ];
 
       allSections.forEach(sec => {
@@ -537,6 +555,10 @@
           pulloutReplaceSection.style.display = 'block';
           pulloutReplaceSection.querySelectorAll('input').forEach(i => (i.disabled = false));
         }
+      } else if (selected === 'usedDr') {
+        // usedDrSection.classList.add('visible');
+        usedDrSection.style.display = 'block';
+        usedDrSection.querySelectorAll('input').forEach(i => (i.disabled = false));
       }
     }
 
@@ -550,7 +572,7 @@
       } else if (type === 'bnew') {
         container = document.getElementById('bnewContainer');
       } else if (type === 'invoice') {
-        container = document.getElementById('drWithInvoiceContainer'); // make sure this div exists in HTML
+        container = document.getElementById('drWithInvoiceContainer');
       } else if (type === 'replacement') {
         container = document.getElementById('replacementContainer');
       } else if (type === 'pullout') {
@@ -561,8 +583,11 @@
         container = document.getElementById('pulloutOnlyContainer');
       } else if (type === 'dr-price') {
         container = document.getElementById('drWithPriceContainer');
+      } else if (type === 'used-dr') {
+        container = document.getElementById('usedDrContainer');
       }
 
+      // ... (rest of the JavaScript remains exactly the same, only updating input names in the innerHTML templates below) ...
       const currentGroupsUsed = container.getElementsByClassName('input-group-used').length;
       const currentGroupsBnew = container.getElementsByClassName('input-group-bnew').length;
       const currentGroupsInvoice = container.getElementsByClassName('input-group-invoice').length;
@@ -571,6 +596,7 @@
       const currentGroupsPulloutOnly = container.getElementsByClassName('input-group-pullout-only').length;
       const currentGroupsReplacementOnly = container.getElementsByClassName('input-group-replacement-only').length;
       const currentGroupWithPrice = container.getElementsByClassName('input-group-price').length;
+      const currentGroupUsedDr = container.getElementsByClassName('input-group-used-dr').length;
 
       // Limit per section
       const maxGroupsUsed = 7;
@@ -612,91 +638,96 @@
         type === 'replacement-only' ? 'input-group-replacement-only' :
         type === 'pullout-only' ? 'input-group-pullout-only' :
         type === 'dr-price' ? 'input-group-price' :
+        type === 'used-dr' ? 'input-group-used-dr' :
         ''
       );
 
-      // HTML structure based on type
+      // HTML structure based on type - UPDATED INPUT NAMES ONLY
       if (type === 'used') {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
-
-            <div class="form-control"><label>Serial No.</label><input type="text" name="serialNo[]" placeholder="Enter Serial Number"></div>
-            <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mrStart[]" placeholder="Enter MR Start"></div>
-            <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="colorImpression[]" placeholder="Enter Color Impression"></div>
-            <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="blackImpression[]" placeholder="Enter Black Impression"></div>
-            <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="colorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mr_start[]" placeholder="Enter MR Start"></div>
+            <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="color_imp[]" placeholder="Enter Color Impression"></div>
+            <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="black_imp[]" placeholder="Enter Black Impression"></div>
+            <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="color_large_imp[]" placeholder="Enter Color Large Impression"></div>
           </div>`;
       } else if (type === 'invoice') {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
-            <div class="form-control"><label>Quantity</label><input type="text" oninput="formatPrice(this)" name="drInvoiceQuantity[]" required placeholder="Enter Quantity"></div>
-            <div class="form-control"><label>Unit Type</label><input type="text" name="drInvoiceUnits[]" required placeholder="Enter Units"></div>
-            <div class="form-control"><label>Item Description</label><input type="text" name="drInvoiceItemDescription[]" required placeholder="Enter Item Description"></div>
+            <div class="form-control"><label>Quantity</label><input type="text" oninput="formatPrice(this)" name="quantity[]" required placeholder="Enter Quantity"></div>
+            <div class="form-control"><label>Unit Type</label><input type="text" name="unit_type[]" required placeholder="Enter Units"></div>
+            <div class="form-control"><label>Item Description</label><input type="text" name="item_desc[]" required placeholder="Enter Item Description"></div>
           </div>`;
       } else if (type === 'pullout') {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
-
-            <div class="form-control"><label>Serial No.</label><input type="text" name="pulloutSerialNo[]" placeholder="Enter Serial Number"></div>
-            <div class="form-control"><label>MR End</label><input type="text" oninput="formatPrice(this)" name="pulloutMrEnd[]" placeholder="Enter MR End"></div>
-            <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="pulloutColorImpression[]" placeholder="Enter Color Impression"></div>
-            <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="pulloutBlackImpression[]" placeholder="Enter Black Impression"></div>
-            <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="pulloutColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="pullout_serial[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>MR End</label><input type="text" oninput="formatPrice(this)" name="pullout_mr_end[]" placeholder="Enter MR End"></div>
+            <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="pullout_color_imp[]" placeholder="Enter Color Impression"></div>
+            <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="pullout_black_imp[]" placeholder="Enter Black Impression"></div>
+            <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="pullout_color_large_imp[]" placeholder="Enter Color Large Impression"></div>
           </div>`;
       } else if (type === 'replacement') {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
-
-              <div class="form-control"><label>Serial No.</label><input type="text" name="replacementSerialNo[]" placeholder="Enter Serial Number"></div>
-              <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="replacementMrStart[]" placeholder="Enter MR Start"></div>
-              <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="replacementColorImpression[]" placeholder="Enter Color Impression"></div>
-              <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="replacemenBlackImpression[]" placeholder="Enter Black Impression"></div>
-              <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="replacemenColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+              <div class="form-control"><label>Serial No.</label><input type="text" name="replace_serial[]" placeholder="Enter Serial Number"></div>
+              <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="replace_mr_start[]" placeholder="Enter MR Start"></div>
+              <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="replace_color_imp[]" placeholder="Enter Color Impression"></div>
+              <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="replace_black_imp[]" placeholder="Enter Black Impression"></div>
+              <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="replace_color_large_imp[]" placeholder="Enter Color Large Impression"></div>
           </div>`;
       } else if (type === 'replacement-only') {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
             <div class="flex-row">
-              <div class="form-control"><label>Serial No.</label><input type="text" name="replacementSerialNo[]" placeholder="Enter Serial Number"></div>
-              <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="replacementMrStart[]" placeholder="Enter MR Start"></div>
-              <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="replacementColorImpression[]" placeholder="Enter Color Impression"></div>
-              <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="replacemenBlackImpression[]" placeholder="Enter Black Impression"></div>
-              <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="replacemenColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+              <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
+              <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mr_start[]" placeholder="Enter MR Start"></div>
+              <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="color_imp[]" placeholder="Enter Color Impression"></div>
+              <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="black_imp[]" placeholder="Enter Black Impression"></div>
+              <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="color_large_imp[]" placeholder="Enter Color Large Impression"></div>
             </div>
           `;
       } else if (type === 'pullout-only') {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
-            
-            <div class="form-control"><label>Serial No.</label><input type="text" name="pulloutSerialNo[]" placeholder="Enter Serial Number"></div>
-            <div class="form-control"><label>MR End</label><input type="text" oninput="formatPrice(this)" name="pulloutMrEnd[]" placeholder="Enter MR End"></div>
-            <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="pulloutColorImpression[]" placeholder="Enter Color Impression"></div>
-            <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="pulloutBlackImpression[]" placeholder="Enter Black Impression"></div>
-            <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="pulloutColorLargeImpression[]" placeholder="Enter Color Large Impression"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>MR End</label><input type="text" oninput="formatPrice(this)" name="mr_end[]" placeholder="Enter MR End"></div>
+            <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="color_imp[]" placeholder="Enter Color Impression"></div>
+            <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="black_imp[]" placeholder="Enter Black Impression"></div>
+            <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="color_large_imp[]" placeholder="Enter Color Large Impression"></div>
           </div>
           `;
       } else if (type === 'dr-price') {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
- 
-            <div class="form-control"><label>Quantity</label><input type="text" oninput="formatPrice(this)" name="drInvoiceQuantity[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>price</label><input oninput="formatPrice(this)" type="text" name="price[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control" id="basedUnit"><label >Unit Type</label><input type="text" name="drInvoiceUnits[]" required placeholder="Enter Unit Type"></div>
-            <div class="form-control"><label>Item Description</label><input type="text" name="drInvoiceItemDescription[]" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Quantity</label><input type="text" oninput="formatPrice(this)" name="quantity[]" required placeholder="Enter Quantity"></div>
+            <div class="form-control"><label>Price</label><input oninput="formatPrice(this)" type="text" name="price[]" required placeholder="Enter Price"></div>
+            <div class="form-control"><label>Unit Type</label><input type="text" name="unit_type[]" required placeholder="Enter Unit Type"></div>
+            <div class="form-control"><label>Item Description</label><input type="text" name="item_desc[]" required placeholder="Enter Item Description"></div>
           </div>
           `;
+      } else if (type === 'used-dr') {
+        newGroup.innerHTML = `
+          <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
+          <div class="flex-row">
+            <div class="form-control"><label>Quantity</label><input type="text" oninput="formatPrice(this)" name="quantity[]" required placeholder="Enter Quantity"></div>
+            <div class="form-control"><label>Unit Type</label><input type="text" name="unit_type[]" required placeholder="Enter Unit Type"></div>
+            <div class="form-control"><label>Item Description</label><input type="text" name="item_desc[]" required placeholder="Enter Item Description"></div>
+          </div>
+        `;
       } else {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
-            <div class="form-control"><label>Machine Model</label><input type="text" name="bnewMachineModel[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" name="serialNo[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" name="serial[]" placeholder="Enter Serial Number"></div>
           </div>`;
       }
 
@@ -708,6 +739,7 @@
       button.parentNode.remove();
       updateSerialCountDisplay();
     }
+
     document.addEventListener("DOMContentLoaded", function() {
       const selectFirst = document.getElementById('machineTypeSelect');
       const selectSecond = document.getElementById('pulloutReplacementTypeSelect');
