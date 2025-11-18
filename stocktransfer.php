@@ -215,11 +215,11 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
 
     /* Second logo in first container */
     .second-logo {
-        top: calc(12mm + 140mm); /* Adjusted position for second table */
+        top: calc(12mm + 140mm); 
         left: calc(10mm + 49.72% - 13%);
     }
 
-    /* Print formatting */
+
     @page {
         size: A4;
         margin: 0;
@@ -480,7 +480,7 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
         </thead>
 
         <tbody>
-            <!-- Repeat the same table structure as above -->
+
             <!-- Row 2 -->
             <tr style="height: 15.75px;">
                 <td colspan="9" class="merged-block"> </td>
@@ -506,7 +506,6 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
                 <td></td>
             </tr>
 
-            <!-- Continue with the same table structure... -->
             <!-- Row 5 -->
             <tr style="height: 12px;">
                 <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;"><?php echo htmlspecialchars($from_location); ?></td>
@@ -662,7 +661,7 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
     <!-- Logo for second page -->
     <img src="otus logo.png" alt="OTUS Logo" class="table-logo first-logo">
     
-    <!-- Third table (Second page) -->
+    <!-- Third table-->
     <table>
         <colgroup>
             <col class="col-1"><col class="col-2"><col class="col-3"><col class="col-4"><col class="col-5">
@@ -670,7 +669,6 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
         </colgroup>
 
         <tbody>
-            <!-- Same table structure as the first table on first page -->
             <!-- Row 1 -->
             <tr style="height: 15px;">
                 <td colspan="9"> </td>
@@ -701,9 +699,6 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
                 <td></td>
                 <td></td>
             </tr>
-
-            <!-- Continue with the same table structure as the first table... -->
-            <!-- ... (include all the same rows as the first table) ... -->
 
             <!-- Row 5 -->
             <tr style="height: 12px;">
