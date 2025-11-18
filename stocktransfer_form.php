@@ -92,7 +92,7 @@
     <form action="stocktransfer.php" method="POST" target="_blank">
         <label>From Location:</label> 
         <select name="from_location" required> 
-            <option value="">Select a location</option> 
+            
             <option value="North-east">North-east</option> 
             <option value="South-West">South-West</option> 
         </select>
