@@ -1,61 +1,70 @@
 <?php
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo "Invalid request method.";
+session_start();
+
+if (!isset($_SESSION['form_data'])) {
+    die("No form data found. Please submit the form first.");
+}
+
+// Use session data instead of direct POST
+$form_data = $_SESSION['form_data'];
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && empty($form_data)) {
+    echo "Invalid request method or no form data.";
     exit;
 }
 
 // Main form fields
-$si_number = $_POST['si_number'] ?? '';
-$delivered_to = $_POST['delivered_to'] ?? '';
-$date = $_POST['date'] ?? '';
-$address = $_POST['address'] ?? '';
-$terms = $_POST['terms'] ?? '';
-$particulars = $_POST['particulars'] ?? '';
-$tin = $_POST['tin'] ?? '';
-$unit_type = $_POST['unit_type'] ?? '';
+$si_number = $form_data['si_number'] ?? '';
+$delivered_to = $form_data['delivered_to'] ?? '';
+$date = $form_data['date'] ?? '';
+$address = $form_data['address'] ?? '';
+$terms = $form_data['terms'] ?? '';
+$particulars = $form_data['particulars'] ?? '';
+$tin = $form_data['tin'] ?? '';
+$unit_type = $form_data['unit_type'] ?? '';
 
 // Form type selections
-$dr_format = $_POST['dr_format'] ?? '';
-$pullout_type = $_POST['pullout_type'] ?? '';
+$dr_format = $form_data['dr_format'] ?? '';
+$pullout_type = $form_data['pullout_type'] ?? '';
 
 // Used Machines & Brand New Machines
-$model = $_POST['model'] ?? [];
-$serial = $_POST['serial'] ?? array_fill(0, 7, '________');
-$mr_start = $_POST['mr_start'] ?? array_fill(0, 7, '________');
-$mr_end = $_POST['mr_end'] ?? array_fill(0, 7, '________');
-$color_imp = $_POST['color_imp'] ?? array_fill(0, 7, '0');
-$black_imp = $_POST['black_imp'] ?? array_fill(0, 7, '0');
-$color_large_imp = $_POST['color_large_imp'] ?? array_fill(0, 7, '0');
+$model = $form_data['model'] ?? [];
+$serial = $form_data['serial'] ?? array_fill(0, 7, '________');
+$mr_start = $form_data['mr_start'] ?? array_fill(0, 7, '________');
+$mr_end = $form_data['mr_end'] ?? array_fill(0, 7, '________');
+$color_imp = $form_data['color_imp'] ?? array_fill(0, 7, '0');
+$black_imp = $form_data['black_imp'] ?? array_fill(0, 7, '0');
+$color_large_imp = $form_data['color_large_imp'] ?? array_fill(0, 7, '0');
 
 // DR with Prices
-$price = $_POST['price'] ?? [];
-$quantity = $_POST['quantity'] ?? [];
-$item_desc = $_POST['item_desc'] ?? [];
+$price = $form_data['price'] ?? [];
+$quantity = $form_data['quantity'] ?? [];
+$item_desc = $form_data['item_desc'] ?? [];
 
 // Replacement Machines (in pullout-replacement section)
-$replace_model = $_POST['replace_model'] ?? [];
-$replace_serial = $_POST['replace_serial'] ?? [];
-$replace_mr_start = $_POST['replace_mr_start'] ?? [];
-$replace_color_imp = $_POST['replace_color_imp'] ?? [];
-$replace_black_imp = $_POST['replace_black_imp'] ?? [];
-$replace_color_large_imp = $_POST['replace_color_large_imp'] ?? [];
+$replace_model = $form_data['replace_model'] ?? [];
+$replace_serial = $form_data['replace_serial'] ?? [];
+$replace_mr_start = $form_data['replace_mr_start'] ?? [];
+$replace_color_imp = $form_data['replace_color_imp'] ?? [];
+$replace_black_imp = $form_data['replace_black_imp'] ?? [];
+$replace_color_large_imp = $form_data['replace_color_large_imp'] ?? [];
 
 // Pullout Machines (in pullout-replacement section)
-$pullout_model = $_POST['pullout_model'] ?? [];
-$pullout_serial = $_POST['pullout_serial'] ?? [];
-$pullout_mr_end = $_POST['pullout_mr_end'] ?? [];
-$pullout_color_imp = $_POST['pullout_color_imp'] ?? [];
-$pullout_black_imp = $_POST['pullout_black_imp'] ?? [];
-$pullout_color_large_imp = $_POST['pullout_color_large_imp'] ?? [];
+$pullout_model = $form_data['pullout_model'] ?? [];
+$pullout_serial = $form_data['pullout_serial'] ?? [];
+$pullout_mr_end = $form_data['pullout_mr_end'] ?? [];
+$pullout_color_imp = $form_data['pullout_color_imp'] ?? [];
+$pullout_black_imp = $form_data['pullout_black_imp'] ?? [];
+$pullout_color_large_imp = $form_data['pullout_color_large_imp'] ?? [];
 
 // DR with Invoice
-$po_number = $_POST['po_number'] ?? [];
-$invoice_number = $_POST['invoice_number'] ?? [];
-$note = $_POST['note'] ?? [];
+$po_number = $form_data['po_number'] ?? [];
+$invoice_number = $form_data['invoice_number'] ?? [];
+$note = $form_data['note'] ?? [];
 
 // Used DR
-$tech_name = $_POST['tech_name'] ?? [];
-$pr_number = $_POST['pr_number'] ?? [];
+$tech_name = $form_data['tech_name'] ?? [];
+$pr_number = $form_data['pr_number'] ?? [];
 
 // Fill arrays with default values if empty to prevent undefined index errors
 $model = !empty($model) ? $model : array_fill(0, 7, '');
@@ -76,6 +85,9 @@ $invoice_number = !empty($invoice_number) ? $invoice_number : [];
 $note = !empty($note) ? $note : [];
 $tech_name = !empty($tech_name) ? $tech_name : [];
 $pr_number = !empty($pr_number) ? $pr_number : [];
+
+// Optional: Clear the session data after use to prevent re-display on refresh
+unset($_SESSION['form_data']);
 ?>
 
 <!DOCTYPE html>
@@ -144,7 +156,7 @@ $pr_number = !empty($pr_number) ? $pr_number : [];
 
         td,
         th {
-            border: 1px solid red;
+            /* border: 1px solid red; */
             text-align: center;
             box-sizing: border-box;
             vertical-align: top;
@@ -320,7 +332,7 @@ $pr_number = !empty($pr_number) ? $pr_number : [];
 
                 <?php
 
-                if (isset($_POST['dr_format']) && $_POST['dr_format'] === 'used') { ?>
+                if (isset($form_data['dr_format']) && $form_data['dr_format'] === 'used') { ?>
                     <tr class="dr-2nd-row">
                         <td><?= htmlspecialchars(count($serial)) ?></td>
                         <td><?= htmlspecialchars($unit_type) ?></td>
@@ -364,27 +376,21 @@ $pr_number = !empty($pr_number) ? $pr_number : [];
                         </tr>
                     <?php } ?>
 
-
-
                     <!-- For the Brand New Machine Delivery -->
-                <?php } else if (isset($_POST['dr_format']) && $_POST['dr_format'] == 'bnew') { ?>
-
+                <?php } else if (isset($form_data['dr_format']) && $form_data['dr_format'] == 'bnew') {  ?>
                     <?php
-
                     // ✅ Clean serial list for each machine (assume $_POST['serial'] is an array, one per machine)
                     $countTableRows = 0;
                     $perRow = 3; // how many serials per row
 
-                    if (!empty($model) && !empty($_POST['serial']) && count($serial) < 18) {
+                    if (!empty($model) && !empty($serial) && count($serial) < 18) {
                         for ($i = 0; $i < count($model); $i++) {
-                            if (count($_POST['serial']) > 15) {
+                            if (count($serial) > 15) {
                                 continue;
                             }
 
-
-
                             // Each machine has its own serial input field (comma-separated)
-                            $serialInput = $_POST['serial'][$i] ?? '';
+                            $serialInput = $serial[$i] ?? '';
                             $serialsClean = array_values(array_filter(array_map('trim', explode(',', $serialInput))));
                             $serialsCount = count($serialsClean);
 
@@ -401,9 +407,6 @@ $pr_number = !empty($pr_number) ? $pr_number : [];
                                 </td>
                             </tr>
                     <?php
-
-
-
                             // ✅ Display serials for this machine
                             $printed = 0;
 
@@ -427,7 +430,6 @@ $pr_number = !empty($pr_number) ? $pr_number : [];
                         }
                     }
 
-
                     // ✅ Fill remaining blank rows up to 7 total
                     for ($s = $countTableRows; $s < 6; $s++) {
                         echo '<tr class="dr-2nd-row-new">
@@ -440,9 +442,9 @@ $pr_number = !empty($pr_number) ? $pr_number : [];
                     ?>
 
                     <!-- For the Pullout Replacement Section -->
-                    <?php } else if (isset($_POST['dr_format']) && $_POST['dr_format'] == 'pullout-delivery') {
+                    <?php } else if (isset($form_data['dr_format']) && $form_data['dr_format'] == 'pullout-delivery') {
 
-                    if (isset($_POST['pullout_type']) && $_POST['pullout_type'] == 'replacementOnly') { ?>
+                    if (isset($form_data['pullout_type']) && $form_data['pullout_type'] == 'replacementOnly') { ?>
                         <tr class="dr-2nd-row">
                             <td><?= htmlspecialchars(count($serial)) ?></td>
                             <td><?= htmlspecialchars($unit_type) ?></td>
@@ -477,7 +479,7 @@ $pr_number = !empty($pr_number) ? $pr_number : [];
 
 
 
-                    <?php } else if (isset($_POST['pullout_type']) && $_POST['pullout_type'] == 'pulloutOnly') { ?>
+                    <?php } else if (isset($form_data['pullout_type']) && $form_data['pullout_type'] == 'pulloutOnly') { ?>
                         <tr class="dr-2nd-row">
                             <td><?= htmlspecialchars(count($serial)) ?></td>
                             <td><?= htmlspecialchars($unit_type) ?></td>
@@ -597,7 +599,7 @@ $pr_number = !empty($pr_number) ? $pr_number : [];
                     <?php } ?>
 
                     <!-- For the DR with Invoice Section -->
-                <?php } else if (isset($_POST['dr_format']) && $_POST['dr_format'] == 'drWithInvoice') { ?>
+                <?php } else if (isset($dr_format['dr_format']) && $dr_format['dr_format'] == 'drWithInvoice') { ?>
                     <?php for ($i = 0; $i < count($quantity); $i++) { ?>
                         <tr class="dr-2nd-row">
                             <td> <?= htmlspecialchars($quantity[$i]) ?></td>
@@ -687,7 +689,7 @@ $pr_number = !empty($pr_number) ? $pr_number : [];
                     <?php } ?>
 
                     <!-- For the DR with Price Section -->
-                <?php } else if (isset($_POST['dr_format']) && $_POST['dr_format'] == 'drWithPrice') { ?>
+                <?php } else if (isset($dr_format['dr_format']) && $dr_format['dr_format'] == 'drWithPrice') { ?>
 
                     <?php
                     $totalPerItem = 0;
@@ -737,15 +739,36 @@ $pr_number = !empty($pr_number) ? $pr_number : [];
                         <td class="col-price"><?= htmlspecialchars(number_format((int)$grandTotal)) ?></td>
                     </tr>
 
-                <?php } else if (isset($_POST['dr_format']) && $_POST['dr_format'] == 'usedDr') { ?>
-                    <?php for ($i = 0; $i < count($quantity); $i++) { ?>
+                    <!-- For the Used Dr Section -->
+                <?php } else if (isset($dr_format['dr_format']) && $dr_format['dr_format'] == 'usedDr') { ?>
 
-                        <tr class="dr-2nd-row">
+                    <?php for ($i = 0; $i < count($quantity); $i++) { ?>
+                        <tr class="dr-2nd-row-header">
                             <td> <?= htmlspecialchars($quantity[$i]) ?> </td>
                             <td> <?= htmlspecialchars($unit_type[$i]) ?> </td>
                             <td class="col-description text-align"> <?= htmlspecialchars($item_desc[$i]) ?> </td>
                         </tr>
                     <?php } ?>
+
+                    <?php for ($j = count($quantity); $j < 4; $j++) { ?>
+                        <tr class="dr-2nd-row-header">
+                            <td> </td>
+                            <td> </td>
+                            <td class="col-description text-align"> </td>
+                        </tr>
+                    <?php } ?>
+
+                    <tr class="dr-2nd-row-header">
+                        <td></td>
+                        <td></td>
+                        <td class="col-description text-align">
+                            <?= !empty($model[0]) ? "Machine Model: " . htmlspecialchars($model[0]) . "<br>" : "" ?>
+                            <?= !empty($tech_name[0]) ? "Technician Name: " . htmlspecialchars($tech_name[0]) . "<br>" : "" ?>
+                            <?= !empty($serial[0]) ? "Serial No.: " . htmlspecialchars($serial[0]) . "<br>" : "" ?>
+                            <?= !empty($mr_start[0]) ? "MR Start: " . htmlspecialchars($mr_start[0]) . "<br>" : "" ?>
+                            <?= !empty($pr_number[0]) ? "PR No.: " . htmlspecialchars($pr_number[0]) : "" ?>
+                        </td>
+                    </tr>
                 <?php } ?>
             </table>
         </div>

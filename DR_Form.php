@@ -162,7 +162,7 @@
 <body>
   <h2>Delivery Rental Machine</h2>
 
-  <form id="myForm" action="print.php" method="post" target="_blank">
+  <form id="myForm" action="DR_save_data.php" method="post" target="_blank">
     <!-- Main details -->
     <div class="input-group">
       <div class="flex-row">
@@ -247,7 +247,7 @@
         <div class="input-group-bnew">
           <div class="flex-row">
             <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" name="serial[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" required name="serial[]" placeholder="Enter Serial Number"></div>
           </div>
         </div>
       </div>
@@ -316,7 +316,7 @@
             <h3>Pull Out Machine</h3>
             <div class="flex-row">
               <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
-              <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
+              <div class="form-control"><label>Serial No.</label><input type="text" name="serial[][]" placeholder="Enter Serial Number"></div>
               <div class="form-control"><label>MR End</label><input type="text" oninput="formatPrice(this)" name="mr_end[]" placeholder="Enter MR End"></div>
               <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="color_imp[]" placeholder="Enter Color Impression"></div>
               <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="black_imp[]" placeholder="Enter Black Impression"></div>
@@ -365,14 +365,14 @@
         <div class="input-group-used-dr">
           <div class="flex-row">
             <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" required placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
             <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mr_start[]" placeholder="Enter MR Start"></div>
             <div class="form-control"><label>Technician Name</label><input type="text" name="tech_name[]" placeholder="Enter Technician Name"></div>
             <div class="form-control"><label>PR No.</label><input type="text" name="pr_number[]" placeholder="Enter PR Number"></div>
           </div>
         </div>
       </div>
-      <button type="button" class="btn-add" onclick="addInput('used-dr')">➕ Add Another Item</button>
+      <button type="button" class="btn-add" onclick="addInput('used-dr')">➕ Add Another Item (Max 5)</button>
     </div>
 
     <button type="submit" class="btn-submit">Save & Generate</button>
@@ -603,6 +603,7 @@
       const maxGroupsBnew = 2;
       const maxGroupsInvoice = 5;
       const maxGroupsReplacementAndPullout = 2;
+      const maxGroupUsedDr = 6;
 
       if (type === 'used' && currentGroupsUsed >= maxGroupsUsed) {
         alert(`You can only add up to ${maxGroupsUsed} sets.`);
@@ -624,6 +625,9 @@
         return;
       } else if (type === 'dr-price' && currentGroupWithPrice >= 5) {
         alert('You can only add up to 5 sets.');
+        return;
+      } else if (type === 'used-dr' && currentGroupUsedDr >= maxGroupUsedDr) {
+        alert(`you can only add up to 5 sets.`);
         return;
       }
 
@@ -647,7 +651,7 @@
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
-            <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" required placeholder="Enter Serial Number"></div>
             <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mr_start[]" placeholder="Enter MR Start"></div>
             <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="color_imp[]" placeholder="Enter Color Impression"></div>
             <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="black_imp[]" placeholder="Enter Black Impression"></div>
@@ -727,7 +731,7 @@
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
             <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" name="serial[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" required name="serial[]" placeholder="Enter Serial Number"></div>
           </div>`;
       }
 
