@@ -365,14 +365,19 @@ function saveBothPulloutReplacement($pdo, $si_number, $delivered_to, $date, $add
     return $record_id;
 }
 
-// Function to save DR with Price format - Dynamic based on items
+// Function to save DR with Price format - One main record with multiple items
 function saveDrWithPriceFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
 {
     $models = $post['model'] ?? [];
+    $quantities = $post['quantity'] ?? [];
+    $prices = $post['price'] ?? [];
+    $unit_types = $post['unit_type'] ?? [];
+    $item_descs = $post['item_desc'] ?? [];
 
-    $stmt = $pdo->prepare("INSERT INTO dr_with_price (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    // Insert main record (only once)
+    $main_stmt = $pdo->prepare("INSERT INTO dr_with_price (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-    $stmt->execute([
+    $main_stmt->execute([
         $si_number,
         $delivered_to,
         $tin,
@@ -380,32 +385,44 @@ function saveDrWithPriceFormat($pdo, $si_number, $delivered_to, $date, $address,
         $terms,
         $particulars,
         $date,
-        $unit_type,
+        $unit_type, // Use the main unit_type from common fields
         $models[0] ?? ''
     ]);
     $record_id = $pdo->lastInsertId();
 
-    // Save items dynamically
-    $quantities = $post['quantity'] ?? [];
-    $prices = $post['price'] ?? [];
-    $unit_types = $post['unit_type'] ?? [];
-    $item_descs = $post['item_desc'] ?? [];
+    // Insert item records dynamically based on quantity length
+    $items_stmt = $pdo->prepare("INSERT INTO dr_with_price_items (dr_with_price_id, quantity, price, unit_type, item_description) VALUES (?, ?, ?, ?, ?)");
 
-    $stmt = $pdo->prepare("INSERT INTO dr_with_price_items (dr_with_price_id, quantity, price, unit_type, item_description) VALUES (?, ?, ?, ?, ?)");
+    $valid_items_count = 0;
 
     for ($i = 0; $i < count($quantities); $i++) {
-        if (!empty($quantities[$i]) && !empty($item_descs[$i])) {
-            $price_val = floatval(str_replace([',', ' '], '', $prices[$i] ?? '0'));
-            $quantity_val = (int)str_replace([',', ' '], '', $quantities[$i] ?? '0');
+        // Only insert if both quantity and description are not empty
+        if (!empty(trim($quantities[$i])) && !empty(trim($item_descs[$i]))) {
 
-            $stmt->execute([
+            // Clean numeric values
+            $price_val = isset($prices[$i]) ? floatval(str_replace([',', ' '], '', $prices[$i])) : 0.0;
+            $quantity_val = (int)str_replace([',', ' '], '', $quantities[$i]);
+
+            // Use item-specific unit_type if available, otherwise use main unit_type
+            $current_unit_type = isset($unit_types[$i]) ? $unit_types[$i] : $unit_type;
+
+            $items_stmt->execute([
                 $record_id,
                 $quantity_val,
                 $price_val,
-                $unit_types[$i] ?? '',
+                $current_unit_type,
                 $item_descs[$i]
             ]);
+
+            $valid_items_count++;
         }
+    }
+
+    // Optional: Update grand total in main record if you have that column
+    if ($valid_items_count > 0) {
+        // You can calculate and update grand total here if needed
+        // $grand_total = calculateGrandTotal($record_id, $pdo);
+        // updateGrandTotal($record_id, $grand_total, $pdo);
     }
 
     return $record_id;
@@ -422,7 +439,7 @@ function saveDrWithInvoiceFormat($pdo, $si_number, $delivered_to, $date, $addres
     // Determine delivery type
     $delivery_type = (!empty($invoice_numbers[0])) ? 'complete' : 'partial';
 
-    $stmt = $pdo->prepare("INSERT INTO dr_with_invoice (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, po_number, invoice_number, note, delivery_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO dr_with_invoice (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, under_po_no, under_invoice_no, note, delivery_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     $stmt->execute([
         $si_number,

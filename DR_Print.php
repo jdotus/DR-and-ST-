@@ -21,9 +21,9 @@ $address = $form_data['address'] ?? '';
 $terms = $form_data['terms'] ?? '';
 $particulars = $form_data['particulars'] ?? '';
 $tin = $form_data['tin'] ?? '';
-$unit_type = $form_data['unit_type'] ?? '';
+$unit_type = $form_data['unit_type'] ?? [];
 
-// Form type selections
+// Form type selections - FIXED: Access directly, not as array
 $dr_format = $form_data['dr_format'] ?? '';
 $pullout_type = $form_data['pullout_type'] ?? '';
 
@@ -76,7 +76,7 @@ $color_large_imp = !empty($color_large_imp) ? $color_large_imp : array_fill(0, 7
 
 // Fill other arrays with empty values if not set
 $price = !empty($price) ? $price : [];
-$quantity = !empty($quantity) ? $quantity : [];
+$quantity1 = !empty($quantity) ? $quantity : [];
 $item_desc = !empty($item_desc) ? $item_desc : [];
 $replace_model = !empty($replace_model) ? $replace_model : [];
 $pullout_model = !empty($pullout_model) ? $pullout_model : [];
@@ -109,8 +109,6 @@ unset($_SESSION['form_data']);
             letter-spacing: 1.5px;
         }
 
-
-
         /* Chrome, Safari, Edge, Opera */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
@@ -118,14 +116,10 @@ unset($_SESSION['form_data']);
             margin: 0;
         }
 
-
-
         /* Firefox */
         input[type=number] {
             -moz-appearance: textfield;
         }
-
-
 
         /* Keep your A5 layout size */
         .a5 {
@@ -150,13 +144,12 @@ unset($_SESSION['form_data']);
         table {
             border-collapse: collapse;
             margin: 0;
-            /* width: 100%;   */
             table-layout: fixed;
         }
 
         td,
         th {
-            /* border: 1px solid red; */
+            border: 1px solid red;
             text-align: center;
             box-sizing: border-box;
             vertical-align: top;
@@ -173,10 +166,8 @@ unset($_SESSION['form_data']);
 
         /* Third Table */
         table:last-of-type {
-            /* width: 138.5mm !important;  */
             width: 188.5mm !important;
         }
-
 
         /* Column widths */
         .col-si-number,
@@ -189,46 +180,43 @@ unset($_SESSION['form_data']);
             width: 91.5mm !important;
         }
 
-
         .col-particulars {
             padding: 1mm 0 0 0;
             width: 64mm !important;
         }
 
-        .col.price {
+        .col-price {
             width: 38mm !important;
         }
 
         .col-quantity {
             width: 17.7mm !important;
-            /* width: 14.7mm !important; */
         }
 
         .col-units {
             width: 14.3mm !important;
-            /* width: 11.3mm !important; */
         }
 
         .col-description {
             padding: 0 5px;
             width: 156.5mm !important;
-            /* width: 96.5mm !important; */
+        }
+
+        .col-description-price {
+            width: 96.5mm !important;
         }
 
         .col-description-header {
-            /* width: 156.5mm !important; */
             width: 96.5mm !important;
         }
 
         .col-price {
-            /* padding: 1mm 0 0 0; */
             width: 30mm !important;
         }
 
         .dr-row {
             height: 9.5mm;
         }
-
 
         .dr-2nd-row {
             height: 6.7mm !important;
@@ -238,14 +226,9 @@ unset($_SESSION['form_data']);
             height: 5.5mm !important;
         }
 
-
-
         .text-align {
             text-align: left !important;
-
         }
-
-
 
         .underline-empty {
             text-decoration: underline;
@@ -255,14 +238,9 @@ unset($_SESSION['form_data']);
             min-width: 55px;
         }
 
-
-
         .dr-2nd-row-new {
-            /* height: 7.5mm !important; */
             height: 5.4mm !important;
         }
-
-
 
         /* Print setup — centers A5 content on A4 paper */
         @media print {
@@ -288,7 +266,6 @@ unset($_SESSION['form_data']);
             }
         }
     </style>
-
 </head>
 
 <body>
@@ -300,12 +277,10 @@ unset($_SESSION['form_data']);
                         <br>
                         <?= htmlspecialchars($si_number) ?>
                     </td>
-
                     <td class="col-sold-to">
                         <?= htmlspecialchars($delivered_to) ?><br>
                         <?= htmlspecialchars($tin) ?>
                     </td>
-
                 </tr>
                 <tr class="dr-row">
                     <td class="col-si-date"><br> <?= htmlspecialchars($date) ?></td>
@@ -318,15 +293,15 @@ unset($_SESSION['form_data']);
             </table>
 
             <table>
-
                 <!-- HEADINGS -->
                 <tr class="dr-2nd-row-header">
                     <td class="col-quantity"></td> <!-- QUANTITY -->
                     <td class="col-units"></td> <!-- UNIT -->
-                    <?php if (isset($_POST['dr_format']) && $_POST['dr_format'] == 'drWithPrice') { ?>
-                        <td class="col-description-header"></td> <!-- DESCRIPTION -->
+                    <?php if ($dr_format === 'drWithPrice') { ?>
+                        <td class="col-description-price"></td> <!-- DESCRIPTION for drWithPrice -->
+                        <td class="col-price"></td> <!-- PRICE for drWithPrice -->
                     <?php } else { ?>
-                        <td class="col-description"></td> <!-- DESCRIPTION -->
+                        <td class="col-description"></td> <!-- DESCRIPTION for other formats -->
                     <?php } ?>
                 </tr>
 
@@ -336,7 +311,7 @@ unset($_SESSION['form_data']);
                     <tr class="dr-2nd-row">
                         <td><?= htmlspecialchars(count($serial)) ?></td>
                         <td><?= htmlspecialchars($unit_type) ?></td>
-                        <td class="text-align" style="font-size: 10px">Deliver Machine<br>Model: <?= htmlspecialchars($model[0] ?? '') ?></td>
+                        <td class=" text-align" style="font-size: 10px">Deliver Machine<br>Model: <?= htmlspecialchars($model[0] ?? '') ?></td>
                     </tr>
 
                     <?php
@@ -354,7 +329,6 @@ unset($_SESSION['form_data']);
                             $messageFormat = "Serial No.: " . $srDisplay .  " MR Start: "  . $mrDisplay;
                         } else {
                             $messageFormat = "Serial No.: " . $srDisplay . " MR Start: " . $mrDisplay
-
                                 . " (CI: " . htmlspecialchars($ci) . "; BI: " . htmlspecialchars($bi) . "; CLI: " . htmlspecialchars($cli) . ")";
                         }
                         ?>
@@ -599,7 +573,7 @@ unset($_SESSION['form_data']);
                     <?php } ?>
 
                     <!-- For the DR with Invoice Section -->
-                <?php } else if (isset($dr_format['dr_format']) && $dr_format['dr_format'] == 'drWithInvoice') { ?>
+                <?php } else if (isset($dr_format['dr_format']) && $dr_format['dr_format'] === 'drWithInvoice') { ?>
                     <?php for ($i = 0; $i < count($quantity); $i++) { ?>
                         <tr class="dr-2nd-row">
                             <td> <?= htmlspecialchars($quantity[$i]) ?></td>
@@ -689,7 +663,7 @@ unset($_SESSION['form_data']);
                     <?php } ?>
 
                     <!-- For the DR with Price Section -->
-                <?php } else if (isset($dr_format['dr_format']) && $dr_format['dr_format'] == 'drWithPrice') { ?>
+                <?php } else if (isset($dr_format) && $dr_format == 'drWithPrice') { ?>
 
                     <?php
                     $totalPerItem = 0;
@@ -704,11 +678,20 @@ unset($_SESSION['form_data']);
                         $totalPerItem = $priceVal * $qtyVal;
                         $grandTotal += $totalPerItem;
 
+                        // Fix: Get unit_type from the right source
+                        $current_unit_type = '';
+                        if (isset($unit_type[$i]) && is_string($unit_type[$i])) {
+                            $current_unit_type = $unit_type[$i];
+                        } elseif (isset($form_data['unit_type'][$i])) {
+                            $current_unit_type = $form_data['unit_type'][$i];
+                        } else {
+                            $current_unit_type = $unit_type; // fallback to main unit_type
+                        }
                     ?>
                         <tr class="dr-2nd-row">
-                            <td class="col-quantity"> <?= htmlspecialchars($quantity[$i]) ?></td> <!-- 1. Quantity -->
-                            <td class="col-units"><?= htmlspecialchars($unit_type[$i] ?? '') ?></td> <!-- 2. Unit -->
-                            <td class="col-description text-align"><?= htmlspecialchars($item_desc[$i] ?? '') ?></td> <!-- 3. Description (WIDE) -->
+                            <td class="col-quantity"> <?= htmlspecialchars($quantity[$i]) ?></td>
+                            <td class="col-units"><?= htmlspecialchars($current_unit_type) ?></td>
+                            <td class="col-description-price text-align"><?= htmlspecialchars($item_desc[$i] ?? '') ?></td>
                             <td class="col-price"><?= htmlspecialchars(number_format((int)$priceVal)) ?></td>
                             <td class="col-price"><?= htmlspecialchars(number_format((int)$totalPerItem)) ?></td>
                         </tr>
@@ -718,7 +701,7 @@ unset($_SESSION['form_data']);
                         <tr class="dr-2nd-row">
                             <td class="col-quantity"> </td>
                             <td class="col-units"></td>
-                            <td class="col-description text-align"></td>
+                            <td class="col-description-price text-align"></td>
                             <td class="col-price"></td>
                             <td class="col-price"></td>
                         </tr>
@@ -726,7 +709,7 @@ unset($_SESSION['form_data']);
                     <tr class="dr-2nd-row">
                         <td class="col-quantity"> </td>
                         <td class="col-units"></td>
-                        <td class="col-description text-align">Machine Model: <?= htmlspecialchars($model[0] ?? '') ?></td>
+                        <td class="col-description-price text-align">Machine Model: <?= htmlspecialchars($model[0] ?? '') ?></td>
                         <td class="col-price"></td>
                         <td class="col-price"></td>
                     </tr>
@@ -734,12 +717,11 @@ unset($_SESSION['form_data']);
                     <tr class="dr-2nd-row">
                         <td class="col-quantity"> </td>
                         <td class="col-units"></td>
-                        <td class="col-description text-align"></td>
+                        <td class="col-description-price text-align"></td>
                         <td class="col-price">TOTAL: </td>
                         <td class="col-price"><?= htmlspecialchars(number_format((int)$grandTotal)) ?></td>
                     </tr>
 
-                    <!-- For the Used Dr Section -->
                 <?php } else if (isset($dr_format['dr_format']) && $dr_format['dr_format'] == 'usedDr') { ?>
 
                     <?php for ($i = 0; $i < count($quantity); $i++) { ?>
