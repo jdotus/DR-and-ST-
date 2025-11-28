@@ -46,10 +46,15 @@
       position: relative;
     }
 
-    .flex-row {
+    .flex-row,
+    .flex-row-serial {
       display: flex;
       flex-wrap: wrap;
       gap: 15px;
+    }
+
+    .flex-row-serial {
+      margin-top: 25px;
     }
 
     .form-control {
@@ -151,10 +156,57 @@
       display: block;
     }
 
-    @media (max-width: 600px) {
-      .form-control {
-        flex: 1 1 100%;
-      }
+    /* Add these to your existing CSS */
+    .machine-model-group {
+      border: 1px solid #bbb;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      background: #f8f9fa;
+      position: relative;
+    }
+
+    .machine-model-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .serial-group {
+      margin-left: 20px;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-left: 3px solid #0078d7;
+      background: #fff;
+      position: relative;
+    }
+
+    .add-serial-btn {
+      background: #17a2b8;
+      color: white;
+      margin-left: 20px;
+      margin-bottom: 15px;
+    }
+
+    .add-serial-btn:hover {
+      background: #138496;
+    }
+
+    .machine-model-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #dc3545;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .machine-model-remove:hover {
+      background: #b02a37;
     }
   </style>
 </head>
@@ -247,7 +299,7 @@
         <div class="input-group-bnew">
           <div class="flex-row">
             <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" required name="serial[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" name="serial[]" placeholder="Enter Serial Number"></div>
           </div>
         </div>
       </div>
@@ -257,7 +309,7 @@
 
     <!-- Pullout Replacement Machine Section -->
     <div id="pulloutReplaceFieldMain">
-      <div id="pulloutReplaceField" class="machine-section">
+      <div id="pulloutReplaceField" clzass="machine-section">
         <div id="replacementContainerMain">
           <div id="replacementContainer">
             <div class="input-group-replacement">
@@ -293,21 +345,37 @@
         </div>
       </div>
 
+      <!-- Replacement Only Section (Modified) -->
       <div id="replacementOnlyContainerMain" class="machine-section">
         <div id="replacementOnlyContainer">
-          <div class="input-group-replacement-only">
-            <h3>Replacement Machine</h3>
-            <div class="flex-row">
-              <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
-              <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
-              <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mr_start[]" placeholder="Enter MR Start"></div>
-              <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="color_imp[]" placeholder="Enter Color Impression"></div>
-              <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="black_imp[]" placeholder="Enter Black Impression"></div>
-              <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="color_large_imp[]" placeholder="Enter Color Large Impression"></div>
+
+          <!-- Default machine model group -->
+          <div class="machine-model-group">
+
+            <div class="machine-model-header">
+              <div class="form-control">
+                <label>Machine Model</label>
+                <input type="text" name="replacement_model[]" required placeholder="Enter Machine Model">
+              </div>
+              <button type="button" class="btn-add add-serial-btn" onclick="addSerialToModel(this)">➕ Add Serial</button>
+            </div>
+            <!-- Serial numbers container for this machine model -->
+            <div class="serials-container">
+              <!-- Default serial group -->
+              <div class="serial-group">
+                <button type="button" class="btn-remove" onclick="removeSerialGroup(this)">✖</button>
+                <div class="flex-row-serial">
+                  <div class="form-control"><label>Serial No.</label><input type="text" name="replacement_serial[]" placeholder="Enter Serial Number"></div>
+                  <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="replacement_mr_start[]" placeholder="Enter MR Start"></div>
+                  <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="replacement_color_imp[]" placeholder="Enter Color Impression"></div>
+                  <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="replacement_black_imp[]" placeholder="Enter Black Impression"></div>
+                  <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="replacement_color_large_imp[]" placeholder="Enter Color Large Impression"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <button type="button" class="btn-add no-margin" onclick="addInput('replacement-only')">➕ Add Another Serial (Max 7)</button>
+        <button type="button" class="btn-add no-margin" onclick="addMachineModel()">➕ Add Another Machine Model</button>
       </div>
 
       <div id="pulloutOnlyContainerMain" class="machine-section">
@@ -316,7 +384,7 @@
             <h3>Pull Out Machine</h3>
             <div class="flex-row">
               <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
-              <div class="form-control"><label>Serial No.</label><input type="text" name="serial[][]" placeholder="Enter Serial Number"></div>
+              <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
               <div class="form-control"><label>MR End</label><input type="text" oninput="formatPrice(this)" name="mr_end[]" placeholder="Enter MR End"></div>
               <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="color_imp[]" placeholder="Enter Color Impression"></div>
               <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="black_imp[]" placeholder="Enter Black Impression"></div>
@@ -365,14 +433,14 @@
         <div class="input-group-used-dr">
           <div class="flex-row">
             <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" required placeholder="Enter Serial Number"></div>
             <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mr_start[]" placeholder="Enter MR Start"></div>
             <div class="form-control"><label>Technician Name</label><input type="text" name="tech_name[]" placeholder="Enter Technician Name"></div>
             <div class="form-control"><label>PR No.</label><input type="text" name="pr_number[]" placeholder="Enter PR Number"></div>
           </div>
         </div>
       </div>
-      <button type="button" class="btn-add" onclick="addInput('used-dr')">➕ Add Another Item (Max 5)</button>
+      <button type="button" class="btn-add" onclick="addInput('used-dr')">➕ Add Another Item</button>
     </div>
 
     <button type="submit" class="btn-submit">Save & Generate</button>
@@ -382,6 +450,8 @@
     const maxGroupsUsed = 7;
     const maxGroupsBnew = 2;
     const maxSerials = 15;
+    const maxMachineModels = 5; // Maximum number of machine models
+    const maxSerialsPerModel = 7; // Maximum serials per machine model
 
     function formatPrice(input) {
       // Remove any non-digit characters (except temporary commas)
@@ -411,7 +481,7 @@
       return total;
     }
 
-    // // --- UPDATE COUNTER DISPLAY ---
+    // --- UPDATE COUNTER DISPLAY ---
     function updateSerialCountDisplay() {
       const total = countTotalSerials();
       const counter = document.getElementById('totalSerialCount');
@@ -451,7 +521,6 @@
 
     // --- TOGGLE INPUT SECTIONS ---
     function toggleInputs(selected, secondarySelected) {
-      // ... (JavaScript remains exactly the same) ...
       const usedSection = document.getElementById('usedMachineFields');
       const bnewSection = document.getElementById('bnewMachineFields');
       const pulloutReplaceSection = document.getElementById('pulloutReplaceField');
@@ -547,6 +616,7 @@
         if (secondarySelected === 'replacementOnly') {
           replacementOnlyContainer.style.display = 'block';
           replacementOnlyContainer.querySelectorAll('input').forEach(i => (i.disabled = false));
+          replacementOnlyContainer.querySelectorAll('button').forEach(b => (b.disabled = false));
         } else if (secondarySelected === 'pulloutOnly') {
           pulloutOnlyContainer.style.display = 'block';
           pulloutOnlyContainer.querySelectorAll('input').forEach(i => (i.disabled = false));
@@ -556,7 +626,6 @@
           pulloutReplaceSection.querySelectorAll('input').forEach(i => (i.disabled = false));
         }
       } else if (selected === 'usedDr') {
-        // usedDrSection.classList.add('visible');
         usedDrSection.style.display = 'block';
         usedDrSection.querySelectorAll('input').forEach(i => (i.disabled = false));
       }
@@ -577,8 +646,6 @@
         container = document.getElementById('replacementContainer');
       } else if (type === 'pullout') {
         container = document.getElementById('pulloutContainer');
-      } else if (type === 'replacement-only') {
-        container = document.getElementById('replacementOnlyContainer');
       } else if (type === 'pullout-only') {
         container = document.getElementById('pulloutOnlyContainer');
       } else if (type === 'dr-price') {
@@ -587,14 +654,12 @@
         container = document.getElementById('usedDrContainer');
       }
 
-      // ... (rest of the JavaScript remains exactly the same, only updating input names in the innerHTML templates below) ...
       const currentGroupsUsed = container.getElementsByClassName('input-group-used').length;
       const currentGroupsBnew = container.getElementsByClassName('input-group-bnew').length;
       const currentGroupsInvoice = container.getElementsByClassName('input-group-invoice').length;
       const currentGroupsReplacement = container.getElementsByClassName('input-group-replacement').length;
       const currentGroupsPullout = container.getElementsByClassName('input-group-pullout').length;
       const currentGroupsPulloutOnly = container.getElementsByClassName('input-group-pullout-only').length;
-      const currentGroupsReplacementOnly = container.getElementsByClassName('input-group-replacement-only').length;
       const currentGroupWithPrice = container.getElementsByClassName('input-group-price').length;
       const currentGroupUsedDr = container.getElementsByClassName('input-group-used-dr').length;
 
@@ -603,7 +668,6 @@
       const maxGroupsBnew = 2;
       const maxGroupsInvoice = 5;
       const maxGroupsReplacementAndPullout = 2;
-      const maxGroupUsedDr = 6;
 
       if (type === 'used' && currentGroupsUsed >= maxGroupsUsed) {
         alert(`You can only add up to ${maxGroupsUsed} sets.`);
@@ -620,14 +684,11 @@
       } else if (type === 'pullout' && currentGroupsPullout >= maxGroupsReplacementAndPullout) {
         alert(`You can only add up to ${maxGroupsReplacementAndPullout} pullout sets.`);
         return;
-      } else if ((type === 'replacement-only' && currentGroupsReplacementOnly >= maxGroupsUsed) || (type === 'pullout-only' && currentGroupsPulloutOnly >= maxGroupsUsed)) {
+      } else if (type === 'pullout-only' && currentGroupsPulloutOnly >= maxGroupsUsed) {
         alert(`You can only add up to ${maxGroupsUsed} sets.`);
         return;
       } else if (type === 'dr-price' && currentGroupWithPrice >= 5) {
         alert('You can only add up to 5 sets.');
-        return;
-      } else if (type === 'used-dr' && currentGroupUsedDr >= maxGroupUsedDr) {
-        alert(`you can only add up to 5 sets.`);
         return;
       }
 
@@ -639,19 +700,18 @@
         type === 'invoice' ? 'input-group-invoice' :
         type === 'replacement' ? 'input-group-replacement' :
         type === 'pullout' ? 'input-group-pullout' :
-        type === 'replacement-only' ? 'input-group-replacement-only' :
         type === 'pullout-only' ? 'input-group-pullout-only' :
         type === 'dr-price' ? 'input-group-price' :
         type === 'used-dr' ? 'input-group-used-dr' :
         ''
       );
 
-      // HTML structure based on type - UPDATED INPUT NAMES ONLY
+      // HTML structure based on type
       if (type === 'used') {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
-            <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" required placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
             <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mr_start[]" placeholder="Enter MR Start"></div>
             <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="color_imp[]" placeholder="Enter Color Impression"></div>
             <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="black_imp[]" placeholder="Enter Black Impression"></div>
@@ -685,17 +745,6 @@
               <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="replace_black_imp[]" placeholder="Enter Black Impression"></div>
               <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="replace_color_large_imp[]" placeholder="Enter Color Large Impression"></div>
           </div>`;
-      } else if (type === 'replacement-only') {
-        newGroup.innerHTML = `
-          <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
-            <div class="flex-row">
-              <div class="form-control"><label>Serial No.</label><input type="text" name="serial[]" placeholder="Enter Serial Number"></div>
-              <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="mr_start[]" placeholder="Enter MR Start"></div>
-              <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="color_imp[]" placeholder="Enter Color Impression"></div>
-              <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="black_imp[]" placeholder="Enter Black Impression"></div>
-              <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="color_large_imp[]" placeholder="Enter Color Large Impression"></div>
-            </div>
-          `;
       } else if (type === 'pullout-only') {
         newGroup.innerHTML = `
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
@@ -731,7 +780,7 @@
           <button type="button" class="btn-remove" onclick="removeGroup(this)">✖</button>
           <div class="flex-row">
             <div class="form-control"><label>Machine Model</label><input type="text" name="model[]" required placeholder="Enter Machine Model"></div>
-            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" required name="serial[]" placeholder="Enter Serial Number"></div>
+            <div class="form-control"><label>Serial No.</label><input type="text" class="serialInput" name="serial[]" placeholder="Enter Serial Number"></div>
           </div>`;
       }
 
@@ -739,9 +788,76 @@
       container.appendChild(newGroup);
     }
 
+    // --- NEW FUNCTIONS FOR REPLACEMENT-ONLY SECTION ---
+    // Add a new machine model
+    function addMachineModel() {
+      const container = document.getElementById('replacementOnlyContainer');
+      const currentModels = container.getElementsByClassName('machine-model-group').length;
+
+      if (currentModels >= maxMachineModels) {
+        alert(`You can only add up to ${maxMachineModels} machine models.`);
+        return;
+      }
+
+      const newModelGroup = document.createElement('div');
+      newModelGroup.className = 'machine-model-group';
+      newModelGroup.innerHTML = `
+        <button type="button" class="machine-model-remove" onclick="removeMachineModel(this)">✖ Remove Model</button>
+        <div class="machine-model-header">
+          <div class="form-control">
+            <label>Machine Model</label>
+            <input type="text" name="replacement_model[]" required placeholder="Enter Machine Model">
+          </div>
+          <button type="button" class="btn-add add-serial-btn" onclick="addSerialToModel(this)">➕ Add Serial</button>
+        </div>
+        <div class="serials-container">
+          <!-- Serial numbers will be added here -->
+        </div>
+      `;
+
+      container.appendChild(newModelGroup);
+    }
+
+    // Add a serial number to a machine model
+    function addSerialToModel(button) {
+      const machineModelGroup = button.closest('.machine-model-group');
+      const serialsContainer = machineModelGroup.querySelector('.serials-container');
+      const currentSerials = serialsContainer.getElementsByClassName('serial-group').length;
+
+      if (currentSerials >= maxSerialsPerModel) {
+        alert(`You can only add up to ${maxSerialsPerModel} serial numbers per machine model.`);
+        return;
+      }
+
+      const newSerialGroup = document.createElement('div');
+      newSerialGroup.className = 'serial-group';
+      newSerialGroup.innerHTML = `
+        <button type="button" class="btn-remove" onclick="removeSerialGroup(this)">✖</button>
+        <div class="flex-row-serial">
+          <div class="form-control"><label>Serial No.</label><input type="text" name="replacement_serial[]" placeholder="Enter Serial Number"></div>
+          <div class="form-control"><label>MR Start</label><input type="text" oninput="formatPrice(this)" name="replacement_mr_start[]" placeholder="Enter MR Start"></div>
+          <div class="form-control"><label>Color Impression</label><input type="text" oninput="formatPrice(this)" name="replacement_color_imp[]" placeholder="Enter Color Impression"></div>
+          <div class="form-control"><label>Black Impression</label><input type="text" oninput="formatPrice(this)" name="replacement_black_imp[]" placeholder="Enter Black Impression"></div>
+          <div class="form-control"><label>Color Large Impression</label><input type="text" oninput="formatPrice(this)" name="replacement_color_large_imp[]" placeholder="Enter Color Large Impression"></div>
+        </div>
+      `;
+
+      serialsContainer.appendChild(newSerialGroup);
+    }
+
+    // Remove a machine model
+    function removeMachineModel(button) {
+      button.parentNode.remove();
+    }
+
     function removeGroup(button) {
       button.parentNode.remove();
       updateSerialCountDisplay();
+    }
+
+    // Remove a serial group
+    function removeSerialGroup(button) {
+      button.parentNode.remove();
     }
 
     document.addEventListener("DOMContentLoaded", function() {
