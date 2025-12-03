@@ -83,16 +83,32 @@
             color: #fff !important;
             cursor: not-allowed;
         }
+
+        .serial-mr-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .serial-mr-row label {
+            margin: 0;
+            font-weight: normal;
+        }
+        .serial-mr-row input[type="text"] {
+            width: 120px;
+        }
+        .serial-mr-row .remove-btn {
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>Stock Transfer Input Form</h2>
-    <form action="stocktransfer.php" method="POST" target="_blank">
+    <form action="multipleserial.php" method="POST">
         <label>From Location:</label> 
         <select name="from_location" required> 
-            
             <option value="North-east">North-east</option> 
             <option value="South-West">South-West</option> 
         </select>
@@ -106,8 +122,6 @@
         <label>Account Name:</label>
         <input type="text" name="account_name" required>
 
-        
-
         <label>Address:</label>
         <input type="text" name="to_location" required>
 
@@ -118,6 +132,7 @@
                     <th>Quantity</th>
                     <th>Unit</th>
                     <th>Description</th>
+                    <th>Model</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -126,89 +141,102 @@
                     <td><input type="number" name="quantity[]" required></td>
                     <td><input type="text" name="unit[]" required></td>
                     <td><input type="text" name="description[]" required></td>
+                    <td><input type="text" name="model[]" required></td>
                     <td><button type="button" class="remove-btn" onclick="removeRow(this)">×</button></td>
                 </tr>
             </tbody>
         </table>
-
-        <button type="button" class="add-btn" onclick="addRow()">+ Add Another</button>
+        <div id="serialMrContainer">
+    <div class="serial-mr-row">
+        <label>Serial No.:</label>
+        <input type="text" name="serial_no[]" required>
+        <label>MR:</label>
+        <input type="text" name="mr[]" required>
+        <button type="button" class="remove-btn" onclick="removeSerialMrRow(this)">×</button>
+    </div>
+</div>
+<button type="button" class="add-btn" id="addSerialMrBtn" onclick="addSerialMrRow()">+ Add Another Serial/MR</button>
+        
 
         <!-- Additional Fields Section -->
         <div class="additional-fields">
             <h4>Additional Information</h4>
-            
-            <label>MR:</label>
-            <input type="text" name="mr" placeholder="Enter MR number" required>
-            
-            <label>Model:</label>
-            <input type="text" name="model" placeholder="Enter model number" required>
-            
-            <label>Serial No.:</label>
-            <input type="text" name="serial_no" placeholder="Enter serial number" required>
-            
             <label>Tech:</label>
-            <input type="text" name="tech" placeholder="Enter tech name"required>
-
-            <label>PR No.:</label>
-            <input type="text" name="prno" placeholder="Enter PR No.">
-            
+            <input type="text" name="delivered_by" placeholder="Enter tech name"required>
         </div>
 
         <!-- <label>Delivered By:</label>
         <input type="text" name="delivered_by" required> -->
 
-        <button type="button" id="submitBtn">Submit to Stock Transfer</button>
+        <button type="submit" id="submitBtn">Submit to Stock Transfer</button>
     </form>
 </div>
 
 <script>
-function updateAddBtn() {
-    const tbody = document.querySelector('#itemsTable tbody');
-    const addBtn = document.querySelector('.add-btn');
-    const currentRows = tbody.querySelectorAll('tr').length;
-    const maxRows = 10;
-    const remaining = maxRows - currentRows;
-    addBtn.textContent = remaining > 0 ? `+ Add Another (${remaining} remaining)` : '+ Add Another (0 remaining)';
-    addBtn.disabled = currentRows >= maxRows;
+const maxSerialMrRows = 8;
+
+function updateAddSerialMrBtn() {
+    const container = document.getElementById('serialMrContainer');
+    const addBtn = document.getElementById('addSerialMrBtn');
+    const currentRows = container.querySelectorAll('.serial-mr-row').length;
+    const remaining = maxSerialMrRows - currentRows;
+    addBtn.textContent = remaining > 0 ? `+ Add Another Serial/MR (${remaining} remaining)` : '+ Add Another Serial/MR (0 remaining)';
+    addBtn.disabled = currentRows >= maxSerialMrRows;
 }
 
-function addRow() {
-    const tbody = document.querySelector('#itemsTable tbody');
-    const currentRows = tbody.querySelectorAll('tr').length;
-    const maxRows = 10;
-    if (currentRows >= maxRows) return;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td><input type="number" name="quantity[]" required></td>
-        <td><input type="text" name="unit[]" required></td>
-        <td><input type="text" name="description[]" required></td>
-        <td><button type="button" class="remove-btn" onclick="removeRow(this)">×</button></td>
+function addSerialMrRow() {
+    const container = document.getElementById('serialMrContainer');
+    const currentRows = container.querySelectorAll('.serial-mr-row').length;
+    if (currentRows >= maxSerialMrRows) return;
+    const div = document.createElement('div');
+    div.className = 'serial-mr-row';
+    div.innerHTML = `
+        <label>Serial No.:</label>
+        <input type="text" name="serial_no[]" required>
+        <label>MR:</label>
+        <input type="text" name="mr[]" required>
+        <button type="button" class="remove-btn" onclick="removeSerialMrRow(this)">×</button>
     `;
-    tbody.appendChild(tr);
-    updateAddBtn();
+    container.appendChild(div);
+    updateAddSerialMrBtn();
 }
 
-function removeRow(btn) {
-    btn.closest('tr').remove();
-    updateAddBtn();
+function removeSerialMrRow(btn) {
+    btn.parentElement.remove();
+    updateAddSerialMrBtn();
 }
 
 document.getElementById('submitBtn').addEventListener('click', function(e) {
-    const stockNo = document.querySelector('input[name="stock_no"]').value;
+    e.preventDefault();
     const form = document.querySelector('form');
-    fetch('check_stockno.php', {
+    const formData = new FormData(form);
+
+    fetch('multipleserial.php', {
         method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'stock_no=' + encodeURIComponent(stockNo)
+        body: formData
     })
     .then(response => response.text())
     .then(result => {
         if (result.trim() === 'exists') {
             alert('Stock No already exists. Please use a unique Stock No.');
-        } else if (result.trim() === 'ok') {
-            form.submit();
+        } else if (result.trim() === 'success') {
+            alert('Stock Transfer saved successfully!');
+            // Open print view
+            const stockNo = form.querySelector('input[name="stock_no"]').value;
+            window.open('multipleserial.php?stock_no=' + encodeURIComponent(stockNo), '_blank');
+            form.reset();
+            document.getElementById('serialMrContainer').innerHTML = `
+                <div class="serial-mr-row">
+                    <label>Serial No.:</label>
+                    <input type="text" name="serial_no[]" required>
+                    <label>MR:</label>
+                    <input type="text" name="mr[]" required>
+                    <button type="button" class="remove-btn" onclick="removeSerialMrRow(this)">×</button>
+                </div>
+            `;
+            updateAddSerialMrBtn();
         } else {
-            alert('Error checking Stock No. Please try again.');
+            alert('Error saving Stock Transfer. Please try again.');
         }
     })
     .catch(() => {
@@ -217,8 +245,7 @@ document.getElementById('submitBtn').addEventListener('click', function(e) {
 });
 
 
-
-document.addEventListener('DOMContentLoaded', updateAddBtn);
+document.addEventListener('DOMContentLoaded', updateAddSerialMrBtn);
 
 </script>
 
