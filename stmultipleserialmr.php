@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Stock Transfer Form</title>
+    <title>Multiple Serial Stock Transfer</title>
     <style>
         body {
             font-family: Arial, sans-serif;

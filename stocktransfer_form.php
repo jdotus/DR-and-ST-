@@ -194,8 +194,30 @@ function removeRow(btn) {
 
 document.getElementById('submitBtn').addEventListener('click', function(e) {
     e.preventDefault(); // Prevent normal form submission
-    const stockNo = document.querySelector('input[name="stock_no"]').value;
     const form = document.querySelector('form');
+
+    // Manual validation for required fields
+    const requiredFields = [
+        'stock_no', 'date', 'account_name', 'from_location', 'to_location',
+        'mr', 'model', 'serial_no', 'tech'
+    ];
+    for (let name of requiredFields) {
+        const field = form.querySelector(`[name="${name}"]`);
+        if (!field || !field.value.trim()) {
+            alert('Please fill in all required fields.');
+            field && field.focus();
+            return;
+        }
+    }
+    // Validate at least one item row
+    const qtyInputs = form.querySelectorAll('input[name="quantity[]"]');
+    if (qtyInputs.length === 0 || !Array.from(qtyInputs).some(input => input.value.trim())) {
+        alert('Please enter at least one item with quantity.');
+        qtyInputs[0] && qtyInputs[0].focus();
+        return;
+    }
+
+    const stockNo = form.querySelector('input[name="stock_no"]').value;
     fetch('check_stockno.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -217,7 +239,6 @@ document.getElementById('submitBtn').addEventListener('click', function(e) {
                 if (res.trim() === 'success') {
                     alert('Stock Transfer saved successfully!');
                     // Open print view in a new tab using the stock_no
-                    const stockNo = form.querySelector('input[name="stock_no"]').value;
                     window.open('stocktransfer.php?stock_no=' + encodeURIComponent(stockNo), '_blank');
                     form.reset();
                     // Reset item rows to just one row
