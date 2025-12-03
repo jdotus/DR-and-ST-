@@ -93,9 +93,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $quantity_json, $unit_json, $description_json,
         $mr, $model, $serial_no, $tech, $prno, $delivered_by, $received_by
     );
-    $stmt->execute();
-    $stmt->close();
-    $conn->close();
+    if ($stmt->execute()) {
+        echo 'success';
+        exit;
+    } else {
+        echo 'error';
+        exit;
+    }
 }
 
 // Count how many items we have

@@ -89,8 +89,7 @@
 
 <div class="container">
     <h2>Stock Transfer Input Form</h2>
-    <form action="stocktransfer.php" method="POST" target="_blank">
-        <label>From Location:</label> 
+    <form action="stocktransfer.php" method="POST">
         <select name="from_location" required> 
             
             <option value="North-east">North-east</option> 
@@ -194,6 +193,7 @@ function removeRow(btn) {
 }
 
 document.getElementById('submitBtn').addEventListener('click', function(e) {
+    e.preventDefault(); // Prevent normal form submission
     const stockNo = document.querySelector('input[name="stock_no"]').value;
     const form = document.querySelector('form');
     fetch('check_stockno.php', {
@@ -206,7 +206,40 @@ document.getElementById('submitBtn').addEventListener('click', function(e) {
         if (result.trim() === 'exists') {
             alert('Stock No already exists. Please use a unique Stock No.');
         } else if (result.trim() === 'ok') {
-            form.submit();
+            // Submit the form data via AJAX
+            const formData = new FormData(form);
+            fetch('stocktransfer.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(res => {
+                if (res.trim() === 'success') {
+                    alert('Stock Transfer saved successfully!');
+                    // Open print view in a new tab using the stock_no
+                    const stockNo = form.querySelector('input[name="stock_no"]').value;
+                    window.open('stocktransfer.php?stock_no=' + encodeURIComponent(stockNo), '_blank');
+                    form.reset();
+                    // Reset item rows to just one row
+                    const tbody = document.querySelector('#itemsTable tbody');
+                    tbody.innerHTML = `
+                        <tr>
+                            <td><input type="number" name="quantity[]" required></td>
+                            <td><input type="text" name="unit[]" required></td>
+                            <td><input type="text" name="description[]" required></td>
+                            <td><button type="button" class="remove-btn" onclick="removeRow(this)">×</button></td>
+                        </tr>
+                    `;
+                    updateAddBtn();
+                } else if (res.trim() === 'exists') {
+                    alert('Stock No already exists. Please use a unique Stock No.');
+                } else {
+                    alert('Error saving Stock Transfer. Please try again.');
+                }
+            })
+            .catch(() => {
+                alert('Error connecting to server.');
+            });
         } else {
             alert('Error checking Stock No. Please try again.');
         }
