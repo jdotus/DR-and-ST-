@@ -720,6 +720,213 @@ for ($i = 0; $i < $blank_rows; $i++) {
             </tr>
         </tbody>
     </table>
+
 </div>
+
+<!-- First Page -->
+<div class="a4-container">
+    <!-- First table logo -->
+    <img src="otus logo.png" alt="OTUS Logo" class="table-logo first-logo">
+    
+    <!-- First table -->
+    <table>
+        <colgroup>
+            <col class="col-1"><col class="col-2"><col class="col-3"><col class="col-4"><col class="col-5">
+            <col class="col-6"><col class="col-7"><col class="col-8"><col class="col-9"><col class="col-10">
+        </colgroup>
+
+        <tbody>
+            <!-- Row 1 -->
+            <tr style="height: 15px;">
+                <td colspan="9"> </td>
+                <td> </td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr style="height: 15.75px;">
+                <td colspan="9" class="merged-block"> </td>
+                <td></td>
+            </tr>
+
+            <!-- Row 3 -->
+            <tr style="height: 15px;">
+                <td colspan="9" class="merged-block"> </td>
+                <td></td>
+            </tr>
+
+            <!-- Row 4 -->
+            <tr style="height: 12.75px;">
+                <td style="text-align: left;">Stock No.:</td>
+                <td><?php echo htmlspecialchars($stock_no); ?></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td colspan="2" class="merged-block" style="font-weight: bold; font-size: 8.5px; color: blue;">OTUS COPY SYSTEMS, INC.</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+
+            <!-- Row 5 -->
+            <tr style="height: 12px;">
+                <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;"><?php echo htmlspecialchars($from_location); ?></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td colspan="4" class="merged-block" style="font-weight: bold; font-size: 9px; text-align: left;">10F MG Tower #75 Brgy. Daang Bakal Shaw Blvd.</td>
+                <td></td>
+            </tr>
+
+            <!-- Row 6 -->
+            <tr style="height: 12px;">
+                <td colspan="2" class="merged-block" style="font-weight: bold; font-size: 9px; text-align: left;"> </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td colspan="2" class="merged-block" style="font-weight: bold; font-size: 9px; text-align: left;">Mandaluyong City</td>
+                <td colspan="2"> </td>
+                <td> </td>
+                <td> </td>
+            </tr>
+
+            <!-- Row 7 -->
+            <tr style="height: 12px;">
+                <td style="font-weight: bold; text-align: left;">Date:</td>
+                <td colspan="2" class="merged-block" style="text-align: left;"><?php echo htmlspecialchars($date); ?></td>
+                <td></td>
+                <td></td>
+                <td colspan="4" class="merged-block" style="font-weight: bold;font-size: 9px; text-align: left;">Philippines Tel. 8631 - 9454 (Telefax: 535 - 8731)</td>
+                <td></td>
+            </tr>
+
+            <!-- Row 8 -->
+            <tr style="height: 15px;">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+
+            <!-- Row 9 -->
+            <tr style="height: 27px;">
+                <td></td>
+                <td></td>
+                <td colspan="6" style="font-family: 'Bodoni Moda', serif; font-size: 24px; font-weight: 900; text-align: center;">
+                    STOCK TRANSFER
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+
+            <!-- Row 10 -->
+            <tr style="height: 15px;">
+                <td colspan="9" class="merged-block"> </td>
+                <td></td>
+            </tr>
+
+            <!-- Row 11 -->
+            <tr style="height: 15.75px;">
+                <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;">Account Name:</td>
+                <td></td>
+                <td style="font-weight: bold; text-align: left;"><?php echo htmlspecialchars($account_name); ?></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+
+            <!-- Row 12 -->
+            <tr style="height: 15.75px;">
+                <td style="font-weight: bold; text-align: left;">Address:</td>
+                <td></td>
+                <td></td>
+                <td colspan="6" class="merged-block" style="text-align: left; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-size: 12px;">
+                    <?php echo htmlspecialchars($to_location); ?>
+                </td>
+                <td></td>
+            </tr>
+
+            <!-- Row 13 -->
+            <tr style="height: 15.75px;">
+                <td colspan="9" class="merged-block"> </td>
+                <td></td>
+            </tr>
+
+            <!-- Row 14 -->
+            <tr>
+                <td style="font-weight: bold; font-size: 10px">QUANTITY</td>
+                <td style="font-weight: bold;font-size: 10px">UNITS</td>
+                <td></td>
+                <td colspan="3" class="merged-block" style="text-align:left;font-weight: bold;font-size: 10px;">ITEMS DESCRIPTION</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+
+            <!-- Single Item Row -->
+            <?php echo $item_html; ?>
+
+            <!-- Model Row -->
+            <?php echo $model_html; ?>
+
+            <!-- Serial No. and MR Rows -->
+            <?php echo $serial_mr_html; ?>
+            <?php echo $tech_html; ?>
+            <?php echo $blank_rows_html; ?>
+
+            <tr style="height: 10px;">
+                <td colspan="10"></td>
+            </tr>
+
+            <tr style="height: 15px;">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+
+            <!-- Signature Rows -->
+            <tr style="height: 15px;">
+                <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;border-top: 2px solid black;">Acknowledged by- End-user</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td colspan="3" class="merged-block" style="font-weight: bold; text-align: center;border-top: 2px solid black;">OTUS Authorized Representative</td>
+                <td></td>
+            </tr>
+
+            <tr style="height: 15px;">
+                <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;">Signature over Printed Name</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr style="height: 15px;">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+             </tr>
+        </tbody>
+    </table>
 </body>
 </html>

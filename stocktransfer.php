@@ -202,7 +202,7 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
 <!DOCTYPE html>
 <html>
 <head>
-<title>A4 Stock Transfer</title>
+<title>Stock Transfer</title>
 <style>
     body {
         background-color: #f0f0f0; 
