@@ -1,7 +1,7 @@
 <?php
 // Database configuration
 $host = 'localhost';
-$dbname = 'drv2';
+$dbname = 'modified_drv2';
 $username = 'root';
 $password = '';
 
@@ -23,6 +23,7 @@ $dr_format = $_POST['dr_format'] ?? '';
 
 // Common fields for all formats
 $si_number = $_POST['si_number'] ?? '';
+$dr_number = $_POST['dr_number'] ?? '';
 $delivered_to = $_POST['delivered_to'] ?? '';
 $date = $_POST['date'] ?? '';
 $address = $_POST['address'] ?? '';
@@ -38,27 +39,27 @@ try {
     // Save based on the selected format
     switch ($dr_format) {
         case 'used':
-            $record_id = saveUsedFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $_POST);
+            $record_id = saveUsedFormat2($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $_POST);
             break;
 
         case 'bnew':
-            $record_id = saveBNewFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $_POST);
+            $record_id = saveBNewFormat2($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $_POST);
             break;
 
         case 'pullout-delivery':
-            $record_id = savePulloutDeliveryFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $_POST);
+            $record_id = savePulloutDeliveryFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $_POST);
             break;
 
         case 'drWithPrice':
-            $record_id = saveDrWithPriceFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $_POST);
+            $record_id = saveDrWithPriceFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $_POST);
             break;
 
         case 'drWithInvoice':
-            $record_id = saveDrWithInvoiceFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $_POST);
+            $record_id = saveDrWithInvoiceFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $_POST);
             break;
 
         case 'usedDr':
-            $record_id = saveUsedDrFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $_POST);
+            $record_id = saveUsedDrFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $_POST);
             break;
 
         default:
@@ -84,7 +85,52 @@ try {
 }
 
 // Function to save Used format - Dynamic based on serials
-function saveUsedFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
+// function saveUsedFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post){
+//     $serials = $post['serial'] ?? [];
+//     $models = $post['model'] ?? [];
+//     $mr_starts = $post['mr_start'] ?? [];
+//     $color_imps = $post['color_imp'] ?? [];
+//     $black_imps = $post['black_imp'] ?? [];
+//     $color_large_imps = $post['color_large_imp'] ?? [];
+
+//     $record_id = null;
+//     $stmt = $pdo->prepare("INSERT INTO used_machine_dr (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, serial_no, mr_start, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+//     // Loop through all serials (dynamic length)
+//     for ($i = 0; $i < count($serials); $i++) {
+
+//         // Clean numeric values
+//         $color_imp = isset($color_imps[$i]) ? (int)str_replace(',', '', $color_imps[$i]) : 0;
+//         $black_imp = isset($black_imps[$i]) ? (int)str_replace(',', '', $black_imps[$i]) : 0;
+//         $color_large_imp = isset($color_large_imps[$i]) ? (int)str_replace(',', '', $color_large_imps[$i]) : 0;
+
+//         $stmt->execute([
+//             $si_number,
+//             $dr_number,
+//             $delivered_to,
+//             $tin,
+//             $address,
+//             $terms,
+//             $particulars,
+//             $date,
+//             $unit_type,
+//             $models[0] ?? '', // Use first model for all serials
+//             $serials[$i],
+//             $mr_starts[$i] ?? 0,
+//             $color_imp,
+//             $black_imp,
+//             $color_large_imp
+//         ]);
+
+//         if ($record_id === null) {
+//             $record_id = $pdo->lastInsertId();
+//         }
+//     }
+
+//     return $record_id;
+// }
+
+function saveUsedFormat2($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
 {
     $serials = $post['serial'] ?? [];
     $models = $post['model'] ?? [];
@@ -93,25 +139,36 @@ function saveUsedFormat($pdo, $si_number, $delivered_to, $date, $address, $terms
     $black_imps = $post['black_imp'] ?? [];
     $color_large_imps = $post['color_large_imp'] ?? [];
 
-    $record_id = null;
-    $stmt = $pdo->prepare("INSERT INTO used_dr (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, serial_no, mr_start, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    // $record_id = null;
+    $stmnt = $pdo->prepare("
+        INSERT INTO main
+        (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, type) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'usedmachine')");
 
-    // Loop through all serials (dynamic length)
+    $stmnt->execute([
+        $si_number,
+        $dr_number,
+        $delivered_to,
+        $tin,
+        $address,
+        $terms,
+        $particulars,
+        $date
+    ]);
+
+    // Get the ID of the newly created header record
+    $main_id = $pdo->lastInsertId();
+
     for ($i = 0; $i < count($serials); $i++) {
+        $stmnt = $pdo->prepare("INSERT INTO used_machine (dr_number, unit_type, machine_model, serial_no, mr_start, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
         // Clean numeric values
         $color_imp = isset($color_imps[$i]) ? (int)str_replace(',', '', $color_imps[$i]) : 0;
         $black_imp = isset($black_imps[$i]) ? (int)str_replace(',', '', $black_imps[$i]) : 0;
         $color_large_imp = isset($color_large_imps[$i]) ? (int)str_replace(',', '', $color_large_imps[$i]) : 0;
 
-        $stmt->execute([
-            $si_number,
-            $delivered_to,
-            $tin,
-            $address,
-            $terms,
-            $particulars,
-            $date,
+        $stmnt->execute([
+            $dr_number,
             $unit_type,
             $models[0] ?? '', // Use first model for all serials
             $serials[$i],
@@ -120,168 +177,324 @@ function saveUsedFormat($pdo, $si_number, $delivered_to, $date, $address, $terms
             $black_imp,
             $color_large_imp
         ]);
-
-        if ($record_id === null) {
-            $record_id = $pdo->lastInsertId();
-        }
     }
 
-    return $record_id;
+    return $main_id;
 }
 
 // Function to save Brand New format - Dynamic based on serials
-function saveBNewFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
+// function saveBNewFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
+// {
+//     $serials = $post['serial'] ?? [];
+//     $models = $post['model'] ?? [];
+
+//     $record_id = null;
+//     $stmt = $pdo->prepare("INSERT INTO bnew_machine_dr (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, serial_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+//     // Handle comma-separated serials for brand new machines
+//     for ($i = 0; $i < count($serials); $i++) {
+//         // if (!empty(trim($serials[$i]))) {
+//         // Split comma-separated serials
+//         $individual_serials = array_map('trim', explode(',', $serials[$i]));
+
+//         foreach ($individual_serials as $serial) {
+//             if (!empty($serial)) {
+//                 $stmt->execute([
+//                     $si_number,
+//                     $dr_number,
+//                     $delivered_to,
+//                     $tin,
+//                     $address,
+//                     $terms,
+//                     $particulars,
+//                     $date,
+//                     $unit_type,
+//                     $models[$i] ?? '',
+//                     $serial
+//                 ]);
+
+//                 if ($record_id === null) {
+//                     $record_id = $pdo->lastInsertId();
+//                 }
+//             }
+//         }
+//         // }
+//     }
+
+//     return $record_id;
+// }
+
+//Bnew Testing Only 
+function saveBNewFormat2($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
 {
     $serials = $post['serial'] ?? [];
     $models = $post['model'] ?? [];
 
-    $record_id = null;
-    $stmt = $pdo->prepare("INSERT INTO bnew_dr (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, serial_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    // 1. Insert into the MAIN table (main)
+    $stmtMain = $pdo->prepare("
+        INSERT INTO main 
+        (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, type) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'bnew')
+    ");
 
-    // Handle comma-separated serials for brand new machines
-    for ($i = 0; $i < count($serials); $i++) {
-        // if (!empty(trim($serials[$i]))) {
-        // Split comma-separated serials
-        $individual_serials = array_map('trim', explode(',', $serials[$i]));
+    $stmtMain->execute([
+        $si_number,
+        $dr_number,
+        $delivered_to,
+        $tin,
+        $address,
+        $terms,
+        $particulars,
+        $date
+    ]);
+
+    // Get the ID of the newly created header record
+    $main_id = $pdo->lastInsertId();
+
+    // 2. Insert into the MACHINE DETAILS table (bnew_machine)
+    $stmtMachine = $pdo->prepare("
+        INSERT INTO bnew_machine 
+        (main_id, unit_type, machine_model, serial_no) 
+        VALUES (?, ?, ?, ?)
+    ");
+
+    foreach ($serials as $i => $serial_input) {
+        // Split comma-separated serials if multiple are entered in one field
+        $individual_serials = array_map('trim', explode(',', $serial_input));
+        $model_name = $models[$i] ?? '';
 
         foreach ($individual_serials as $serial) {
             if (!empty($serial)) {
-                $stmt->execute([
-                    $si_number,
-                    $delivered_to,
-                    $tin,
-                    $address,
-                    $terms,
-                    $particulars,
-                    $date,
+                $stmtMachine->execute([
+                    $main_id,
                     $unit_type,
-                    $models[$i] ?? '',
+                    $model_name,
                     $serial
                 ]);
-
-                if ($record_id === null) {
-                    $record_id = $pdo->lastInsertId();
-                }
             }
         }
-        // }
     }
 
-    return $record_id;
+    // Return the ID to the main script so it can be stored in the session
+    return $main_id;
 }
 
 // Function to save Pullout Delivery format
-function savePulloutDeliveryFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
+function savePulloutDeliveryFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
 {
     $pullout_type = $post['pullout_type'] ?? '';
 
     if ($pullout_type === 'replacementOnly') {
-        saveReplacementOnly($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post);
+        saveReplacementOnly2($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post);
         return;
     } elseif ($pullout_type === 'pulloutOnly') {
-        savePulloutOnly($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post);
+        savePulloutOnly($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post);
         return;
     } else {
-        saveBothPulloutReplacement($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post);
+        saveBothPulloutReplacement($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post);
         return;
     }
 }
 
-// Dynamic Replacement Only - based on serials
-function saveReplacementOnly($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
+/// Dynamic Replacement Only - based on serials
+function saveReplacementOnly($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
 {
-    $serials = $post['replacement_serial'] ?? [];
-    $models = $post['replacement_model'] ?? [];
-    $mr_starts = $post['replacement_mr_start'] ?? [];
-    $color_imps = $post['replacement_color_imp'] ?? [];
-    $black_imps = $post['replacement_black_imp'] ?? [];
-    $color_large_imps = $post['replacement_color_large_imp'] ?? [];
-
     $record_id = null;
-    $stmt = $pdo->prepare("INSERT INTO replacement_machine_dr (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, serial_no, mr_start, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-    for ($i = 0; $i < count($serials); $i++) {
-        if (!empty(trim($serials[$i]))) {
-            // Clean numeric values
-            $color_imp = isset($color_imps[$i]) ? (int)str_replace(',', '', $color_imps[$i]) : 0;
-            $black_imp = isset($black_imps[$i]) ? (int)str_replace(',', '', $black_imps[$i]) : 0;
-            $color_large_imp = isset($color_large_imps[$i]) ? (int)str_replace(',', '', $color_large_imps[$i]) : 0;
+    // Check if using new nested structure
+    if (isset($post['replace_machines'])) {
 
-            $stmt->execute([
-                $si_number,
-                $delivered_to,
-                $tin,
-                $address,
-                $terms,
-                $particulars,
-                $date,
-                $unit_type,
-                $models[0] ?? '',
-                $serials[$i],
-                $mr_starts[$i] ?? '',
-                $color_imp,
-                $black_imp,
-                $color_large_imp
-            ]);
+        $stmt = $pdo->prepare("INSERT INTO replacement_machine_dr (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, serial_no, mr_start, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-            if ($record_id === null) {
-                $record_id = $pdo->lastInsertId();
+        foreach ($post['replace_machines'] as $machineGroup) {
+            $model_name = $machineGroup['model'] ?? '';
+
+            if (!empty(trim($model_name)) && isset($machineGroup['serials']) && is_array($machineGroup['serials'])) {
+                foreach ($machineGroup['serials'] as $serialData) {
+                    $serial_no = $serialData['serial'] ?? '';
+
+                    if (!empty(trim($serial_no))) {
+                        // Clean numeric values
+                        $mr_start = $serialData['mr_start'] ?? '';
+                        $color_imp = isset($serialData['color_imp']) ? (int)str_replace(',', '', $serialData['color_imp']) : 0;
+                        $black_imp = isset($serialData['black_imp']) ? (int)str_replace(',', '', $serialData['black_imp']) : 0;
+                        $color_large_imp = isset($serialData['color_large_imp']) ? (int)str_replace(',', '', $serialData['color_large_imp']) : 0;
+
+                        try {
+                            $stmt->execute([
+                                $si_number,
+                                $dr_number,
+                                $delivered_to,
+                                $tin,
+                                $address,
+                                $terms,
+                                $particulars,
+                                $date,
+                                $unit_type,
+                                $model_name,
+                                $serial_no,
+                                $mr_start,
+                                $color_imp,
+                                $black_imp,
+                                $color_large_imp
+                            ]);
+
+                            if ($record_id === null) {
+                                $record_id = $pdo->lastInsertId();
+                            }
+                        } catch (PDOException $e) {
+                            // Log error if needed
+                            error_log("Database error: " . $e->getMessage());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return $record_id;
+}
+
+function saveReplacementOnly2($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
+{
+    $stmtMain = $pdo->prepare("
+        INSERT INTO main
+        (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, type) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'replacementmachine')");
+
+    $stmtMain->execute([
+        $si_number,
+        $dr_number,
+        $delivered_to,
+        $tin,
+        $address,
+        $terms,
+        $particulars,
+        $date
+    ]);
+
+    $main_id = $pdo->lastInsertId();
+
+    $stmtReplacement = $pdo->prepare("
+        INSERT INTO replacement_machine
+        (dr_number, unit_type, machine_model, serial_no, mr_start, color_impression, black_impression, color_large_impression) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+
+    foreach ($post['replace_only_machines'] as $machineGroup) {
+        $model_name = $machineGroup['model'] ?? '';
+
+        if (!empty(trim($model_name)) && isset($machineGroup['serials']) && is_array($machineGroup['serials'])) {
+            foreach ($machineGroup['serials'] as $serialData) {
+                $serial_no = $serialData['serial'] ?? '';
+
+                if (!empty(trim($serial_no))) {
+
+                    // Clean numeric values
+                    $mr_start = $serialData['mr_start'] ?? '';
+                    $color_imp = isset($serialData['color_imp']) ? (int)str_replace(',', '', $serialData['color_imp']) : 0;
+                    $black_imp = isset($serialData['black_imp']) ? (int)str_replace(',', '', $serialData['black_imp']) : 0;
+                    $color_large_imp = isset($serialData['color_large_imp']) ? (int)str_replace(',', '', $serialData['color_large_imp']) : 0;
+
+                    try {
+                        $stmtReplacement->execute([
+                            $dr_number,
+                            $unit_type,
+                            $model_name,
+                            $serial_no,
+                            $mr_start,
+                            $color_imp,
+                            $black_imp,
+                            $color_large_imp
+                        ]);
+
+                        if ($main_id === null) {
+                            $main_id = $pdo->lastInsertId();
+                        }
+                    } catch (PDOException $e) {
+                        // Log error if needed
+                        error_log("Database error: " . $e->getMessage());
+                    }
+                }
             }
         }
     }
 
-    return $record_id;
+    return $main_id;
 }
+
 
 // Dynamic Pullout Only - based on serials
-function savePulloutOnly($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
+function savePulloutOnly($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
 {
-    $serials = $post['serial'] ?? [];
-    $models = $post['model'] ?? [];
-    $mr_ends = $post['mr_end'] ?? [];
-    $color_imps = $post['color_imp'] ?? [];
-    $black_imps = $post['black_imp'] ?? [];
-    $color_large_imps = $post['color_large_imp'] ?? [];
+    // Save pullout machines
+    $pullout_serials = $post['pullout_serial'] ?? [];
+    $pullout_models = $post['pullout_model'] ?? [];
+    $pullout_mr_ends = $post['pullout_mr_end'] ?? [];
+    $pullout_color_imps = $post['pullout_color_imp'] ?? [];
+    $pullout_black_imps = $post['pullout_black_imp'] ?? [];
+    $pullout_color_large_imps = $post['pullout_color_large_imp'] ?? [];
 
     $record_id = null;
-    $stmt = $pdo->prepare("INSERT INTO pullout_machine_dr (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, serial_no, mr_end, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-    for ($i = 0; $i < count($serials); $i++) {
-        // if (!empty(trim($serials[$i]))) {
-        // Clean numeric values
-        $color_imp = isset($color_imps[$i]) ? (int)str_replace(',', '', $color_imps[$i]) : 0;
-        $black_imp = isset($black_imps[$i]) ? (int)str_replace(',', '', $black_imps[$i]) : 0;
-        $color_large_imp = isset($color_large_imps[$i]) ? (int)str_replace(',', '', $color_large_imps[$i]) : 0;
-        $mr_end = isset($mr_ends[$i]) ? (int)str_replace(',', '', $mr_ends[$i]) : 0;
+    $stmt = $pdo->prepare("INSERT INTO main (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pulloutmachine')");
 
-        $stmt->execute([
-            $si_number,
-            $delivered_to,
-            $tin,
-            $address,
-            $terms,
-            $particulars,
-            $date,
-            $unit_type,
-            $models[0] ?? '',
-            $serials[$i],
-            $mr_end,
-            $color_imp,
-            $black_imp,
-            $color_large_imp
-        ]);
+    $stmt->execute([
+        $si_number,
+        $dr_number,
+        $delivered_to,
+        $tin,
+        $address,
+        $terms,
+        $particulars,
+        $date
+    ]);
 
-        if ($record_id === null) {
-            $record_id = $pdo->lastInsertId();
+    $record_id = $pdo->lastInsertId();
+
+    $stmt_pullout = $pdo->prepare('INSERT INTO pullout_machine ( dr_number, unit_type, machine_model, serial_no, mr_end, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+
+
+    foreach ($post['pullout_machines'] as $machineGroup) {
+        $model_name = $machineGroup['model'] ?? '';
+        if (!empty(trim($model_name)) && isset($machineGroup['serials']) && is_array($machineGroup['serials'])) {
+            foreach ($machineGroup['serials'] as $serialData) {
+                $serial_no = $serialData['serial'] ?? '';
+                if (!empty(trim($serial_no))) {
+                    // Clean numeric values
+                    $mr_end = isset($serialData['mr_end']) ? (int)str_replace(',', '', $serialData['mr_end']) : 0;
+                    $color_imp = isset($serialData['color_imp']) ? (int)str_replace(',', '', $serialData['color_imp']) : 0;
+                    $black_imp = isset($serialData['black_imp']) ? (int)str_replace(',', '', $serialData['black_imp']) : 0;
+                    $color_large_imp = isset($serialData['color_large_imp']) ? (int)str_replace(',', '', $serialData['color_large_imp']) : 0;
+
+                    try {
+                        $stmt_pullout->execute([
+                            $dr_number,
+                            $unit_type,
+                            $model_name,
+                            $serial_no,
+                            $mr_end,
+                            $color_imp,
+                            $black_imp,
+                            $color_large_imp
+                        ]);
+
+                        if ($record_id === null) {
+                            $record_id = $pdo->lastInsertId();
+                        }
+                    } catch (PDOException $e) {
+                        // Log error if needed
+                        error_log("Database error: " . $e->getMessage());
+                    }
+                }
+            }
         }
-        // }
     }
-
     return $record_id;
 }
 
+
+
 // Dynamic Both Pullout Replacement - based on serials
-function saveBothPulloutReplacement($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
+function saveBothPulloutReplacement($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
 {
     $record_id = null;
 
@@ -293,8 +506,32 @@ function saveBothPulloutReplacement($pdo, $si_number, $delivered_to, $date, $add
     $replace_black_imps = $post['replace_black_imp'] ?? [];
     $replace_color_large_imps = $post['replace_color_large_imp'] ?? [];
 
-    if (!empty($replace_serials)) {
-        $stmt = $pdo->prepare("INSERT INTO replacement_machine_dr (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, serial_no, mr_start, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    // Save pullout machines
+    $pullout_serials = $post['pullout_serial'] ?? [];
+    $pullout_models = $post['pullout_model'] ?? [];
+    $pullout_mr_ends = $post['pullout_mr_end'] ?? [];
+    $pullout_color_imps = $post['pullout_color_imp'] ?? [];
+    $pullout_black_imps = $post['pullout_black_imp'] ?? [];
+    $pullout_color_large_imps = $post['pullout_color_large_imp'] ?? [];
+
+    if (!empty($replace_serials) && !empty($replace_serials)) {
+        // $stmt = $pdo->prepare("INSERT INTO replacement_machine_dr (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, serial_no, mr_start, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO main (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pulloutandreplacement')");
+
+        $stmt->execute([
+            $si_number,
+            $dr_number,
+            $delivered_to,
+            $tin,
+            $address,
+            $terms,
+            $particulars,
+            $date
+        ]);
+
+        $record_id = $pdo->lastInsertId();
+
+        $stmt_replacement = $pdo->prepare("INSERT INTO replacement_machine (dr_number, unit_type, machine_model, serial_no, mr_start, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
         for ($i = 0; $i < count($replace_serials); $i++) {
             // if (!empty(trim($replace_serials[$i]))) {
@@ -303,14 +540,8 @@ function saveBothPulloutReplacement($pdo, $si_number, $delivered_to, $date, $add
             $black_imp = isset($replace_black_imps[$i]) ? (int)str_replace(',', '', $replace_black_imps[$i]) : 0;
             $color_large_imp = isset($replace_color_large_imps[$i]) ? (int)str_replace(',', '', $replace_color_large_imps[$i]) : 0;
 
-            $stmt->execute([
-                $si_number,
-                $delivered_to,
-                $tin,
-                $address,
-                $terms,
-                $particulars,
-                $date,
+            $stmt_replacement->execute([
+                $dr_number,
                 $unit_type,
                 $replace_models[0] ?? '',
                 $replace_serials[$i],
@@ -323,20 +554,23 @@ function saveBothPulloutReplacement($pdo, $si_number, $delivered_to, $date, $add
             if ($record_id === null) {
                 $record_id = $pdo->lastInsertId();
             }
-            // }
         }
-    }
 
-    // Save pullout machines
-    $pullout_serials = $post['pullout_serial'] ?? [];
-    $pullout_models = $post['pullout_model'] ?? [];
-    $pullout_mr_ends = $post['pullout_mr_end'] ?? [];
-    $pullout_color_imps = $post['pullout_color_imp'] ?? [];
-    $pullout_black_imps = $post['pullout_black_imp'] ?? [];
-    $pullout_color_large_imps = $post['pullout_color_large_imp'] ?? [];
+        // $stmt = $pdo->prepare("INSERT INTO pullout_machine_dr (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, serial_no, mr_end, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt_pullout_main = $pdo->prepare("INSERT INTO main (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
-    if (!empty($pullout_serials)) {
-        $stmt = $pdo->prepare("INSERT INTO pullout_machine_dr (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, serial_no, mr_end, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt_pullout_main->execute([
+            $si_number,
+            $dr_number,
+            $delivered_to,
+            $tin,
+            $address,
+            $terms,
+            $particulars,
+            $date
+        ]);
+
+        $stmt_pullout = $pdo->prepare('INSERT INTO pullout_machine(dr_number, unit_type, machine_model, serial_no, mr_end, color_impression, black_impression, color_large_impression) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
 
         for ($i = 0; $i < count($pullout_serials); $i++) {
             if (!empty(trim($pullout_serials[$i]))) {
@@ -345,14 +579,8 @@ function saveBothPulloutReplacement($pdo, $si_number, $delivered_to, $date, $add
                 $black_imp = isset($pullout_black_imps[$i]) ? (int)str_replace(',', '', $pullout_black_imps[$i]) : 0;
                 $color_large_imp = isset($pullout_color_large_imps[$i]) ? (int)str_replace(',', '', $pullout_color_large_imps[$i]) : 0;
 
-                $stmt->execute([
-                    $si_number,
-                    $delivered_to,
-                    $tin,
-                    $address,
-                    $terms,
-                    $particulars,
-                    $date,
+                $stmt_pullout->execute([
+                    $dr_number,
                     $unit_type,
                     $pullout_models[0] ?? '',
                     $pullout_serials[$i],
@@ -364,13 +592,17 @@ function saveBothPulloutReplacement($pdo, $si_number, $delivered_to, $date, $add
             }
         }
     }
-
     return $record_id;
 }
 
 // Function to save DR with Price format - One main record with multiple items
-function saveDrWithPriceFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
+function saveDrWithPriceFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
 {
+
+    if (empty($post['quantity']) || !is_array($post['quantity'])) {
+        throw new Exception("No items provided for DR with Price format.");
+    }
+
     $models = $post['model'] ?? [];
     $quantities = $post['quantity'] ?? [];
     $prices = $post['price'] ?? [];
@@ -378,23 +610,23 @@ function saveDrWithPriceFormat($pdo, $si_number, $delivered_to, $date, $address,
     $item_descs = $post['item_desc'] ?? [];
 
     // Insert main record (only once)
-    $main_stmt = $pdo->prepare("INSERT INTO dr_with_price (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    // $main_stmt = $pdo->prepare("INSERT INTO dr_with_price (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, machine_model) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $main_stmt = $pdo->prepare("INSERT INTO main (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'drwithprice')");
 
     $main_stmt->execute([
         $si_number,
+        $dr_number,
         $delivered_to,
         $tin,
         $address,
         $terms,
         $particulars,
-        $date,
-        $unit_type, // Use the main unit_type from common fields
-        $models[0] ?? ''
+        $date
     ]);
     $record_id = $pdo->lastInsertId();
 
     // Insert item records dynamically based on quantity length
-    $items_stmt = $pdo->prepare("INSERT INTO dr_with_price_items (dr_with_price_id, quantity, price, unit_type, item_description) VALUES (?, ?, ?, ?, ?)");
+    $items_stmt = $pdo->prepare("INSERT INTO dr_with_price (dr_number, machine_model, quantity, price, total, unit_type, item_description) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
     $valid_items_count = 0;
 
@@ -406,13 +638,22 @@ function saveDrWithPriceFormat($pdo, $si_number, $delivered_to, $date, $address,
             $price_val = isset($prices[$i]) ? floatval(str_replace([',', ' '], '', $prices[$i])) : 0.0;
             $quantity_val = (int)str_replace([',', ' '], '', $quantities[$i]);
 
+            // Get the total price for the item
+            if ($price_val < 0 && $quantity_val < 0) {
+                $price_val = 0.0;
+                $quantity_val = 0;
+            }
+            $total_price = $quantity_val * $price_val;
+
             // Use item-specific unit_type if available, otherwise use main unit_type
             $current_unit_type = isset($unit_types[$i]) ? $unit_types[$i] : $unit_type;
 
             $items_stmt->execute([
-                $record_id,
+                $dr_number,
+                $models[0] ?? '',
                 $quantity_val,
                 $price_val,
+                $total_price,
                 $current_unit_type,
                 $item_descs[$i]
             ]);
@@ -422,93 +663,93 @@ function saveDrWithPriceFormat($pdo, $si_number, $delivered_to, $date, $address,
     }
 
     // Optional: Update grand total in main record if you have that column
-    if ($valid_items_count > 0) {
-        // You can calculate and update grand total here if needed
-        // $grand_total = calculateGrandTotal($record_id, $pdo);
-        // updateGrandTotal($record_id, $grand_total, $pdo);
-    }
 
     return $record_id;
 }
 
 // Function to save DR with Invoice format - Dynamic based on items
-function saveDrWithInvoiceFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
+function saveDrWithInvoiceFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $post)
 {
-    $po_numbers = $post['po_number'] ?? [];
-    $invoice_numbers = $post['invoice_number'] ?? [];
-    $notes = $post['note'] ?? [];
-    $models = $post['model'] ?? [];
+    if (!empty($post['quantity']) && is_array($post['quantity'])) {
 
-    // Determine delivery type
-    $delivery_type = (!empty($invoice_numbers[0])) ? 'complete' : 'partial';
+        $po_numbers = $post['po_number'] ?? [];
+        $invoice_numbers = $post['invoice_number'] ?? [];
+        $notes = $post['note'] ?? [];
+        $models = $post['model'] ?? [];
 
-    $stmt = $pdo->prepare("INSERT INTO dr_with_invoice (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, under_po_no, under_invoice_no, note, delivery_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        // Determine delivery type
+        $delivery_type = (!empty($invoice_numbers[0])) ? 'complete' : 'partial';
 
-    $stmt->execute([
-        $si_number,
-        $delivered_to,
-        $tin,
-        $address,
-        $terms,
-        $particulars,
-        $date,
-        $unit_type,
-        $models[0] ?? '',
-        $po_numbers[0] ?? '',
-        $invoice_numbers[0] ?? '',
-        $notes[0] ?? '',
-        $delivery_type
-    ]);
-    $record_id = $pdo->lastInsertId();
+        // $stmt = $pdo->prepare("INSERT INTO dr_with_invoice (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, under_po_no, under_invoice_no, note, delivery_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO main (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'drinvoice')");
 
-    // Save items dynamically
-    $quantities = $post['quantity'] ?? [];
-    $unit_types = $post['unit_type'] ?? [];
-    $item_descs = $post['item_desc'] ?? [];
+        $stmt->execute([
+            $si_number,
+            $dr_number,
+            $delivered_to,
+            $tin,
+            $address,
+            $terms,
+            $particulars,
+            $date
+        ]);
 
-    $stmt = $pdo->prepare("INSERT INTO dr_with_invoice_items (dr_with_invoice_id, quantity, unit_type, item_description) VALUES (?, ?, ?, ?)");
+        $record_id = $pdo->lastInsertId();
 
-    for ($i = 0; $i < count($quantities); $i++) {
-        if (!empty($quantities[$i]) && !empty($item_descs[$i])) {
-            $quantity_val = (int)str_replace([',', ' '], '', $quantities[$i] ?? '0');
+        // Save items dynamically
+        $quantities = $post['quantity'] ?? [];
+        $unit_types = $post['unit_type'] ?? [];
+        $item_descs = $post['item_desc'] ?? [];
 
-            $stmt->execute([
-                $record_id,
-                $quantity_val,
-                $unit_types[$i] ?? '',
-                $item_descs[$i]
-            ]);
+        $stmtinvoice = $pdo->prepare("INSERT INTO dr_invoice (unit_type, dr_number, quantity, item_description, machine_model, under_po_no, under_invoice_no, note, delivery_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+        for ($i = 0; $i < count($quantities); $i++) {
+            if (!empty($quantities[$i]) && !empty($item_descs[$i])) {
+                $quantity_val = (int)str_replace([',', ' '], '', $quantities[$i] ?? '0');
+
+                $stmtinvoice->execute([
+                    $unit_types[$i] ?? '',
+                    $dr_number,
+                    $quantity_val,
+                    $item_descs[$i],
+                    $models[0] ?? '',
+                    $po_numbers[0] ?? '',
+                    $invoice_numbers[0] ?? '',
+                    $notes[0] ?? '',
+                    $delivery_type
+                ]);
+            }
         }
     }
-
     return $record_id;
 }
 
-// Function to save Used DR format - Dynamic based on items
-function saveUsedDrFormat($pdo, $si_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
+//Function to save Used DR format - Dynamic based on items
+function saveUsedDrFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
 {
-    $models = $post['model'] ?? [];
-    $serials = $post['serial'] ?? [];
-    $mr_starts = $post['mr_start'] ?? [];
-    $tech_names = $post['tech_name'] ?? [];
-    $pr_numbers = $post['pr_number'] ?? [];
+    $models = $post['model'] ?? '';
+    $serials = $post['serial'] ?? '';
+    $mr_starts = $post['mr_start'] ?? '';
+    $tech_names = $post['tech_name'] ?? '';
+    $pr_numbers = $post['pr_number'] ?? '';
 
-    $stmt = $pdo->prepare("INSERT INTO used_dr_full (si_number, delivered_to, tin, address, terms, particulars, si_date, unit_type, machine_model, serial_no, mr_start, technician_name, pr_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO main (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'useddr')");
 
     $stmt->execute([
         $si_number,
+        $dr_number,
         $delivered_to,
         $tin,
         $address,
         $terms,
         $particulars,
-        $date,
-        $unit_type,
-        $models[0] ?? '',
-        $serials[0] ?? '',
-        $mr_starts[0] ?? '',
-        $tech_names[0] ?? '',
-        $pr_numbers[0] ?? ''
+        $date
+        // $unit_type,
+        // $models[0] ?? '',
+        // $serials[0] ?? '',
+        // $mr_starts[0] ?? '',
+        // $tech_names[0] ?? '',
+        // $pr_numbers[0] ?? ''
     ]);
     $record_id = $pdo->lastInsertId();
 
@@ -517,17 +758,22 @@ function saveUsedDrFormat($pdo, $si_number, $delivered_to, $date, $address, $ter
     $unit_types = $post['unit_type'] ?? [];
     $item_descs = $post['item_desc'] ?? [];
 
-    $stmt = $pdo->prepare("INSERT INTO used_dr_full_items (used_dr_full_id, quantity, unit_type, item_description) VALUES (?, ?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO used_dr(dr_number, quantity, unit_type, item_description, machine_model, serial_no, mr_start, technician_name, pr_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     for ($i = 0; $i < count($quantities); $i++) {
         if (!empty($quantities[$i]) && !empty($item_descs[$i])) {
             $quantity_val = (int)str_replace([',', ' '], '', $quantities[$i] ?? '0');
 
             $stmt->execute([
-                $record_id,
+                $dr_number,
                 $quantity_val,
                 $unit_types[$i] ?? '',
-                $item_descs[$i]
+                $item_descs[$i],
+                $models[0] ?? '',
+                $serials[0] ?? '',
+                $mr_starts[0] ?? '',
+                $tech_names[0] ?? '',
+                $pr_numbers[0] ?? ''
             ]);
         }
     }

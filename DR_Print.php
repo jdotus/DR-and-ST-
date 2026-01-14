@@ -418,40 +418,96 @@ unset($_SESSION['form_data']);
                     <!-- For the Pullout Replacement Section -->
                     <?php } else if (isset($form_data['dr_format']) && $form_data['dr_format'] == 'pullout-delivery') {
 
-                    if (isset($form_data['pullout_type']) && $form_data['pullout_type'] == 'replacementOnly') { ?>
-                        <tr class="dr-2nd-row">
-                            <td><?= htmlspecialchars(count($serial)) ?></td>
-                            <td><?= htmlspecialchars($unit_type) ?></td>
-                            <td class="text-align" style="font-size: 10px">Deliever Replacement Machine <br>Model: <?= htmlspecialchars($model[0] ?? '') ?></td>
-                        </tr>
+                    if (isset($form_data['pullout_type']) && $form_data['pullout_type'] == 'replacementOnly') {
+                        $machines_by_model = [];
+                        $total_rows_used = 0; // Counter for total rows used
 
-                        <?php for ($i = 0; $i < count($serial); $i++) {
-                            $srReplacementDisplay = trim($serial[$i]) !== '' ? htmlspecialchars($serial[$i]) : '<span class="underline-empty"></span>';
-                            $mrReplacementDisplay = trim($mr_start[$i]) !== '' ? htmlspecialchars($mr_start[$i]) : '<span class="underline-empty"></span>';
+                        if (isset($form_data['replace_machines']) && is_array($form_data['replace_machines'])) {
+                            foreach ($form_data['replace_machines'] as $machineGroup) {
+                                $model_name = $machineGroup['model'] ?? 'Unknown Model';
 
-                            $ciDisplay = trim($color_imp[$i]) !== '' ? htmlspecialchars($color_imp[$i]) : '<span class="underline-empty"></span>';
-                            $biDisplay = trim($black_imp[$i]) !== '' ? htmlspecialchars($black_imp[$i]) : '<span class="underline-empty"></span>';
-                            $cliDisplay = trim($color_large_imp[$i]) !== '' ? htmlspecialchars($color_large_imp[$i]) : '<span class="underline-empty"></span>';
+                                if (!isset($machines_by_model[$model_name])) {
+                                    $machines_by_model[$model_name] = [];
+                                }
 
-                            $mrReplacementFormat = "MR Start:" . $mrReplacementDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
+                                if (isset($machineGroup['serials']) && is_array($machineGroup['serials'])) {
+                                    foreach ($machineGroup['serials'] as $serialData) {
+                                        if (!empty(trim($serialData['serial'] ?? ''))) {
+                                            $machines_by_model[$model_name][] = [
+                                                'serial' => $serialData['serial'] ?? '',
+                                                'mr_start' => $serialData['mr_start'] ?? '',
+                                                'color_imp' => $serialData['color_imp'] ?? '',
+                                                'black_imp' => $serialData['black_imp'] ?? '',
+                                                'color_large_imp' => $serialData['color_large_imp'] ?? '',
+                                                'unit_type' => $unit_type
+                                            ];
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
-                        ?>
-                            <tr class="dr-2nd-row">
-                                <td></td>
-                                <td></td>
-                                <td class="text-align">Serial No.: <?= $srReplacementDisplay ?> <?= $mrReplacementFormat ?> </td>
-                            </tr>
-                        <?php } ?>
+                        // Display grouped data and count rows
+                        foreach ($machines_by_model as $model_name => $machines) {
+                            $total_machines = count($machines);
+                            if ($total_machines > 0) {
+                                $total_rows_used += 1; // Count header row for this model
+                    ?>
+                                <!-- MODEL HEADER -->
+                                <tr class="dr-2nd-row">
+                                    <td><?= htmlspecialchars($total_machines) ?></td>
+                                    <td><?= htmlspecialchars($unit_type) ?></td>
+                                    <td class="text-align" style="font-size: 10px">Deliver Replacement Machine <br>Model: <?= htmlspecialchars($model_name) ?></td>
+                                </tr>
 
-                        <?php for ($i = count($replace_serial); $i < 6; $i++) { ?>
+                                <?php
+                                // DISPLAY ALL SERIALS FOR THIS MODEL
+                                foreach ($machines as $machine) {
+                                    $total_rows_used += 1; // Count each serial row
+                                    $srReplacementDisplay = trim($machine['serial']) !== '' ? htmlspecialchars($machine['serial']) : '<span class="underline-empty"></span>';
+                                    $mrReplacementDisplay = trim($machine['mr_start']) !== '' ? htmlspecialchars($machine['mr_start']) : '<span class="underline-empty"></span>';
+
+                                    $ciDisplay = trim($machine['color_imp']) !== '' ? htmlspecialchars($machine['color_imp']) : '<span class="underline-empty"></span>';
+                                    $biDisplay = trim($machine['black_imp']) !== '' ? htmlspecialchars($machine['black_imp']) : '<span class="underline-empty"></span>';
+                                    $cliDisplay = trim($machine['color_large_imp']) !== '' ? htmlspecialchars($machine['color_large_imp']) : '<span class="underline-empty"></span>';
+
+                                    $mrReplacementFormat = "MR Start:" . $mrReplacementDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
+                                ?>
+                                    <tr class="dr-2nd-row">
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-align">Serial No.: <?= $srReplacementDisplay ?> <?= $mrReplacementFormat ?> </td>
+                                    </tr>
+                                <?php } ?>
+
+                            <?php
+                            }
+                        } // END OF MODEL GROUP
+
+                        // ADD EMPTY ROWS AT THE END FOR THE ENTIRE TABLE
+                        // Determine how many rows per "page" you want (e.g., 6, 10, 12)
+                        $rows_per_page = 7; // Change this to your desired row count
+
+                        // Calculate how many empty rows needed to fill the page
+                        $empty_rows_needed = $rows_per_page - ($total_rows_used % $rows_per_page);
+
+                        // If total_rows_used is exactly divisible by rows_per_page, don't add extra rows
+                        if ($empty_rows_needed == $rows_per_page) {
+                            $empty_rows_needed = 0;
+                        }
+
+                        // Debug: Show counts
+                        // echo "Total rows used: $total_rows_used<br>";
+                        // echo "Empty rows needed: $empty_rows_needed<br>";
+
+                        // Add empty rows at the end
+                        for ($i = 0; $i < $empty_rows_needed; $i++) { ?>
                             <tr class="dr-2nd-row">
                                 <td></td>
                                 <td></td>
                                 <td class="text-align"></td>
                             </tr>
                         <?php } ?>
-
-
 
                     <?php } else if (isset($form_data['pullout_type']) && $form_data['pullout_type'] == 'pulloutOnly') { ?>
                         <tr class="dr-2nd-row">
@@ -487,88 +543,84 @@ unset($_SESSION['form_data']);
                             </tr>
                         <?php } ?>
 
-                        <?php } else {
+                    <?php } else if (!empty($replace_model) && !empty($replace_serial)) { ?>
 
-                        if (!empty($replace_model) && !empty($replace_serial)) { ?>
+                        <tr class="dr-2nd-row">
+                            <td><?= htmlspecialchars(count($replace_serial)) ?></td>
+                            <td><?= htmlspecialchars($unit_type) ?></td>
+                            <td class="text-align" style="font-size: 10px">Deliever Replacement Machine <br>Model: <?= htmlspecialchars($replace_model[0] ?? '') ?></td>
+                        </tr>
+
+                        <?php for ($i = 0; $i < count($replace_serial); $i++) {
+                            $srReplacementDisplay = trim($replace_serial[$i]) !== '' ? htmlspecialchars($replace_serial[$i]) : '<span class="underline-empty"></span>';
+                            $mrReplacementDisplay = trim($replace_mr_start[$i]) !== '' ? htmlspecialchars($replace_mr_start[$i]) : '<span class="underline-empty"></span>';
+
+                            $ciDisplay = trim($replace_color_imp[$i]) !== '' ? htmlspecialchars($replace_color_imp[$i]) : '<span class="underline-empty"></span>';
+                            $biDisplay = trim($replace_black_imp[$i]) !== '' ? htmlspecialchars($replace_black_imp[$i]) : '<span class="underline-empty"></span>';
+                            $cliDisplay = trim($replace_color_large_imp[$i]) !== '' ? htmlspecialchars($replace_color_large_imp[$i]) : '<span class="underline-empty"></span>';
+
+                            $mrReplacementFormat = "MR Start:" . $mrReplacementDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
+
+                        ?>
 
                             <tr class="dr-2nd-row">
-                                <td><?= htmlspecialchars(count($replace_serial)) ?></td>
-                                <td><?= htmlspecialchars($unit_type) ?></td>
-                                <td class="text-align" style="font-size: 10px">Deliever Replacement Machine <br>Model: <?= htmlspecialchars($replace_model[0] ?? '') ?></td>
+                                <td></td>
+                                <td></td>
+                                <td class="text-align">Serial No.: <?= $srReplacementDisplay ?> <?= $mrReplacementFormat ?> </td>
                             </tr>
 
-                            <?php for ($i = 0; $i < count($replace_serial); $i++) {
-                                $srReplacementDisplay = trim($replace_serial[$i]) !== '' ? htmlspecialchars($replace_serial[$i]) : '<span class="underline-empty"></span>';
-                                $mrReplacementDisplay = trim($replace_mr_start[$i]) !== '' ? htmlspecialchars($replace_mr_start[$i]) : '<span class="underline-empty"></span>';
-
-                                $ciDisplay = trim($replace_color_imp[$i]) !== '' ? htmlspecialchars($replace_color_imp[$i]) : '<span class="underline-empty"></span>';
-                                $biDisplay = trim($replace_black_imp[$i]) !== '' ? htmlspecialchars($replace_black_imp[$i]) : '<span class="underline-empty"></span>';
-                                $cliDisplay = trim($replace_color_large_imp[$i]) !== '' ? htmlspecialchars($replace_color_large_imp[$i]) : '<span class="underline-empty"></span>';
-
-                                $mrReplacementFormat = "MR Start:" . $mrReplacementDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
-
-                            ?>
-
-                                <tr class="dr-2nd-row">
-                                    <td></td>
-                                    <td></td>
-                                    <td class="text-align">Serial No.: <?= $srReplacementDisplay ?> <?= $mrReplacementFormat ?> </td>
-                                </tr>
-
-                            <?php }
-
-                            for ($j = count($replace_serial); $j < 2; $j++) { ?>
-                                <tr class="dr-2nd-row">
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
                         <?php }
-                        } ?>
 
-
-                        <?php if (!empty($pullout_model) && !empty($pullout_serial)) { ?>
+                        for ($j = count($replace_serial); $j < 2; $j++) { ?>
                             <tr class="dr-2nd-row">
-                                <td><?= htmlspecialchars(count($pullout_serial)) ?></td>
-                                <td><?= htmlspecialchars($unit_type) ?></td>
-                                <td class="text-align" style="font-size: 10px">Pull Out Machine <br>Model: <?= htmlspecialchars($pullout_model[0] ?? '') ?></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
                             </tr>
+                    <?php }
+                    } ?>
 
-                            <?php for ($i = 0; $i < count($pullout_serial); $i++) {
-                                $srPulloutDisplay = trim($pullout_serial[$i]) !== '' ? htmlspecialchars($pullout_serial[$i]) : '<span class="underline-empty"></span>';
-                                $mrPulloutDisplay = trim($pullout_mr_end[$i]) !== '' ? htmlspecialchars($pullout_mr_end[$i]) : '<span class="underline-empty"></span>';
 
-                                $ciDisplay = trim($pullout_color_imp[$i]) !== '' ? htmlspecialchars($pullout_color_imp[$i]) : '<span class="underline-empty"></span>';
-                                $biDisplay = trim($pullout_black_imp[$i]) !== '' ? htmlspecialchars($pullout_black_imp[$i]) : '<span class="underline-empty"></span>';
-                                $cliDisplay = trim($pullout_color_large_imp[$i]) !== '' ? htmlspecialchars($pullout_color_large_imp[$i]) : '<span class="underline-empty"></span>';
+                    <?php if (!empty($pullout_model) && !empty($pullout_serial)) { ?>
+                        <tr class="dr-2nd-row">
+                            <td><?= htmlspecialchars(count($pullout_serial)) ?></td>
+                            <td><?= htmlspecialchars($unit_type) ?></td>
+                            <td class="text-align" style="font-size: 10px">Pull Out Machine <br>Model: <?= htmlspecialchars($pullout_model[0] ?? '') ?></td>
+                        </tr>
 
-                                $mrPulloutFormat = "MR End:" . $mrPulloutDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
+                        <?php for ($i = 0; $i < count($pullout_serial); $i++) {
+                            $srPulloutDisplay = trim($pullout_serial[$i]) !== '' ? htmlspecialchars($pullout_serial[$i]) : '<span class="underline-empty"></span>';
+                            $mrPulloutDisplay = trim($pullout_mr_end[$i]) !== '' ? htmlspecialchars($pullout_mr_end[$i]) : '<span class="underline-empty"></span>';
 
-                            ?>
+                            $ciDisplay = trim($pullout_color_imp[$i]) !== '' ? htmlspecialchars($pullout_color_imp[$i]) : '<span class="underline-empty"></span>';
+                            $biDisplay = trim($pullout_black_imp[$i]) !== '' ? htmlspecialchars($pullout_black_imp[$i]) : '<span class="underline-empty"></span>';
+                            $cliDisplay = trim($pullout_color_large_imp[$i]) !== '' ? htmlspecialchars($pullout_color_large_imp[$i]) : '<span class="underline-empty"></span>';
 
-                                <tr class="dr-2nd-row">
-                                    <td></td>
-                                    <td></td>
-                                    <td class="text-align">Serial No.:<?= $srPulloutDisplay ?> <?= $mrPulloutFormat ?> </td>
-                                </tr>
-                            <?php }
+                            $mrPulloutFormat = "MR End:" . $mrPulloutDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
 
-                            for ($j = count($pullout_serial); $j < 2; $j++) { ?>
-                                <tr class="dr-2nd-row">
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-
-                            <?php } ?>
+                        ?>
 
                             <tr class="dr-2nd-row">
                                 <td></td>
                                 <td></td>
-                                <td class="text-align"></td>
+                                <td class="text-align">Serial No.:<?= $srPulloutDisplay ?> <?= $mrPulloutFormat ?> </td>
+                            </tr>
+                        <?php }
+
+                        for ($j = count($pullout_serial); $j < 2; $j++) { ?>
+                            <tr class="dr-2nd-row">
+                                <td></td>
+                                <td></td>
+                                <td></td>
                             </tr>
 
                         <?php } ?>
+
+                        <tr class="dr-2nd-row">
+                            <td></td>
+                            <td></td>
+                            <td class="text-align"></td>
+                        </tr>
 
                     <?php } ?>
 
@@ -722,7 +774,7 @@ unset($_SESSION['form_data']);
                         <td class="col-price"><?= htmlspecialchars(number_format((int)$grandTotal)) ?></td>
                     </tr>
 
-                <?php } else if (isset($dr_format['dr_format']) && $dr_format['dr_format'] == 'usedDr') { ?>
+                <?php } else if (isset($dr_format) && $dr_format == 'drWithPrice') { ?>
 
                     <?php for ($i = 0; $i < count($quantity); $i++) { ?>
                         <tr class="dr-2nd-row-header">
