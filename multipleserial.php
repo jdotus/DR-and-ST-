@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-    $stmt = $conn->prepare("SELECT * FROM stock_transfers WHERE stock_no = ?");
+    $stmt = $conn->prepare("SELECT * FROM multipleserial_transfers WHERE stock_no = ?");
     $stmt->bind_param("s", $stock_no);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -22,39 +22,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $from_location = $invoice['from_location'];
         $to_location = $invoice['to_location'];
         $delivered_by = $invoice['delivered_by'];
-        $received_by = $invoice['received_by'];
-        $mr = $invoice['mr'];
-        $model = $invoice['model'];
-        $serial_no = $invoice['serial_no'];
-        $tech = $invoice['tech'];
-        $prno = $invoice['prno'];
         $quantities = json_decode($invoice['quantity'], true) ?? [];
         $units = json_decode($invoice['unit'], true) ?? [];
         $descriptions = json_decode($invoice['description'], true) ?? [];
+        $models = json_decode($invoice['model'], true) ?? [];
+        $serial_nos = json_decode($invoice['serial_no'], true) ?? [];
+        $mrs = json_decode($invoice['mr'], true) ?? [];
     } else {
         echo "<h2>Invoice not found.</h2>";
         exit;
     }
+    // Continue to render the invoice HTML below using these variables
 } else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stock_no = $_POST['stock_no'] ?? '';
+    $quantities = $_POST['quantity'] ?? [];
+    $units = $_POST['unit'] ?? [];
+    $descriptions = $_POST['description'] ?? [];
+    $models = $_POST['model'] ?? [];
+    $serial_nos = $_POST['serial_no'] ?? [];
+    $mrs = $_POST['mr'] ?? [];
+    $delivered_by = $_POST['delivered_by'] ?? '';
     $date = $_POST['date'] ?? '';
     $account_name = $_POST['account_name'] ?? '';
     $from_location = $_POST['from_location'] ?? '';
     $to_location = $_POST['to_location'] ?? '';
-    $delivered_by = $_POST['delivered_by'] ?? '';
-    $received_by = $_POST['received_by'] ?? '';
-    $mr = $_POST['mr'] ?? '';
-    $model = $_POST['model'] ?? '';
-    $serial_no = $_POST['serial_no'] ?? '';
-    $tech = $_POST['tech'] ?? '';
-    $prno = $_POST['prno'] ?? '';
-    $quantities = $_POST['quantity'] ?? [];
-    $units = $_POST['unit'] ?? [];
-    $descriptions = $_POST['description'] ?? [];
 
     $conn = new mysqli('localhost', 'root', '', 'stock_transfer_db');
     if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
+        echo 'error';
+        exit;
     }
 
     // Check for duplicate in BOTH tables
@@ -69,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $check_stmt2->store_result();
 
     if ($check_stmt1->num_rows > 0 || $check_stmt2->num_rows > 0) {
-        echo "<script>alert('Stock No already exists in one of the tables. Please use a unique Stock No.'); window.history.back();</script>";
+        echo 'exists';
         $check_stmt1->close();
         $check_stmt2->close();
         $conn->close();
@@ -78,21 +74,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $check_stmt1->close();
     $check_stmt2->close();
 
-    // Prepare item arrays as JSON
+    // Prepare arrays as JSON
     $quantity_json = json_encode($quantities);
     $unit_json = json_encode($units);
     $description_json = json_encode($descriptions);
+    $model_json = json_encode($models);
+    $serial_json = json_encode($serial_nos);
+    $mr_json = json_encode($mrs);
 
     // Insert data
-    $stmt = $conn->prepare("INSERT INTO stock_transfers 
-        (stock_no, date, account_name, from_location, to_location, quantity, unit, description, mr, model, serial_no, tech, prno, delivered_by, received_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO multipleserial_transfers 
+        (stock_no, date, account_name, from_location, to_location, quantity, unit, description, model, serial_no, mr, delivered_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param(
-        "sssssssssssssss",
+        "ssssssssssss",
         $stock_no, $date, $account_name, $from_location, $to_location,
-        $quantity_json, $unit_json, $description_json,
-        $mr, $model, $serial_no, $tech, $prno, $delivered_by, $received_by
+        $quantity_json, $unit_json, $description_json, $model_json, $serial_json, $mr_json, $delivered_by
     );
+
     if ($stmt->execute()) {
         echo 'success';
         exit;
@@ -100,109 +99,118 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo 'error';
         exit;
     }
+    $stmt->close(); 
+    $conn->close();
 }
 
-// Count how many items we have
-$item_count = count($quantities);
-
-// Calculate how many blank rows we need (total 11 rows for items section)
-$total_rows_needed = 10;
-$blank_rows_needed = max(0, $total_rows_needed - $item_count);
-
-// Function to generate item rows
-function generateItemRows($quantities, $units, $descriptions, $blank_rows_needed) {
-    $html = '';
-    $item_count = count($quantities);
-    for ($i = 0; $i < $item_count; $i++) {
-        $quantity = htmlspecialchars($quantities[$i] ?? '');
-        $unit = htmlspecialchars($units[$i] ?? '');
-        $description = htmlspecialchars($descriptions[$i] ?? '');
-        $html .= '
-            <tr style="height: 15px;">
-                <td style="text-align: center;">' . $quantity . '</td>
-                <td style="text-align: center;">' . $unit . '</td>
-                <td></td>
-                <td colspan="6" class="merged-block" style="text-align: left; font-family:\'Gill Sans\', \'Gill Sans MT\', Calibri, \'Trebuchet MS\', sans-serif">' . $description . '</td>
-                <td></td>
-            </tr>';
-    }
-    for ($i = 0; $i < $blank_rows_needed; $i++) {
-        $html .= '
-            <tr style="height: 15px;">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td colspan="6" class="merged-block"></td>
-                <td></td>
-            </tr>';
-    }
-    return $html;
+// Only display the first item detail
+$item_html = '';
+if (count($quantities) > 0) {
+    $quantity = htmlspecialchars($quantities[0] ?? '');
+    $unit = htmlspecialchars($units[0] ?? '');
+    $description = htmlspecialchars($descriptions[0] ?? '');
+    $item_html .= '
+        <tr style="height: 15px;">
+            <td style="text-align: center;">' . $quantity . '</td>
+            <td style="text-align: center;">' . $unit . '</td>
+            <td></td>
+            <td colspan="6" class="merged-block" style="text-align: left;">' . $description . '</td>
+            <td></td>
+        </tr>';
 }
 
-// Function to generate additional info rows
-function generateAdditionalInfoRows($mr, $model, $serial_no, $tech, $prno) {
-    $html = '';
-    if (!empty($mr)) {
-        $html .= '
-            <tr style="height: 15px;">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td colspan="6" class="merged-block" style="text-align: left;">MR: ' . htmlspecialchars($mr) . '</td>
-                <td></td>
-            </tr>';
-    }
-    if (!empty($model)) {
-        $html .= '
-            <tr style="height: 15px;">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td colspan="6" class="merged-block" style="text-align: left;">Model: ' . htmlspecialchars($model) . '</td>
-                <td></td>
-            </tr>';
-    }
-    if (!empty($serial_no)) {
-        $html .= '
-            <tr style="height: 15px;">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td colspan="6" class="merged-block" style="text-align: left;">Serial No.: ' . htmlspecialchars($serial_no) . '</td>
-                <td></td>
-            </tr>';
-    }
-    if (!empty($tech)) {
-        $html .= '
-            <tr style="height: 15px;">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td colspan="6" class="merged-block" style="text-align: left;">Tech: ' . htmlspecialchars($tech) . '</td>
-                <td></td>
-            </tr>';
-    }
-    if (!empty($prno)) {
-        $html .= '
-            <tr style="height: 15px;">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td colspan="6" class="merged-block" style="text-align: left;"><strong>PR No:</strong>' . htmlspecialchars($prno) . '</td>
-                <td></td>
-            </tr>';
-    }
-    return $html;
+// Model row (below item detail)
+$model_html = '';
+if (!empty($models[0])) {
+    $model_html = '
+        <tr style="height: 15px;">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td colspan="6" class="merged-block" style="text-align: left;">Model: ' . htmlspecialchars($models[0]) . '</td>
+            <td></td>
+        </tr>
+        <tr style="height: 15px;">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td colspan="6" class="merged-block" style="text-align: left;">Serial Nos.</td>
+            <td></td>
+        </tr>
+        ';
 }
 
-$item_rows_html = generateItemRows($quantities, $units, $descriptions, $blank_rows_needed);
-$additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tech, $prno);
+
+// Serial No. and MR rows (each pair per line)
+$serial_mr_html = '';
+$max_serial_rows = 9;
+$used_serial_rows = 0;
+if (!empty($serial_nos) && !empty($mrs)) {
+    $count = min(count($serial_nos), count($mrs));
+    for ($i = 0; $i < $count; $i++) {
+        $serial = htmlspecialchars($serial_nos[$i] ?? '');
+        $mr = htmlspecialchars($mrs[$i] ?? '');
+        if ($serial !== '' || $mr !== '') {
+            $serial_mr_html .= '
+                <tr style="height: 15px;">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td colspan="6" class="merged-block" style="text-align: left;">
+                        ' . $serial . ' &nbsp; MR: ' . $mr . '
+                    </td>
+                    <td></td>
+                </tr>';
+            $used_serial_rows++;
+        }
+    }
+}
+
+$tech_html = '';
+if (!empty($delivered_by)) {
+    $tech_html = '
+
+        <tr style="height: 15px;">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+
+        <tr style="height: 15px;">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td colspan="6" class="merged-block" style="text-align: left; font-weight: bold;">
+                Tech: ' . htmlspecialchars($delivered_by) . '
+            </td>
+            <td></td>
+        </tr>';
+}
+
+
+// Calculate blank rows to add between serials and signature rows
+$blank_rows = $max_serial_rows - $used_serial_rows;
+$blank_rows_html = '';
+for ($i = 0; $i < $blank_rows; $i++) {
+    $blank_rows_html .= '
+        <tr style="height: 15px;">
+            <td></td>
+            <td></td>
+            <td></td>
+            <td colspan="6" class="merged-block" style="text-align: left;">&nbsp;</td>
+            <td></td>
+        </tr>';
+}
+
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-<title>Stock Transfer</title>
+<title>A4 Stock Transfer</title>
 <style>
     body {
         background-color: #f0f0f0; 
@@ -222,7 +230,6 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
         page-break-after: always;
     }
 
-    /* Remove page break after for the last container */
     .a4-container:last-child {
         page-break-after: auto;
     }
@@ -241,7 +248,7 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
         overflow: visible;
         white-space: nowrap;
         vertical-align: middle;
-        border: none;
+        border: none
     }
 
     th {
@@ -253,7 +260,6 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
         vertical-align: middle;
     }
 
-    /* Column widths (proportional to Excel) */
     .col-1 { width: calc(9.43 / 101.58 * 100%); }
     .col-2 { width: calc(18.14 / 101.58 * 100%); }
     .col-3 { width: calc(1.86 / 101.58 * 100%); }
@@ -265,7 +271,6 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
     .col-9 { width: calc(15 / 101.58 * 100%); }
     .col-10 { width: calc(8.43 / 101.58 * 100%); }
 
-    /* Logo positioning */
     .table-logo {
         position: absolute;
         width: calc(8.43% + 8.43% + 11.57%);
@@ -275,18 +280,15 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
         pointer-events: none;
     }
 
-    /* First logo in each container */
     .first-logo {
         top: 10mm;
         left: calc(10mm + 49.72% - 13%);
     }
 
-    /* Second logo in first container */
     .second-logo {
         top: calc(12mm + 140mm); 
         left: calc(10mm + 49.72% - 13%);
     }
-
 
     @page {
         size: A4;
@@ -477,16 +479,21 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
                 <td></td>
             </tr>
 
-            <!-- Dynamic Item Rows -->
-            <?php echo $item_rows_html; ?>
+            <!-- Single Item Row -->
+            <?php echo $item_html; ?>
+
+            <!-- Model Row -->
+            <?php echo $model_html; ?>
+
+            <!-- Serial No. and MR Rows -->
+            <?php echo $serial_mr_html; ?>
+            <?php echo $tech_html; ?>
+            <?php echo $blank_rows_html; ?>
 
             <tr style="height: 10px;">
                 <td colspan="10"></td>
             </tr>
 
-            <!-- Additional Information Rows -->
-            <?php echo $additional_info_html; ?>
-              
             <tr style="height: 15px;">
                 <td></td>
                 <td></td>
@@ -548,18 +555,11 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
         </thead>
 
         <tbody>
-
             <!-- Row 2 -->
             <tr style="height: 15.75px;">
                 <td colspan="9" class="merged-block"> </td>
                 <td></td>
             </tr>
-
-            <!-- Row 3 -->
-            <!-- <tr style="height: 15px;">
-                <td colspan="9" class="merged-block"> </td>
-                <td></td>
-            </tr> -->
 
             <!-- Row 4 -->
             <tr style="height: 12.75px;">
@@ -679,16 +679,15 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
                 <td></td>
             </tr>
 
-            <!-- Dynamic Item Rows -->
-            <?php echo $item_rows_html; ?>
+        <?php echo $item_html; ?>
+        <?php echo $model_html; ?>
+        <?php echo $serial_mr_html; ?>
+        <?php echo $tech_html; ?>
+        <?php echo $blank_rows_html; ?>
 
             <tr style="height: 10px;">
                 <td colspan="10"></td>
             </tr>
-
-            <!-- Additional Information Rows -->
-            <?php echo $additional_info_html; ?>
-            
             <tr style="height: 15px;">
                 <td></td>
                 <td></td>
@@ -696,21 +695,20 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
                 <td></td>
                 <td></td>
                 <td></td>
-             </tr>
+            </tr>
             <!-- Signature Rows -->
-
             <tr style="height: 15px;">
-                <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;border-top: 2px solid black;">OTUS Authorized Representative</td>
+                <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;border-top: 2px solid black;">Acknowledged by- End-user</td>
                 <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
-                <td colspan="3" class="merged-block" style="font-weight: bold; text-align: center;"> </td>
+                <td colspan="3" class="merged-block" style="font-weight: bold; text-align: center;border-top: 2px solid black;">OTUS Authorized Representative</td>
                 <td></td>
             </tr>
 
             <tr style="height: 15px;">
-                <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;"> </td>
+                <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;">Signature over Printed Name</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -722,14 +720,15 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
             </tr>
         </tbody>
     </table>
+
 </div>
 
-<!-- Second Page -->
+<!-- First Page -->
 <div class="a4-container">
-    <!-- Logo for second page -->
+    <!-- First table logo -->
     <img src="otus logo.png" alt="OTUS Logo" class="table-logo first-logo">
     
-    <!-- Third table-->
+    <!-- First table -->
     <table>
         <colgroup>
             <col class="col-1"><col class="col-2"><col class="col-3"><col class="col-4"><col class="col-5">
@@ -873,15 +872,21 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
                 <td></td>
             </tr>
 
-            <!-- Dynamic Item Rows -->
-            <?php echo $item_rows_html; ?>
+            <!-- Single Item Row -->
+            <?php echo $item_html; ?>
+
+            <!-- Model Row -->
+            <?php echo $model_html; ?>
+
+            <!-- Serial No. and MR Rows -->
+            <?php echo $serial_mr_html; ?>
+            <?php echo $tech_html; ?>
+            <?php echo $blank_rows_html; ?>
 
             <tr style="height: 10px;">
                 <td colspan="10"></td>
             </tr>
 
-            <!-- Additional Information Rows -->
-            <?php echo $additional_info_html; ?>
             <tr style="height: 15px;">
                 <td></td>
                 <td></td>
@@ -890,6 +895,7 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
                 <td></td>
                 <td></td>
             </tr>
+
             <!-- Signature Rows -->
             <tr style="height: 15px;">
                 <td colspan="2" class="merged-block" style="font-weight: bold; text-align: left;border-top: 2px solid black;">Acknowledged by- End-user</td>
@@ -912,9 +918,15 @@ $additional_info_html = generateAdditionalInfoRows($mr, $model, $serial_no, $tec
                 <td></td>
                 <td></td>
             </tr>
+            <tr style="height: 15px;">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+             </tr>
         </tbody>
     </table>
-</div>
-
 </body>
 </html>

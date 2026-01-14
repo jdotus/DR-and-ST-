@@ -89,8 +89,7 @@
 
 <div class="container">
     <h2>Stock Transfer Input Form</h2>
-    <form action="stocktransfer.php" method="POST" target="_blank">
-        <label>From Location:</label> 
+    <form action="stocktransfer.php" method="POST">
         <select name="from_location" required> 
             
             <option value="North-east">North-east</option> 
@@ -157,7 +156,7 @@
         <!-- <label>Delivered By:</label>
         <input type="text" name="delivered_by" required> -->
 
-        <button type="submit">Submit to Stock Transfer</button>
+        <button type="button" id="submitBtn">Submit to Stock Transfer</button>
     </form>
 </div>
 
@@ -192,6 +191,85 @@ function removeRow(btn) {
     btn.closest('tr').remove();
     updateAddBtn();
 }
+
+document.getElementById('submitBtn').addEventListener('click', function(e) {
+    e.preventDefault(); // Prevent normal form submission
+    const form = document.querySelector('form');
+
+    // Manual validation for required fields
+    const requiredFields = [
+        'stock_no', 'date', 'account_name', 'from_location', 'to_location',
+        'mr', 'model', 'serial_no', 'tech'
+    ];
+    for (let name of requiredFields) {
+        const field = form.querySelector(`[name="${name}"]`);
+        if (!field || !field.value.trim()) {
+            alert('Please fill in all required fields.');
+            field && field.focus();
+            return;
+        }
+    }
+    // Validate at least one item row
+    const qtyInputs = form.querySelectorAll('input[name="quantity[]"]');
+    if (qtyInputs.length === 0 || !Array.from(qtyInputs).some(input => input.value.trim())) {
+        alert('Please enter at least one item with quantity.');
+        qtyInputs[0] && qtyInputs[0].focus();
+        return;
+    }
+
+    const stockNo = form.querySelector('input[name="stock_no"]').value;
+    fetch('check_stockno.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'stock_no=' + encodeURIComponent(stockNo)
+    })
+    .then(response => response.text())
+    .then(result => {
+        if (result.trim() === 'exists') {
+            alert('Stock No already exists. Please use a unique Stock No.');
+        } else if (result.trim() === 'ok') {
+            // Submit the form data via AJAX
+            const formData = new FormData(form);
+            fetch('stocktransfer.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(res => {
+                if (res.trim() === 'success') {
+                    alert('Stock Transfer saved successfully!');
+                    // Open print view in a new tab using the stock_no
+                    window.open('stocktransfer.php?stock_no=' + encodeURIComponent(stockNo), '_blank');
+                    form.reset();
+                    // Reset item rows to just one row
+                    const tbody = document.querySelector('#itemsTable tbody');
+                    tbody.innerHTML = `
+                        <tr>
+                            <td><input type="number" name="quantity[]" required></td>
+                            <td><input type="text" name="unit[]" required></td>
+                            <td><input type="text" name="description[]" required></td>
+                            <td><button type="button" class="remove-btn" onclick="removeRow(this)">×</button></td>
+                        </tr>
+                    `;
+                    updateAddBtn();
+                } else if (res.trim() === 'exists') {
+                    alert('Stock No already exists. Please use a unique Stock No.');
+                } else {
+                    alert('Error saving Stock Transfer. Please try again.');
+                }
+            })
+            .catch(() => {
+                alert('Error connecting to server.');
+            });
+        } else {
+            alert('Error checking Stock No. Please try again.');
+        }
+    })
+    .catch(() => {
+        alert('Error connecting to server.');
+    });
+});
+
 
 
 document.addEventListener('DOMContentLoaded', updateAddBtn);
