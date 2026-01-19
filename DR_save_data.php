@@ -1,7 +1,7 @@
 <?php
 // Database configuration
 $host = 'localhost';
-$dbname = 'modified_drv2';
+$dbname = 'final_dr';
 $username = 'root';
 $password = '';
 
@@ -254,7 +254,7 @@ function saveBNewFormat2($pdo, $si_number, $dr_number, $delivered_to, $date, $ad
     // 2. Insert into the MACHINE DETAILS table (bnew_machine)
     $stmtMachine = $pdo->prepare("
         INSERT INTO bnew_machine 
-        (main_id, unit_type, machine_model, serial_no) 
+        (dr_number, unit_type, machine_model, serial_no) 
         VALUES (?, ?, ?, ?)
     ");
 
@@ -266,7 +266,7 @@ function saveBNewFormat2($pdo, $si_number, $dr_number, $delivered_to, $date, $ad
         foreach ($individual_serials as $serial) {
             if (!empty($serial)) {
                 $stmtMachine->execute([
-                    $main_id,
+                    $dr_number,
                     $unit_type,
                     $model_name,
                     $serial

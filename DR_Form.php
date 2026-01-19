@@ -5,338 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Delivery for Mono and Colored Machine</title>
-  <style>
-    /* Base Styles */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f5f5f5;
-      text-transform: uppercase;
-      color: #333;
-    }
-
-    h2 {
-      margin-bottom: 20px;
-      text-align: center;
-      color: #2c3e50;
-      font-size: 24px;
-      padding-bottom: 10px;
-      /* border-bottom: 2px solid #3498db; */
-    }
-
-    form {
-      max-width: 980px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-
-    /* Consistent Input Groups */
-    .input-group,
-    .input-group-used,
-    .input-group-bnew,
-    .input-group-pullout,
-    .input-group-pullout-only,
-    .input-group-replacement,
-    .input-group-replacement-only,
-    .input-group-invoice,
-    .input-group-partial,
-    .input-group-price,
-    .input-group-used-dr {
-      border: 1px solid #e0e0e0;
-      padding: 25px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      background: linear-gradient(to bottom, #fff, #f9f9f9);
-      position: relative;
-      transition: border-color 0.3s ease;
-    }
-
-    .input-group:hover,
-    .input-group-used:hover,
-    .input-group-bnew:hover {
-      border-color: #3498db;
-    }
-
-    /* Flex Layouts */
-    .flex-row,
-    .flex-row-serial {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      align-items: flex-start;
-    }
-
-    .flex-row-serial {
-      margin-top: 30px;
-      padding-left: 10px;
-    }
-
-    .form-control {
-      flex: 1 1 200px;
-      display: flex;
-      flex-direction: column;
-      min-width: 180px;
-    }
-
-    .form-control label {
-      font-weight: 600;
-      font-size: 13px;
-      margin-bottom: 6px;
-      color: #2c3e50;
-      letter-spacing: 0.5px;
-    }
-
-    input,
-    select {
-      padding: 10px 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 14px;
-      transition: all 0.3s ease;
-      background: #fff;
-      color: #333;
-    }
-
-    input:focus,
-    select:focus {
-      outline: none;
-      border-color: #3498db;
-      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-    }
-
-    input::placeholder {
-      color: #999;
-      text-transform: none;
-    }
-
-    /* Button Styles */
-    button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .btn-add {
-      background: #3498db;
-      color: #fff;
-      margin-top: 10px;
-      margin-bottom: 15px;
-    }
-
-    .btn-add:hover {
-      background: #2980b9;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .no-margin {
-      margin-top: 0 !important;
-      margin-bottom: 15px !important;
-    }
-
-    .btn-remove {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: #e74c3c;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 6px 12px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    .btn-remove:hover {
-      background: #c0392b;
-    }
-
-    .btn-submit {
-      background: #2ecc71;
-      color: #fff;
-      display: block;
-      width: 100%;
-      margin-top: 30px;
-      padding: 14px;
-      font-size: 16px;
-    }
-
-    .btn-submit:hover {
-      background: #27ae60;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    /* Selection Groups */
-    .radio-group,
-    .pullout-replacement-group {
-      margin-bottom: 25px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .radio-group {
-      margin: 40px 0 30px 0;
-    }
-
-    .pullout-replacement-group {
-      margin: 15px 0 25px 0;
-    }
-
-    .radio-group label,
-    .pullout-replacement-group label {
-      font-weight: 600;
-      font-size: 14px;
-      color: #2c3e50;
-    }
-
-    select {
-      width: 300px;
-      padding: 10px;
-      border-radius: 6px;
-      background: #fff;
-      cursor: pointer;
-    }
-
-    /* Machine Sections */
-    .machine-section {
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
-    }
-
-    .visible {
-      display: block;
-    }
-
-    /* Machine Model Groups */
-    .machine-model-group {
-      border: 1px solid #ddd;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      background: linear-gradient(to bottom, #f8fafc, #fff);
-      position: relative;
-    }
-
-    .machine-model-header {
-      display: flex;
-      align-items: flex-end;
-      gap: 20px;
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .serial-group {
-      margin-left: 20px;
-      margin-bottom: 15px;
-      padding: 15px;
-      border-left: 3px solid #3498db;
-      background: #f8fafc;
-      border-radius: 4px;
-      position: relative;
-      height: 180px;
-    }
-
-    .add-serial-btn {
-      background: #17a2b8;
-      color: white;
-      margin-left: 20px;
-      margin-bottom: 15px;
-    }
-
-    .add-serial-btn:hover {
-      background: #138496;
-    }
-
-    .machine-model-remove {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background: #e74c3c;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 6px 12px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    .machine-model-remove:hover {
-      background: #c0392b;
-    }
-
-    /* Section Headers */
-    h3 {
-      margin: 0 0 20px 0;
-      color: #2c3e50;
-      font-size: 18px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #eee;
-    }
-
-    /* Counter Display */
-    #totalSerialCount {
-      font-weight: bold;
-      color: #2c3e50;
-      margin-top: 10px;
-      padding: 8px 15px;
-      background: #f8f9fa;
-      border-radius: 4px;
-      display: inline-block;
-    }
-
-    /* Validation Styles */
-    /* input:invalid {
-      border-color: #e74c3c;
-    }
-
-    input:valid {
-      border-color: #2ecc71;
-    } */
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .form-control {
-        flex: 1 1 100%;
-      }
-
-      .flex-row,
-      .flex-row-serial {
-        gap: 15px;
-      }
-
-      .machine-model-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-      }
-
-      select {
-        width: 100%;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="DRStyle.css" />
 </head>
 
 <body>
@@ -368,11 +37,11 @@
         </div>
         <div class="form-control">
           <label>Terms</label>
-          <input type="text" name="terms" required placeholder="Enter Terms">
+          <input type="text" name="terms" placeholder="Enter Terms">
         </div>
         <div class="form-control">
           <label>Particulars</label>
-          <input type="text" name="particulars" required placeholder="Enter Particulars">
+          <input type="text" name="particulars" placeholder="Enter Particulars">
         </div>
         <div class="form-control">
           <label>S.I Date</label>
@@ -407,6 +76,31 @@
       </select>
     </div>
 
+    <!-- NOTE SECTION -->
+    <div id="note-main-used-machine" class="note-main-used-machine visible">
+      <h3>Note:</h3>
+      <div class="note-container">
+        <li>Please fill in the details of the machines below based on the selected DR format.</li>
+        <li>To indentify if the machine is <strong>Colored</strong> or <strong>Mono</strong> type:</li>
+        <ul>
+          <li>If the machine is <strong>Colored type</strong>, please input <strong>"Color Impression"</strong> and <strong>"Color Large Impression"</strong> fields.</li>
+          <li>If the machine is <strong>Mono type</strong>, please input only the <strong>"Black Impression"</strong> field only.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="note-main-invoice" class="note-main-invoice visible">
+      <h3>Note:</h3>
+      <div class="note-container">
+        <li>Please fill in the details of the machines below based on the selected DR format.</li>
+        <li>To Identify if the record is <strong>Partial</strong> or <strong>Complete</strong></li>
+        <ul>
+          <li>If the machine is for Partial delivery please input only the <strong>Under PO No.</strong></li>
+          <li>If the machine is for Complete delivery please input the <strong>Under PO No.</strong> and <strong>Under Invoice No.</strong></li>
+        </ul>
+      </div>
+    </div>
+
     <!-- Used Machine Section -->
     <div id="usedMachineFields" class="machine-section visible">
       <div id="usedContainer">
@@ -434,7 +128,7 @@
           </div>
         </div>
       </div>
-      <button type="button" class="btn-add" onclick="addInput('bnew')">➕ Add Another Model and Serials (Max 2)</button>
+      <button type="button" class="btn-add" onclick="addInput('bnew')">➕ Add Another Model and Serials</button>
       <p id="totalSerialCount" style="font-weight:bold; color:#2c3e50; margin-top:10px; padding:8px 15px; background:#f8f9fa; border-radius:4px; display:inline-block;">Total Serials: 0 / 15</p>
     </div>
 

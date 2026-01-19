@@ -405,7 +405,7 @@ unset($_SESSION['form_data']);
                     }
 
                     // ✅ Fill remaining blank rows up to 7 total
-                    for ($s = $countTableRows; $s < 6; $s++) {
+                    for ($s = $countTableRows; $s < 5; $s++) {
                         echo '<tr class="dr-2nd-row-new">
                                 <td></td>
                                 <td></td>
