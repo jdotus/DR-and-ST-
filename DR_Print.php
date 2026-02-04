@@ -422,10 +422,16 @@ unset($_SESSION['form_data']);
                         $machines_by_model = [];
                         $total_rows_used = 0; // Counter for total rows used
 
-                        if (isset($form_data['replace_machines']) && is_array($form_data['replace_machines'])) {
-                            foreach ($form_data['replace_machines'] as $machineGroup) {
-                                $model_name = $machineGroup['model'] ?? 'Unknown Model';
+                        $replaceGroups = [];
+                        if (!empty($form_data['replace_machines']) && is_array($form_data['replace_machines'])) {
+                            $replaceGroups = $form_data['replace_machines'];
+                        } elseif (!empty($form_data['replace_only_machines']) && is_array($form_data['replace_only_machines'])) {
+                            $replaceGroups = $form_data['replace_only_machines'];
+                        }
 
+                        if (!empty($replaceGroups)) {
+                            foreach ($replaceGroups as $machineGroup) {
+                                $model_name = $machineGroup['model'] ?? 'Unknown Model';
                                 if (!isset($machines_by_model[$model_name])) {
                                     $machines_by_model[$model_name] = [];
                                 }
@@ -433,13 +439,15 @@ unset($_SESSION['form_data']);
                                 if (isset($machineGroup['serials']) && is_array($machineGroup['serials'])) {
                                     foreach ($machineGroup['serials'] as $serialData) {
                                         if (!empty(trim($serialData['serial'] ?? ''))) {
+                                            // normalize unit type to a string for display
+                                            $unit_display = is_array($unit_type) ? ($unit_type[0] ?? '') : $unit_type;
                                             $machines_by_model[$model_name][] = [
                                                 'serial' => $serialData['serial'] ?? '',
                                                 'mr_start' => $serialData['mr_start'] ?? '',
                                                 'color_imp' => $serialData['color_imp'] ?? '',
                                                 'black_imp' => $serialData['black_imp'] ?? '',
                                                 'color_large_imp' => $serialData['color_large_imp'] ?? '',
-                                                'unit_type' => $unit_type
+                                                'unit_type' => $unit_display
                                             ];
                                         }
                                     }
@@ -516,13 +524,13 @@ unset($_SESSION['form_data']);
                             <td class="text-align" style="font-size: 10px">Pull Out Machine <br>Model: <?= htmlspecialchars($models[0] ?? '') ?></td>
                         </tr>
 
-                        <?php for ($i = 0; $i < count($serial); $i++) {
-                            $srPulloutDisplay = trim($serial[$i]) !== '' ? htmlspecialchars($serial[$i]) : '<span class="underline-empty"></span>';
-                            $mrPulloutDisplay = trim($mr_end[$i]) !== '' ? htmlspecialchars($mr_end[$i]) : '<span class="underline-empty"></span>';
+                        <?php for ($i = 0; $i < count($pullout_serial); $i++) {
+                            $srPulloutDisplay = trim($pullout_serial[$i]) !== '' ? htmlspecialchars($pullout_serial[$i]) : '<span class="underline-empty"></span>';
+                            $mrPulloutDisplay = trim($pullout_mr_end[$i]) !== '' ? htmlspecialchars($pullout_mr_end[$i]) : '<span class="underline-empty"></span>';
 
-                            $ciDisplay = trim($color_imp[$i]) !== '' ? htmlspecialchars($color_imp[$i]) : '<span class="underline-empty"></span>';
-                            $biDisplay = trim($black_imp[$i]) !== '' ? htmlspecialchars($black_imp[$i]) : '<span class="underline-empty"></span>';
-                            $cliDisplay = trim($color_large_imp[$i]) !== '' ? htmlspecialchars($color_large_imp[$i]) : '<span class="underline-empty"></span>';
+                            $ciDisplay = trim($pullout_color_imp[$i]) !== '' ? htmlspecialchars($pullout_color_imp[$i]) : '<span class="underline-empty"></span>';
+                            $biDisplay = trim($pullout_black_imp[$i]) !== '' ? htmlspecialchars($pullout_black_imp[$i]) : '<span class="underline-empty"></span>';
+                            $cliDisplay = trim($pullout_color_large_imp[$i]) !== '' ? htmlspecialchars($pullout_color_large_imp[$i]) : '<span class="underline-empty"></span>';
 
                             $mrPulloutFormat = "MR End:" . $mrPulloutDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
                         ?>
@@ -607,7 +615,7 @@ unset($_SESSION['form_data']);
                             </tr>
                         <?php }
 
-                        for ($j = count($pullout_serial); $j < 2; $j++) { ?>
+                        for ($j = count($pullout_serial); $j < 6; $j++) { ?>
                             <tr class="dr-2nd-row">
                                 <td></td>
                                 <td></td>

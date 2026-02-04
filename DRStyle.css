@@ -128,7 +128,7 @@ button {
 .btn-add {
     background: #3498db;
     color: #fff;
-    margin-top: 10px;
+    margin-top: 40px;
     margin-bottom: 15px;
 }
 
@@ -363,5 +363,8 @@ ul {
 
     select {
     width: 100%;
+    }
+    .btn-add {
+        margin-top: 10px;
     }
 }
