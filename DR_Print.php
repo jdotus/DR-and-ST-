@@ -80,9 +80,9 @@ $quantity1 = !empty($quantity) ? $quantity : [];
 $item_desc = !empty($item_desc) ? $item_desc : [];
 $replace_model = !empty($replace_model) ? $replace_model : [];
 $pullout_model = !empty($pullout_model) ? $pullout_model : [];
-$po_number = !empty($po_number) ? $po_number : [];
-$invoice_number = !empty($invoice_number) ? $invoice_number : [];
-$note = !empty($note) ? $note : [];
+// $po_number = !empty($po_number) ? $po_number : [];
+// $invoice_number = !empty($invoice_number) ? $invoice_number : [];
+// $note = !empty($note) ? $note : [];
 $tech_name = !empty($tech_name) ? $tech_name : [];
 $pr_number = !empty($pr_number) ? $pr_number : [];
 
@@ -707,96 +707,106 @@ unset($_SESSION['form_data']);
                     <?php } ?>
 
                     <!-- For the DR with Invoice Section -->
-                <?php } else if (isset($dr_format['dr_format']) && $dr_format['dr_format'] === 'drWithInvoice') { ?>
-                    <?php for ($i = 0; $i < count($quantity); $i++) { ?>
+                    <?php } else if (isset($dr_format) && $dr_format == 'drWithInvoice') {
+                    // Use the individual arrays from your form data
+                    for ($i = 0; $i < count($quantity1); $i++) {
+                        // Get unit type - handle if it's array or string
+                        $current_unit_type = '';
+                        if (isset($unit_type[$i]) && is_string($unit_type[$i])) {
+                            $current_unit_type = $unit_type[$i];
+                        } elseif (isset($form_data['unit_type'][$i])) {
+                            $current_unit_type = $form_data['unit_type'][$i];
+                        } else {
+                            $current_unit_type = $unit_type; // fallback to main unit_type
+                        }
+                    ?>
                         <tr class="dr-2nd-row">
-                            <td> <?= htmlspecialchars($quantity[$i]) ?></td>
-                            <td><?= htmlspecialchars($unit_type[$i] ?? '') ?></td>
-                            <td class="text-align"><?= htmlspecialchars($item_desc[$i] ?? '') ?></td>
+                            <td class="col-quantity"> <?= htmlspecialchars($quantity1[$i] ?? '') ?></td>
+                            <td class="col-units"><?= htmlspecialchars($current_unit_type) ?></td>
+                            <td class="col-description-price text-align"><?= htmlspecialchars($item_desc[$i] ?? '') ?></td>
                         </tr>
                     <?php } ?>
 
-                    <?php for ($j = count($quantity); $j < 4; $j++) { ?>
+                    <?php for ($j = count($quantity1); $j < 4; $j++) { ?>
                         <tr class="dr-2nd-row-new">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align"></td>
+                            <td class="col-quantity"></td>
+                            <td class="col-units"></td>
+                            <td class="col-description-price text-align"></td>
                         </tr>
                     <?php } ?>
 
                     <tr class="dr-2nd-row-new">
-                        <td></td>
-                        <td></td>
-                        <td class="text-align">Model: <?= htmlspecialchars($model[0] ?? '') ?> </td> <!-- Echo here -->
+                        <td class="col-quantity"></td>
+                        <td class="col-units"></td>
+                        <td class="col-description-price text-align">Model: <?= htmlspecialchars($model[0] ?? '') ?> </td>
                     </tr>
 
+                    <?php
+                    // Get values from individual arrays
+                    $po_val = $po_number[0];
+                    $invoice_val = $invoice_number[0];
+                    $note_val = $note[0];
 
-
-                    <?php if (!empty($po_number[0]) && !empty($invoice_number[0])) { ?>
+                    if (!empty($po_val) && !empty($invoice_val)) { ?>
                         <tr class="dr-2nd-row-new">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align">Under PO No.: <?= htmlspecialchars($po_number[0]) ?></td> <!-- Echo here -->
+                            <td class="col-quantity"></td>
+                            <td class="col-units"></td>
+                            <td class="col-description-price text-align">Under PO No.: <?= htmlspecialchars($po_val) ?></td>
                         </tr>
 
                         <tr class="dr-2nd-row-new">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align">Under Invoice No: <?= htmlspecialchars($invoice_number[0]) ?><br> <span style="font-style: italic;"><?= htmlspecialchars($note[0] ?? ''); ?></span>
-                            <td> <!-- Echo here -->
+                            <td class="col-quantity"></td>
+                            <td class="col-units"></td>
+                            <td class="col-description-price text-align">Under Invoice No: <?= htmlspecialchars($invoice_val) ?><br> <span style="font-style: italic;"><?= htmlspecialchars($note_val); ?></span></td>
                         </tr>
 
-                    <?php } else if (empty($po_number[0]) && !empty($invoice_number[0])) { ?>
+                    <?php } else if (empty($po_val) && !empty($invoice_val)) { ?>
 
                         <tr class="dr-2nd-row-new">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align">Under Invoice No: <?= htmlspecialchars($invoice_number[0]) ?><br> <span style="font-style: italic;"><?= htmlspecialchars($note[0] ?? ''); ?></span>
-                            <td> <!-- Echo here -->
-
+                            <td class="col-quantity"></td>
+                            <td class="col-units"></td>
+                            <td class="col-description-price text-align">Under Invoice No: <?= htmlspecialchars($invoice_val) ?><br> <span style="font-style: italic;"><?= htmlspecialchars($note_val); ?></span></td>
                         </tr>
 
                         <tr class="dr-2nd-row-new">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align"></td>
+                            <td class="col-quantity"></td>
+                            <td class="col-units"></td>
+                            <td class="col-description-price text-align"></td>
                         </tr>
 
-                    <?php } else if (!empty($po_number[0]) && empty($invoice_number[0])) { ?>
+                    <?php } else if (!empty($po_val) && empty($invoice_val)) { ?>
                         <tr class="dr-2nd-row-new">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align">Under PO No.: <?= htmlspecialchars($po_number[0]) ?><br><span style="font-style: italic;"><?= htmlspecialchars($note[0] ?? ''); ?></span></td> <!-- Echo here -->
+                            <td class="col-quantity"></td>
+                            <td class="col-units"></td>
+                            <td class="col-description-price text-align">Under PO No.: <?= htmlspecialchars($po_val) ?><br><span style="font-style: italic;"><?= htmlspecialchars($note_val); ?></span></td>
                         </tr>
 
                         <tr class="dr-2nd-row-new">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align"></td>
+                            <td class="col-quantity"></td>
+                            <td class="col-units"></td>
+                            <td class="col-description-price text-align"></td>
                         </tr>
 
                     <?php } else { ?>
                         <tr class="dr-2nd-row-new">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align"></td>
+                            <td class="col-quantity"></td>
+                            <td class="col-units"></td>
+                            <td class="col-description-price text-align"><?= htmlspecialchars($note_val); ?></td>
                         </tr>
 
                         <tr class="dr-2nd-row-new">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align"></td>
+                            <td class="col-quantity"></td>
+                            <td class="col-units"></td>
+                            <td class="col-description-price text-align"></td>
                         </tr>
 
                         <tr class="dr-2nd-row-new">
-                            <td></td>
-                            <td></td>
-                            <td class="text-align"></td>
+                            <td class="col-quantity"></td>
+                            <td class="col-units"></td>
+                            <td class="col-description-price text-align"></td>
                         </tr>
 
                     <?php } ?>
-
-                    <!-- For the DR with Price Section -->
                 <?php } else if (isset($dr_format) && $dr_format == 'drWithPrice') { ?>
 
                     <?php
