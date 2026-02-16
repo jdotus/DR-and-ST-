@@ -136,11 +136,35 @@ $conn->close();
             .filter-bar { flex-direction: column; gap: 8px; }
             .pagination { flex-wrap: wrap; }
         }
+
+        .custom-btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            }
+            .custom-btn:hover {
+            background-color: #0056b3;
+        }
+
     </style>
 </head>
 <body>
 <div class="container">
     <h2>Stock Transfer List</h2>
+    <button class="custom-btn" onclick="window.open('stmultipleserialmr.php', '_blank')">
+        Go to Multiple Serial MR
+    </button>
+
+    <button class="custom-btn" onclick="window.open('stocktransfer_form.php', '_blank')">
+        Go to Stock Transfer Form
+    </button>
+
     <div class="filter-bar">
         <label>Filter Invoice No: <input type="text" id="filterInvoice"></label>
         <label>Filter Date: <input type="text" id="filterDate" placeholder="YYYY-MM-DD"></label>
