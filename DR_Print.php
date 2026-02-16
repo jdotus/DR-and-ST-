@@ -866,7 +866,7 @@ unset($_SESSION['form_data']);
                         <td class="col-price"><?= htmlspecialchars(number_format((int)$grandTotal)) ?></td>
                     </tr>
 
-                <?php } else if (isset($dr_format) && $dr_format == 'drWithPrice') { ?>
+                <?php } else if (isset($dr_format) && $dr_format == 'usedDr') { ?>
 
                     <?php for ($i = 0; $i < count($quantity); $i++) { ?>
                         <tr class="dr-2nd-row-header">
