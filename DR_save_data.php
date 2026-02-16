@@ -650,33 +650,31 @@ function saveDrWithPriceFormat($pdo, $si_number, $dr_number, $delivered_to, $dat
         $date
     ]);
 
-    //For the History Table
-    $stmtHistory = $pdo->prepare("
-        INSERT INTO history
-        (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, type, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'drwithprice', 'CREATED')");
-
-    $stmtHistory->execute([
-        $si_number,
-        $dr_number,
-        $delivered_to,
-        $tin,
-        $address,
-        $terms,
-        $particulars,
-        $date
-    ]);
-
     $record_id = $pdo->lastInsertId();
 
     // Insert item records dynamically based on quantity length
     $items_stmt = $pdo->prepare("INSERT INTO dr_with_price (dr_number, machine_model, quantity, price, total, unit_type, item_description) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
-    $valid_items_count = 0;
+    $stmtHistoryv2 = $pdo->prepare("
+        INSERT INTO historyv2
+        (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, machine_model, quantity, price, total, unit_type, item_description, type, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'drwithprice', 'CREATED')");
+
+    $historyQuantities = [];
+    $historyPrices = [];
+    $total_prices = [];
+    $historyUnitTypes = [];
+    $historyDescriptuions = [];
 
     for ($i = 0; $i < count($quantities); $i++) {
         // Only insert if both quantity and description are not empty
         if (!empty(trim($quantities[$i])) && !empty(trim($item_descs[$i]))) {
+
+            $historyQuantities[] = isset($quantities[$i]) ? str_replace([',', ' '], '', $quantities[$i]) : 0;
+            $historyPrices[] = isset($prices[$i]) ? floatval(str_replace(',', '', $prices[$i])) : 0.0;
+            $historyUnitTypes[] = isset($unit_types[$i]) ? $unit_types[$i] : $unit_type;
+            $historyDescriptuions[] = isset($item_descs[$i]) ? $item_descs[$i] : '';
+
 
             // Clean numeric values
             $price_val = isset($prices[$i]) ? floatval(str_replace([',', ' '], '', $prices[$i])) : 0.0;
@@ -689,24 +687,40 @@ function saveDrWithPriceFormat($pdo, $si_number, $dr_number, $delivered_to, $dat
             }
             $total_price = $quantity_val * $price_val;
 
+            $total_prices[] = $total_price;
             // Use item-specific unit_type if available, otherwise use main unit_type
             $current_unit_type = isset($unit_types[$i]) ? $unit_types[$i] : $unit_type;
 
             $items_stmt->execute([
                 $dr_number,
-                $models[0] ?? '',
+                $models[0],
                 $quantity_val,
                 $price_val,
                 $total_price,
                 $current_unit_type,
                 $item_descs[$i]
             ]);
-
-            $valid_items_count++;
         }
     }
 
-    // Optional: Update grand total in main record if you have that column
+    if (!empty($historyQuantities)) {
+        $stmtHistoryv2->execute([
+            $si_number,
+            $dr_number,
+            $delivered_to,
+            $tin,
+            $address,
+            $terms,
+            $particulars,
+            $date,
+            $models[0] ?? '',
+            implode(',', $historyQuantities),
+            implode(',', $historyPrices),
+            implode(',', $total_prices),
+            $historyUnitTypes[0] ?? '',
+            implode(',', $historyDescriptuions)
+        ]);
+    }
 
     return $record_id;
 }
@@ -721,7 +735,7 @@ function saveDrWithInvoiceFormat($pdo, $si_number, $dr_number, $delivered_to, $d
         $notes = $post['note'] ?? [];
         $models = $post['model'] ?? [];
 
-        // Determine delivery type
+        // Determine delivery type (global for the invoice)
         $delivery_type = (!empty($invoice_numbers[0])) ? 'complete' : 'partial';
 
         $stmt = $pdo->prepare("INSERT INTO main (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'drinvoice')");
@@ -763,27 +777,83 @@ function saveDrWithInvoiceFormat($pdo, $si_number, $dr_number, $delivered_to, $d
 
         $stmtinvoice = $pdo->prepare("INSERT INTO dr_invoice (unit_type, dr_number, quantity, item_description, machine_model, under_po_no, under_invoice_no, note, delivery_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
+        // Arrays to collect values for combined history record
+        $unit_types_for_history = [];
+        $machines_for_history = [];
+        $quantities_for_history = [];
+        $item_descs_for_history = [];
+        $under_po_nos_for_history = [];
+        $under_invoice_nos_for_history = [];
+        $notes_for_history = [];
+
         for ($i = 0; $i < count($quantities); $i++) {
             if (!empty($quantities[$i]) && !empty($item_descs[$i])) {
                 $quantity_val = (int)str_replace([',', ' '], '', $quantities[$i] ?? '0');
 
-                $stmtinvoice->execute([
-                    $unit_types[$i] ?? '',
+                // Add values to history arrays (as individual values, not arrays)
+                $unit_types_for_history[] = $unit_types[$i] ?? '';
+                $machines_for_history[] = $models[$i] ?? '';
+                $quantities_for_history[] = $quantity_val;
+                $item_descs_for_history[] = $item_descs[$i] ?? '';
+                $under_po_nos_for_history[] = $po_numbers[$i] ?? '';
+                $under_invoice_nos_for_history[] = $invoice_numbers[$i] ?? '';
+                $notes_for_history[] = $notes[$i] ?? '';
+
+                // Insert into dr_invoice (individual records)
+                try {
+                    $stmtinvoice->execute([
+                        $unit_types[$i] ?? '',
+                        $dr_number,
+                        $quantity_val,
+                        $item_descs[$i],
+                        $models[0],
+                        $po_numbers[0],
+                        $invoice_numbers[0],
+                        $notes[0],
+                        $delivery_type
+                    ]);
+                } catch (PDOException $e) {
+                    error_log("Database error in dr_invoice: " . $e->getMessage());
+                }
+            }
+        }
+
+        // Insert ONE combined record into historyv2 with comma-separated values
+        if (!empty($unit_types_for_history)) {
+
+            // Prepare the historyv2 statement INSIDE the function
+            $stmtHistoryv2 = $pdo->prepare("INSERT INTO historyv2 
+                (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, 
+                 unit_type, machine_model, quantity, item_description, under_po_no, under_invoice_no, 
+                 note, delivery_type, type, status) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'drinvoice', 'CREATED')");
+
+            try {
+                $stmtHistoryv2->execute([
+                    $si_number,
                     $dr_number,
-                    $quantity_val,
-                    $item_descs[$i],
-                    $models[0] ?? '',
-                    $po_numbers[0] ?? '',
-                    $invoice_numbers[0] ?? '',
-                    $notes[0] ?? '',
-                    $delivery_type
+                    $delivered_to,
+                    $tin,
+                    $address,
+                    $terms,
+                    $particulars,
+                    $date,
+                    implode(', ', $unit_types_for_history),      // Comma-separated unit types
+                    implode(', ', $machines_for_history),        // Comma-separated machine models
+                    implode(', ', $quantities_for_history),      // Comma-separated quantities
+                    implode(', ', $item_descs_for_history),      // Comma-separated item descriptions
+                    implode(', ', $under_po_nos_for_history),    // Comma-separated PO numbers
+                    implode(', ', $under_invoice_nos_for_history), // Comma-separated invoice numbers
+                    implode(', ', $notes_for_history),           // Comma-separated notes
+                    $delivery_type                                // Single delivery type for the whole invoice
                 ]);
+            } catch (PDOException $e) {
+                error_log("Database error in historyv2: " . $e->getMessage());
             }
         }
     }
     return $record_id;
 }
-
 //Function to save Used DR format - Dynamic based on items
 function saveUsedDrFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $address, $terms, $particulars, $tin, $unit_type, $post)
 {
@@ -806,23 +876,6 @@ function saveUsedDrFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $a
         $date
     ]);
 
-    //For the History Table
-    $stmtHistory = $pdo->prepare("
-        INSERT INTO history
-        (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, type, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'useddr', 'CREATED')");
-
-    $stmtHistory->execute([
-        $si_number,
-        $dr_number,
-        $delivered_to,
-        $tin,
-        $address,
-        $terms,
-        $particulars,
-        $date
-    ]);
-
     $record_id = $pdo->lastInsertId();
 
     // Save items dynamically
@@ -832,9 +885,33 @@ function saveUsedDrFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $a
 
     $stmt = $pdo->prepare("INSERT INTO used_dr(dr_number, quantity, unit_type, item_description, machine_model, serial_no, mr_start, technician_name, pr_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
+    //For the History Table
+    $stmtHistoryv2 = $pdo->prepare("INSERT INTO historyv2 (si_number, dr_number, delivered_to, tin, address, terms, particulars, si_date, quantity, unit_type, item_description, machine_model, serial_no, mr_start, technician_name, pr_number, type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'useddr', 'CREATED')");
+
+    $historyQuantity = [];
+    $historyUnitType = [];
+    $historyItemDesc = [];
+    $historyMachineModel = [];
+    $historySerialNo = [];
+    $historyMrStart = [];
+    $historyTechName = [];
+    $historyPrNumber = [];
+
+
     for ($i = 0; $i < count($quantities); $i++) {
         if (!empty($quantities[$i]) && !empty($item_descs[$i])) {
             $quantity_val = (int)str_replace([',', ' '], '', $quantities[$i] ?? '0');
+
+            // Converting the current item values to history arrays
+            $historyQuantity[] = $quantity_val;
+            $historyUnitType[] = $unit_types[$i] ?? '';
+            $historyItemDesc[] = $item_descs[$i] ?? '';
+            $historyMachineModel[] = $models[$i] ?? '';
+            $historySerialNo[] = $serials[$i] ?? '';
+            $historyMrStart[] = $mr_starts[$i] ?? '';
+            $historyTechName[] = $tech_names[$i] ?? '';
+            $historyPrNumber[] = $pr_numbers[$i] ?? '';
+
 
             $stmt->execute([
                 $dr_number,
@@ -850,5 +927,28 @@ function saveUsedDrFormat($pdo, $si_number, $dr_number, $delivered_to, $date, $a
         }
     }
 
+    // Insert into history table
+    try {
+        $stmtHistoryv2->execute([
+            $si_number,
+            $dr_number,
+            $delivered_to,
+            $tin,
+            $address,
+            $terms,
+            $particulars,
+            $date,
+            implode(',', $historyQuantity),
+            $historyUnitType,
+            implode(',', $historyItemDesc),
+            implode(',', $historyMachineModel),
+            implode(',', $historySerialNo),
+            implode(',', $historyMrStart),
+            implode(',', $historyTechName),
+            implode(',', $historyPrNumber)
+        ]);
+    } catch (PDOException $e) {
+        error_log("Database error in historyv2: " . $e->getMessage());
+    }
     return $record_id;
 }
