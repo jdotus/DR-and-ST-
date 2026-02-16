@@ -517,33 +517,107 @@ unset($_SESSION['form_data']);
                             </tr>
                         <?php } ?>
 
-                    <?php } else if (isset($form_data['pullout_type']) && $form_data['pullout_type'] == 'pulloutOnly') { ?>
-                        <tr class="dr-2nd-row">
-                            <td><?= htmlspecialchars(count($serial)) ?></td>
-                            <td><?= htmlspecialchars($unit_type) ?></td>
-                            <td class="text-align" style="font-size: 10px">Pull Out Machine <br>Model: <?= htmlspecialchars($models[0] ?? '') ?></td>
-                        </tr>
+                        <?php } else if (isset($form_data['pullout_type']) && $form_data['pullout_type'] == 'pulloutOnly') {
+                        $machines_by_model = [];
+                        $total_rows_used = 0; // Counter for total rows used
 
-                        <?php for ($i = 0; $i < count($pullout_serial); $i++) {
-                            $srPulloutDisplay = trim($pullout_serial[$i]) !== '' ? htmlspecialchars($pullout_serial[$i]) : '<span class="underline-empty"></span>';
-                            $mrPulloutDisplay = trim($pullout_mr_end[$i]) !== '' ? htmlspecialchars($pullout_mr_end[$i]) : '<span class="underline-empty"></span>';
+                        $pulloutGroups = [];
+                        if (!empty($form_data['pullout_machines']) && is_array($form_data['pullout_machines'])) {
+                            $pulloutGroups = $form_data['pullout_machines'];
+                        } elseif (!empty($form_data['pullout_only_machines']) && is_array($form_data['pullout_only_machines'])) {
+                            $pulloutGroups = $form_data['pullout_only_machines'];
+                        }
 
-                            $ciDisplay = trim($pullout_color_imp[$i]) !== '' ? htmlspecialchars($pullout_color_imp[$i]) : '<span class="underline-empty"></span>';
-                            $biDisplay = trim($pullout_black_imp[$i]) !== '' ? htmlspecialchars($pullout_black_imp[$i]) : '<span class="underline-empty"></span>';
-                            $cliDisplay = trim($pullout_color_large_imp[$i]) !== '' ? htmlspecialchars($pullout_color_large_imp[$i]) : '<span class="underline-empty"></span>';
+                        // Group machines by model (assuming $models contains model names)
+                        if (!empty($pulloutGroups)) {
+                            foreach ($pulloutGroups as $machineGroup) {
+                                $model_name = $machineGroup['model'] ?? 'Unknown Model';
+                                if (!isset($machines_by_model[$model_name])) {
+                                    $machines_by_model[$model_name] = [];
+                                }
 
-                            $mrPulloutFormat = "MR End:" . $mrPulloutDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
+                                if (isset($machineGroup['serials']) && is_array($machineGroup['serials'])) {
+                                    foreach ($machineGroup['serials'] as $serialData) {
+                                        if (!empty(trim($serialData['serial'] ?? ''))) {
+                                            // normalize unit type to a string for display
+                                            $unit_display = is_array($unit_type) ? ($unit_type[0] ?? '') : $unit_type;
+                                            $machines_by_model[$model_name][] = [
+                                                'serial' => $serialData['serial'] ?? '',
+                                                'mr_end' => $serialData['mr_end'] ?? '',
+                                                'color_imp' => $serialData['color_imp'] ?? '',
+                                                'black_imp' => $serialData['black_imp'] ?? '',
+                                                'color_large_imp' => $serialData['color_large_imp'] ?? '',
+                                                'unit_type' => $unit_display
+                                            ];
+                                        }
+                                    }
+                                }
+
+                                // Check if we have data for this index
+                                // if (isset($pullout_serial[$index]) && !empty(trim($pullout_serial[$index] ?? ''))) {
+                                //     $machines_by_model[$model_name][] = [
+                                //         'serial' => $pullout_serial[$index] ?? '',
+                                //         'mr_end' => $pullout_mr_end[$index] ?? '',
+                                //         'color_imp' => $pullout_color_imp[$index] ?? '',
+                                //         'black_imp' => $pullout_black_imp[$index] ?? '',
+                                //         'color_large_imp' => $pullout_color_large_imp[$index] ?? '',
+                                //         'unit_type' => $unit_type
+                                //     ];
+                                // }
+                            }
+                        }
+
+                        // Display grouped data and count rows
+                        foreach ($machines_by_model as $model_name => $machines) {
+                            $total_machines = count($machines);
+                            if ($total_machines > 0) {
+                                $total_rows_used += 1; // Count header row for this model
                         ?>
+                                <!-- MODEL HEADER -->
+                                <tr class="dr-2nd-row">
+                                    <td><?= htmlspecialchars($total_machines) ?></td>
+                                    <td><?= htmlspecialchars($unit_type) ?></td>
+                                    <td class="text-align" style="font-size: 10px">Pull Out Machine <br>Model: <?= htmlspecialchars($model_name) ?></td>
+                                </tr>
 
-                            <tr class="dr-2nd-row">
-                                <td></td>
-                                <td></td>
-                                <td class="text-align">Serial No.:<?= $srPulloutDisplay ?> <?= $mrPulloutFormat ?> </td>
-                            </tr>
-                        <?php } ?>
+                                <?php
+                                // DISPLAY ALL SERIALS FOR THIS MODEL
+                                foreach ($machines as $machine) {
+                                    $total_rows_used += 1; // Count each serial row
+                                    $srPulloutDisplay = trim($machine['serial']) !== '' ? htmlspecialchars($machine['serial']) : '<span class="underline-empty"></span>';
+                                    $mrPulloutDisplay = trim($machine['mr_end']) !== '' ? htmlspecialchars($machine['mr_end']) : '<span class="underline-empty"></span>';
 
+                                    $ciDisplay = trim($machine['color_imp']) !== '' ? htmlspecialchars($machine['color_imp']) : '<span class="underline-empty"></span>';
+                                    $biDisplay = trim($machine['black_imp']) !== '' ? htmlspecialchars($machine['black_imp']) : '<span class="underline-empty"></span>';
+                                    $cliDisplay = trim($machine['color_large_imp']) !== '' ? htmlspecialchars($machine['color_large_imp']) : '<span class="underline-empty"></span>';
 
-                        <?php for ($i = count($pullout_serial); $i < 6; $i++) { ?>
+                                    $mrPulloutFormat = "MR End:" . $mrPulloutDisplay . " (CI:" . $ciDisplay . "; BI:" . $biDisplay . "; CLI:" . $cliDisplay . ")";
+                                ?>
+                                    <tr class="dr-2nd-row">
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-align">Serial No.: <?= $srPulloutDisplay ?> <?= $mrPulloutFormat ?> </td>
+                                    </tr>
+                                <?php } ?>
+
+                            <?php
+                            }
+                        } // END OF MODEL GROUP
+
+                        // ADD EMPTY ROWS AT THE END FOR THE ENTIRE TABLE
+                        // Determine how many rows per "page" you want (e.g., 6, 10, 12)
+                        $rows_per_page = 7; // Change this to your desired row count
+
+                        // Calculate how many empty rows needed to fill the page
+                        $empty_rows_needed = $rows_per_page - ($total_rows_used % $rows_per_page);
+
+                        // If total_rows_used is exactly divisible by rows_per_page, don't add extra rows
+                        if ($empty_rows_needed == $rows_per_page) {
+                            $empty_rows_needed = 0;
+                        }
+
+                        // Add empty rows at the end
+                        for ($i = 0; $i < $empty_rows_needed; $i++) { ?>
                             <tr class="dr-2nd-row">
                                 <td></td>
                                 <td></td>
