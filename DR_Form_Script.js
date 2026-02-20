@@ -466,9 +466,10 @@ function addInput(type) {
     }
 }
 
-let machineModelCount = 0;
-let totalGlobalSerialsCount = 0;
+let machineModelCount = 1; // Start from 1 since we have one model input by default 
+let totalGlobalSerialsCount = 1; // Start from 1 since we have one serial input by default in the first model
 
+// Update the countAllSerials function to properly count
 function countAllSerials() {
     const replacementOnlyContainer = document.getElementById('replacementOnlyContainer');
     const pulloutOnlyContainer = document.getElementById('pulloutOnlyContainer');
@@ -500,7 +501,7 @@ function countAllSerials() {
     return totalSerials;
 }
 
-function addMachineModel(containerId, arrayName = null) {
+function addMachineModel(containerId, arrayName) {
     const container = document.getElementById(containerId);
     const currentModels = container.getElementsByClassName('machine-model-group').length;
 
